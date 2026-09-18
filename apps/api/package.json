@@ -1,0 +1,32 @@
+{
+  "name": "@axp/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "HTTP API process. Owns authorization, tenant isolation and all Matomo access.",
+  "scripts": {
+    "dev": "tsx watch --clear-screen=false src/main.ts",
+    "start": "node dist/main.js",
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "bootstrap-admin": "tsx src/cli/bootstrap-admin.ts",
+    "recover-admin": "tsx src/cli/recover-admin.ts"
+  },
+  "dependencies": {
+    "@axp/config": "*",
+    "@axp/contracts": "*",
+    "@axp/core": "*",
+    "@axp/db": "*",
+    "@axp/observability": "*",
+    "@fastify/cookie": "^11.0.2",
+    "@fastify/cors": "^11.1.0",
+    "@fastify/helmet": "^13.0.2",
+    "@fastify/rate-limit": "^10.3.0",
+    "fastify": "^5.12.5",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "tsup": "^8.5.0"
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "name": "axp-claude",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Analytics Experience Platform - Claude Code canonical engineering track",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm-run-all --parallel dev:api dev:web dev:worker",
+    "dev:api": "npm run dev --workspace @axp/api",
+    "dev:web": "npm run dev --workspace @axp/web",
+    "dev:worker": "npm run dev --workspace @axp/worker",
+    "build": "npm run build --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present && tsc --noEmit -p tsconfig.tests.json",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run --project unit",
+    "test:watch": "vitest --project unit",
+    "test:e2e": "playwright test",
+    "db:generate": "npm run db:generate --workspace @axp/db",
+    "db:migrate": "npm run db:migrate --workspace @axp/db",
+    "db:reset": "npm run db:reset --workspace @axp/db",
+    "seed:demo": "npm run seed:demo --workspace @axp/fixtures",
+    "bootstrap-admin": "npm run bootstrap-admin --workspace @axp/api",
+    "recover-admin": "npm run recover-admin --workspace @axp/api",
+    "verify": "npm run typecheck && npm run lint && npm run test && npm run test:integration && npm run build",
+    "test:integration": "vitest run --project integration",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "docker:reset": "docker compose down -v && docker compose up -d"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^24.10.0",
+    "@vitest/coverage-v8": "^5.0.1",
+    "eslint": "^10.10.0",
+    "eslint-config-prettier": "^10.1.8",
+    "npm-run-all2": "^8.0.4",
+    "prettier": "^3.6.2",
+    "tsx": "^4.20.7",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.70.0",
+    "vitest": "^5.0.1"
+  }
+}

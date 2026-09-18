@@ -1,0 +1,79 @@
+/*
+ * Global stylesheet.
+ *
+ * Only the design system plus page-level layout primitives. Component styling
+ * lives in CSS modules next to the component, and every value is a token.
+ */
+@import '@axp/ui/tokens.css';
+@import '@axp/ui/base.css';
+
+.page-centered {
+  display: flex;
+  min-height: 100dvh;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6);
+}
+
+.page-centered__inner {
+  width: 100%;
+  max-width: 26rem;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.stack--tight {
+  gap: var(--space-2);
+}
+
+.stack--loose {
+  gap: var(--space-6);
+}
+
+.text-muted {
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.text-secondary {
+  color: var(--text-secondary);
+}
+
+.brand {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin-bottom: var(--space-6);
+}
+
+.brand__name {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+}
+
+.brand__tagline {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.skip-link {
+  position: absolute;
+  inset-inline-start: var(--space-4);
+  inset-block-start: calc(var(--space-4) * -1 - 3rem);
+  z-index: 100;
+  padding: var(--space-2) var(--space-4);
+  background: var(--surface-card);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+.skip-link:focus-visible {
+  inset-block-start: var(--space-4);
+}

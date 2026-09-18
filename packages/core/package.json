@@ -1,0 +1,23 @@
+{
+  "name": "@axp/core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Domain modules of the modular monolith. Shared by the API process and the worker.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@axp/config": "*",
+    "@axp/contracts": "*",
+    "@axp/db": "*",
+    "@axp/observability": "*",
+    "@node-rs/argon2": "^2.2.1",
+    "drizzle-orm": "^0.45.2",
+    "zod": "^4.6.5"
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    "target": "ES2023",
+    "lib": ["ES2023"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "moduleDetection": "force",
+    "verbatimModuleSyntax": true,
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "exactOptionalPropertyTypes": false,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "allowJs": false,
+    "isolatedModules": true,
+    "forceConsistentCasingInFileNames": true,
+    "declaration": true,
+    "sourceMap": true,
+    "noEmit": true,
+    "paths": {
+      "@axp/contracts": ["./packages/contracts/src/index.ts"],
+      "@axp/config": ["./packages/config/src/index.ts"],
+      "@axp/observability": ["./packages/observability/src/index.ts"],
+      "@axp/db": ["./packages/db/src/index.ts"],
+      "@axp/core": ["./packages/core/src/index.ts"],
+      "@axp/ui": ["./packages/ui/src/index.ts"],
+      "@axp/fixtures": ["./packages/fixtures/src/index.ts"]
+    }
+  }
+}

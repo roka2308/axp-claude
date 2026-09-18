@@ -1,0 +1,28 @@
+{
+  "name": "@axp/web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Next.js frontend. Holds the user session and proxies to the API; never reaches the database or Matomo directly.",
+  "scripts": {
+    "dev": "next dev --port ${WEB_PORT:-3000}",
+    "build": "next build",
+    "start": "next start --port ${WEB_PORT:-3000}",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@axp/config": "*",
+    "@axp/contracts": "*",
+    "@axp/observability": "*",
+    "@axp/ui": "*",
+    "next": "^16.3.5",
+    "next-intl": "^4.14.5",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "server-only": "^0.0.1"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.1"
+  }
+}

@@ -1,0 +1,39 @@
+# dependencies
+node_modules/
+.npm/
+
+# build output
+dist/
+.next/
+out/
+*.tsbuildinfo
+
+# environment / secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+
+# test output
+coverage/
+playwright-report/
+test-results/
+blob-report/
+.playwright/
+
+# local runtime artifacts
+tmp/
+.tmp/
+logs/
+*.log
+.bootstrap-token
+
+# editors / os
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.shared.json

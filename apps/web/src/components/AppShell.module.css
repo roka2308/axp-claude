@@ -1,0 +1,142 @@
+.shell {
+  display: grid;
+  grid-template-rows: var(--layout-topbar-height) 1fr;
+  grid-template-columns: var(--layout-sidebar-width) 1fr;
+  grid-template-areas:
+    'topbar topbar'
+    'sidebar content';
+  min-height: 100dvh;
+}
+
+.topbar {
+  grid-area: topbar;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding-inline: var(--space-4);
+  background: var(--surface-card);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.topbarStart,
+.topbarEnd {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.brandName {
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+}
+
+.contextSwitcher {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+}
+
+.sidebar {
+  grid-area: sidebar;
+  padding: var(--space-4) var(--space-3);
+  background: var(--surface-card);
+  border-inline-end: 1px solid var(--border-subtle);
+}
+
+.navList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.navLink {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  min-height: var(--density-row-height);
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: var(--font-size-md);
+}
+
+.navLink:hover {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+}
+
+.navLinkActive {
+  background: var(--surface-selected);
+  color: var(--text-primary);
+  font-weight: var(--font-weight-medium);
+}
+
+/*
+ * Navigation entries whose milestone has not landed yet. Rendered, but plainly
+ * marked as unavailable with a text badge rather than a dimmed link, so nothing
+ * in the shell pretends to be a working feature.
+ */
+.navLinkPending {
+  color: var(--text-disabled);
+  cursor: not-allowed;
+}
+
+.pendingBadge {
+  font-size: var(--font-size-2xs);
+  padding: 0 var(--space-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xs);
+  color: var(--text-muted);
+}
+
+.content {
+  grid-area: content;
+  padding: var(--space-6);
+  max-width: var(--layout-content-max-width);
+}
+
+.footer {
+  margin-top: var(--space-8);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border-subtle);
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+/* Viewer surfaces are fully responsive (D10). */
+@media (max-width: 1279px) {
+  .shell {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      'topbar'
+      'sidebar'
+      'content';
+    grid-template-rows: var(--layout-topbar-height) auto 1fr;
+  }
+
+  .sidebar {
+    border-inline-end: none;
+    border-bottom: 1px solid var(--border-subtle);
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .navList {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .content {
+    padding: var(--space-4);
+  }
+}

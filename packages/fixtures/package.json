@@ -1,0 +1,22 @@
+{
+  "name": "@axp/fixtures",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Canonical demo fixtures (Pulse reference). Test and demo environments only.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "seed:demo": "tsx src/cli/seed-demo.ts"
+  },
+  "dependencies": {
+    "@axp/config": "*",
+    "@axp/contracts": "*",
+    "@axp/core": "*",
+    "@axp/db": "*",
+    "@axp/observability": "*",
+    "drizzle-orm": "^0.45.2"
+  }
+}

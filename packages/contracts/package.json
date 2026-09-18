@@ -1,0 +1,16 @@
+{
+  "name": "@axp/contracts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Canonical domain vocabulary shared by API, worker and web. Mirrors the Shared Product & Engineering Contract.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "zod": "^4.6.5"
+  }
+}

@@ -1,0 +1,145 @@
+{
+  "product": {
+    "name": "Analytics Experience",
+    "tagline": "Make data tangible"
+  },
+  "nav": {
+    "skipToContent": "Skip to main content",
+    "primary": "Primary navigation",
+    "home": "Home",
+    "projects": "Projects",
+    "dashboards": "Dashboards",
+    "templates": "Templates",
+    "administration": "Administration",
+    "search": "Product search",
+    "attention": "Attention",
+    "help": "Help",
+    "profile": "Profile",
+    "tenantSwitcher": "Switch tenant",
+    "projectSwitcher": "Switch project"
+  },
+  "home": {
+    "title": "Welcome",
+    "subtitle": "This instance is under construction. Phase 0 delivers the foundation: processes, database, bootstrap and design system.",
+    "signedInAs": "Signed in as {name}",
+    "rolesTitle": "Your roles",
+    "noRoles": "No role has been assigned to you yet.",
+    "roleScope": "Scope: {scope}",
+    "noAutomaticDataAccess": "A role alone grants no access to analytics data. Access to a dashboard is granted separately through groups or direct grants.",
+    "nextMilestone": "Next milestone",
+    "nextMilestoneBody": "Phase 1 – first vertical slice: project, Matomo connection, site, semantic metric, dashboard, widget, viewer."
+  },
+  "login": {
+    "title": "Sign in",
+    "subtitle": "Sign in with your email address and password.",
+    "email": "Email address",
+    "password": "Password",
+    "submit": "Sign in",
+    "submitting": "Signing in …",
+    "failed": "Sign-in failed",
+    "signOut": "Sign out"
+  },
+  "setup": {
+    "title": "Set up the platform",
+    "subtitle": "Create the first platform administration account. This step is possible exactly once.",
+    "tokenMissing": "No activation token",
+    "tokenMissingBody": "Open setup through the link printed by the bootstrap-admin command.",
+    "tokenInvalid": "Activation token is not valid",
+    "tokenInvalidBody": "The token is unknown, expired or already used. Generate a new one with bootstrap-admin.",
+    "alreadyInitialized": "Platform already set up",
+    "alreadyInitializedBody": "This instance has already been initialized. The setup path is permanently closed. For administrative emergencies use the separate, audited recover-admin path.",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "email": "Email address",
+    "password": "Password",
+    "passwordHint": "At least 12 characters. Must not contain your name or the local part of your email address.",
+    "passwordConfirm": "Repeat password",
+    "passwordMismatch": "The two passwords do not match.",
+    "submit": "Create platform administration",
+    "submitting": "Creating …",
+    "failed": "Setup failed",
+    "successTitle": "Platform set up",
+    "successBody": "The administration account has been created. You can sign in now.",
+    "toLogin": "Go to sign-in"
+  },
+  "recover": {
+    "title": "Restore administrative access",
+    "subtitle": "Break-glass procedure. Every use is audited.",
+    "notice": "This path restores platform administration access when none is left. It does not replace regular setup.",
+    "submit": "Restore access",
+    "successTitle": "Access restored",
+    "successBody": "The account holds platform administration rights again. All previous sessions of this account were revoked."
+  },
+  "states": {
+    "loading": "Loading",
+    "ready": "Ready",
+    "empty": "No data available",
+    "zero": "0",
+    "missing": "Value missing",
+    "unknown": "Unknown",
+    "notApplicable": "Not applicable",
+    "notTracked": "Not tracked",
+    "unavailable": "Data currently unavailable",
+    "warning": "Interpretation note"
+  },
+  "errors": {
+    "generic": "An unexpected error occurred.",
+    "genericAction": "Please try again. If the problem persists, contact your administrator with the correlation id.",
+    "correlationId": "Correlation id: {id}",
+    "unreachable": "The service is currently unreachable.",
+    "unreachableAction": "The application could not reach the API. Check that the API process is running.",
+    "auth": {
+      "invalid_credentials": "Email address or password is not correct.",
+      "temporarily_locked": "Too many failed attempts. Please wait {retryAfterSeconds} seconds.",
+      "session_required": "Please sign in.",
+      "session_expired": "Your session has expired. Please sign in again."
+    },
+    "bootstrap": {
+      "already_initialized": "This instance has already been initialized.",
+      "invalid_token": "The activation token is invalid, expired or already used.",
+      "not_initialized": "The platform is not initialized yet."
+    },
+    "password": {
+      "too_short": "The password is too short. At least 12 characters.",
+      "too_long": "The password is too long.",
+      "contains_email": "The password must not contain the local part of your email address.",
+      "contains_name": "The password must not contain your name.",
+      "repeated_characters": "The password must not consist of a single repeated character.",
+      "reused": "This password has been used before. Please choose a different one."
+    },
+    "validation_failed": {
+      "schema": "The input is incomplete or invalid.",
+      "bad_request": "The request could not be processed."
+    },
+    "permission_denied": {
+      "capability": "You do not have permission for this action."
+    },
+    "not_found": {
+      "route": "The requested resource was not found."
+    },
+    "internal_error": {
+      "unexpected": "An internal error occurred."
+    }
+  },
+  "roles": {
+    "viewer": { "label": "Viewer", "purpose": "Views explicitly granted published dashboards." },
+    "dashboard_editor": { "label": "Dashboard Editor", "purpose": "Creates, edits and publishes dashboards within the allowed scope." },
+    "semantic_catalog_manager": { "label": "Semantic Catalog Manager", "purpose": "Manages definitions, formulas, scores and versions." },
+    "tenant_admin": { "label": "Tenant Admin", "purpose": "Manages users, groups, roles and tenant configuration." },
+    "platform_admin": { "label": "Platform Admin", "purpose": "Manages the platform, tenant lifecycle and global administration." }
+  },
+  "scopes": {
+    "platform": "Platform",
+    "tenant": "Tenant",
+    "project": "Project"
+  },
+  "system": {
+    "versionLabel": "Version {version} · Schema {schemaVersion} · Build {commit}",
+    "environmentLabel": "Environment: {env}",
+    "deploymentProfile": {
+      "central_multi_tenant": "Central multi-tenant platform",
+      "dedicated_single_customer": "Dedicated customer instance",
+      "customer_hosted": "Customer-hosted"
+    }
+  }
+}

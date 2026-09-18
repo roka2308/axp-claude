@@ -1,0 +1,145 @@
+{
+  "product": {
+    "name": "Analytics Experience",
+    "tagline": "Daten erlebbar machen"
+  },
+  "nav": {
+    "skipToContent": "Zum Hauptinhalt springen",
+    "primary": "Hauptnavigation",
+    "home": "Home",
+    "projects": "Projekte",
+    "dashboards": "Dashboards",
+    "templates": "Vorlagen",
+    "administration": "Administration",
+    "search": "Produktsuche",
+    "attention": "Aufmerksamkeit",
+    "help": "Hilfe",
+    "profile": "Profil",
+    "tenantSwitcher": "Kunde wechseln",
+    "projectSwitcher": "Projekt wechseln"
+  },
+  "home": {
+    "title": "Willkommen",
+    "subtitle": "Diese Instanz befindet sich im Aufbau. Phase 0 liefert das Fundament: Prozesse, Datenbank, Bootstrap und Design-System.",
+    "signedInAs": "Angemeldet als {name}",
+    "rolesTitle": "Ihre Rollen",
+    "noRoles": "Ihnen ist noch keine Rolle zugewiesen.",
+    "roleScope": "Gültigkeitsbereich: {scope}",
+    "noAutomaticDataAccess": "Eine Rolle allein gewährt keinen Zugriff auf Analytics-Daten. Der Zugriff auf ein Dashboard wird zusätzlich über Gruppen oder direkte Freigaben erteilt.",
+    "nextMilestone": "Nächster Meilenstein",
+    "nextMilestoneBody": "Phase 1 – erster vertikaler Schnitt: Projekt, Matomo-Verbindung, Site, semantische Kennzahl, Dashboard, Widget, Viewer."
+  },
+  "login": {
+    "title": "Anmelden",
+    "subtitle": "Melden Sie sich mit Ihrer E-Mail-Adresse und Ihrem Passwort an.",
+    "email": "E-Mail-Adresse",
+    "password": "Passwort",
+    "submit": "Anmelden",
+    "submitting": "Anmeldung läuft …",
+    "failed": "Anmeldung nicht möglich",
+    "signOut": "Abmelden"
+  },
+  "setup": {
+    "title": "Plattform einrichten",
+    "subtitle": "Legen Sie das erste Plattform-Administrationskonto an. Dieser Schritt ist genau einmal möglich.",
+    "tokenMissing": "Kein Aktivierungstoken",
+    "tokenMissingBody": "Öffnen Sie die Einrichtung über den Link, den der Befehl bootstrap-admin ausgegeben hat.",
+    "tokenInvalid": "Aktivierungstoken ungültig",
+    "tokenInvalidBody": "Das Token ist unbekannt, abgelaufen oder bereits verwendet. Erzeugen Sie mit bootstrap-admin ein neues Token.",
+    "alreadyInitialized": "Plattform bereits eingerichtet",
+    "alreadyInitializedBody": "Diese Instanz wurde bereits initialisiert. Der Einrichtungsweg ist dauerhaft geschlossen. Für administrative Notfälle steht der separate, auditierte Wiederherstellungspfad recover-admin zur Verfügung.",
+    "firstName": "Vorname",
+    "lastName": "Nachname",
+    "email": "E-Mail-Adresse",
+    "password": "Passwort",
+    "passwordHint": "Mindestens 12 Zeichen. Darf weder Ihren Namen noch den lokalen Teil Ihrer E-Mail-Adresse enthalten.",
+    "passwordConfirm": "Passwort wiederholen",
+    "passwordMismatch": "Die beiden Passwörter stimmen nicht überein.",
+    "submit": "Plattform-Administration anlegen",
+    "submitting": "Wird angelegt …",
+    "failed": "Einrichtung nicht möglich",
+    "successTitle": "Plattform eingerichtet",
+    "successBody": "Das Administrationskonto wurde angelegt. Sie können sich jetzt anmelden.",
+    "toLogin": "Zur Anmeldung"
+  },
+  "recover": {
+    "title": "Administrativen Zugang wiederherstellen",
+    "subtitle": "Break-Glass-Verfahren. Jede Verwendung wird protokolliert.",
+    "notice": "Dieser Weg stellt den Plattform-Administrationszugang wieder her, wenn kein Zugang mehr besteht. Er ersetzt nicht die reguläre Einrichtung.",
+    "submit": "Zugang wiederherstellen",
+    "successTitle": "Zugang wiederhergestellt",
+    "successBody": "Das Konto besitzt wieder Plattform-Administrationsrechte. Alle bisherigen Sitzungen dieses Kontos wurden beendet."
+  },
+  "states": {
+    "loading": "Wird geladen",
+    "ready": "Bereit",
+    "empty": "Keine Daten vorhanden",
+    "zero": "0",
+    "missing": "Wert fehlt",
+    "unknown": "Unbekannt",
+    "notApplicable": "Nicht anwendbar",
+    "notTracked": "Nicht erfasst",
+    "unavailable": "Daten aktuell nicht verfügbar",
+    "warning": "Hinweis zur Interpretation"
+  },
+  "errors": {
+    "generic": "Es ist ein unerwarteter Fehler aufgetreten.",
+    "genericAction": "Bitte versuchen Sie es erneut. Bleibt das Problem bestehen, wenden Sie sich mit der Vorgangsnummer an die Administration.",
+    "correlationId": "Vorgangsnummer: {id}",
+    "unreachable": "Der Dienst ist derzeit nicht erreichbar.",
+    "unreachableAction": "Die Anwendung konnte die API nicht erreichen. Prüfen Sie, ob der API-Prozess läuft.",
+    "auth": {
+      "invalid_credentials": "E-Mail-Adresse oder Passwort ist nicht korrekt.",
+      "temporarily_locked": "Zu viele Fehlversuche. Bitte warten Sie {retryAfterSeconds} Sekunden.",
+      "session_required": "Bitte melden Sie sich an.",
+      "session_expired": "Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an."
+    },
+    "bootstrap": {
+      "already_initialized": "Diese Instanz wurde bereits initialisiert.",
+      "invalid_token": "Das Aktivierungstoken ist ungültig, abgelaufen oder bereits verwendet.",
+      "not_initialized": "Die Plattform ist noch nicht initialisiert."
+    },
+    "password": {
+      "too_short": "Das Passwort ist zu kurz. Mindestens 12 Zeichen.",
+      "too_long": "Das Passwort ist zu lang.",
+      "contains_email": "Das Passwort darf den lokalen Teil Ihrer E-Mail-Adresse nicht enthalten.",
+      "contains_name": "Das Passwort darf Ihren Namen nicht enthalten.",
+      "repeated_characters": "Das Passwort darf nicht aus einem einzigen wiederholten Zeichen bestehen.",
+      "reused": "Dieses Passwort wurde bereits verwendet. Bitte wählen Sie ein anderes."
+    },
+    "validation_failed": {
+      "schema": "Die Eingaben sind unvollständig oder ungültig.",
+      "bad_request": "Die Anfrage konnte nicht verarbeitet werden."
+    },
+    "permission_denied": {
+      "capability": "Für diese Aktion fehlt Ihnen die Berechtigung."
+    },
+    "not_found": {
+      "route": "Die angeforderte Ressource wurde nicht gefunden."
+    },
+    "internal_error": {
+      "unexpected": "Es ist ein interner Fehler aufgetreten."
+    }
+  },
+  "roles": {
+    "viewer": { "label": "Viewer", "purpose": "Sieht ausdrücklich freigegebene veröffentlichte Dashboards." },
+    "dashboard_editor": { "label": "Dashboard Editor", "purpose": "Erstellt, bearbeitet und veröffentlicht Dashboards im erlaubten Bereich." },
+    "semantic_catalog_manager": { "label": "Semantic Catalog Manager", "purpose": "Verwaltet Definitionen, Formeln, Scores und Versionen." },
+    "tenant_admin": { "label": "Tenant Admin", "purpose": "Verwaltet Benutzer, Gruppen, Rollen und Kundenkonfiguration." },
+    "platform_admin": { "label": "Platform Admin", "purpose": "Verwaltet Plattform, Tenant-Lebenszyklus und globale Administration." }
+  },
+  "scopes": {
+    "platform": "Plattform",
+    "tenant": "Kunde",
+    "project": "Projekt"
+  },
+  "system": {
+    "versionLabel": "Version {version} · Schema {schemaVersion} · Build {commit}",
+    "environmentLabel": "Umgebung: {env}",
+    "deploymentProfile": {
+      "central_multi_tenant": "Zentrale Multi-Tenant-Plattform",
+      "dedicated_single_customer": "Dedizierte Kundeninstanz",
+      "customer_hosted": "Customer-hosted"
+    }
+  }
+}

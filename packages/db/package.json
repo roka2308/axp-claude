@@ -1,0 +1,28 @@
+{
+  "name": "@axp/db",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "MySQL product store: Drizzle schema, deterministic migrations and connection management.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "tsx src/cli/migrate.ts",
+    "db:reset": "tsx src/cli/reset.ts",
+    "db:check": "drizzle-kit check"
+  },
+  "dependencies": {
+    "@axp/config": "*",
+    "@axp/contracts": "*",
+    "@axp/observability": "*",
+    "drizzle-orm": "^0.45.2",
+    "mysql2": "^3.24.4",
+    "uuid": "^14.0.2"
+  },
+  "devDependencies": {
+    "drizzle-kit": "^0.31.10"
+  }
+}
