@@ -66,8 +66,17 @@ export default tseslint.config(
     },
   },
   {
-    // CLI entry points are allowed to write to stdout.
-    files: ['**/cli/**/*.ts', '**/scripts/**/*.ts', '**/*.config.{ts,js,mjs}'],
+    // CLI entry points and operator scripts are allowed to write to stdout.
+    files: ['**/cli/**/*.ts', 'scripts/**/*.{ts,mjs}', '**/*.config.{ts,js,mjs}'],
+    languageOptions: {
+      globals: {
+        console: 'readonly',
+        process: 'readonly',
+        fetch: 'readonly',
+        AbortSignal: 'readonly',
+        URL: 'readonly',
+      },
+    },
     rules: { 'no-console': 'off' },
   },
   {

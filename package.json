@@ -35,7 +35,8 @@
     "test:integration": "vitest run --project integration",
     "docker:up": "docker compose up -d",
     "docker:down": "docker compose down",
-    "docker:reset": "docker compose down -v && docker compose up -d"
+    "docker:reset": "docker compose down -v && docker compose up -d",
+    "gate:f0": "node scripts/verify-gate-f0.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
