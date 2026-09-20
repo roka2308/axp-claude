@@ -1,8 +1,13 @@
 import { and, desc, eq } from 'drizzle-orm';
 import {
   AppError,
+  type Breakpoint,
+  BREAKPOINTS,
+  type DashboardLifecycle,
   type DashboardRef,
   type DashboardSnapshot,
+  type DashboardVersionRef,
+  type EditorLease,
   GRID_COLUMNS,
   type PublishImpact,
   type PublishIssue,
@@ -17,16 +22,23 @@ import {
   dashboardVersions,
   newId,
   projects,
+  users,
 } from '@axp/db';
 import type { Clock } from '../clock';
 import type { AuditService } from '../audit/audit-service';
 import type { SemanticService } from '../semantic/semantic-service';
+import { decideLease, holdsLease, isHeldByOther, type LeaseSnapshot } from './draft-lease';
+import { overlaps, resolveLayout } from './layout';
 
 export interface DashboardServiceDeps {
   readonly db: Database;
   readonly clock: Clock;
   readonly audit: AuditService;
   readonly semantics: SemanticService;
+  readonly leasePolicy: {
+    readonly ttlSeconds: number;
+    readonly heartbeatSeconds: number;
+  };
 }
 
 export interface CreateDashboardInput {
@@ -45,6 +57,15 @@ export interface DraftState {
   readonly hasUnpublishedChanges: boolean;
   readonly publishedVersion: number | null;
   readonly updatedAt: string;
+  /** Who is editing, when a live lease exists. */
+  readonly lease: EditorLease | null;
+  /** How often the editor should refresh its lease, in seconds. */
+  readonly heartbeatSeconds: number;
+}
+
+export interface LeaseResult {
+  readonly acquired: boolean;
+  readonly lease: EditorLease;
 }
 
 export interface PublishedState {
@@ -134,6 +155,8 @@ export class DashboardService {
       hasUnpublishedChanges: true,
       publishedVersion: null,
       updatedAt: this.deps.clock.now().toISOString(),
+      lease: null,
+      heartbeatSeconds: this.deps.leasePolicy.heartbeatSeconds,
     };
   }
 
@@ -172,20 +195,13 @@ export class DashboardService {
     return refs;
   }
 
-  async getDraft(tenantId: string, dashboardId: string): Promise<DraftState> {
+  async getDraft(
+    tenantId: string,
+    dashboardId: string,
+    callerUserId?: string,
+  ): Promise<DraftState> {
     const dashboard = await this.requireDashboard(tenantId, dashboardId);
-    const [draft] = await this.deps.db
-      .select()
-      .from(dashboardDrafts)
-      .where(eq(dashboardDrafts.dashboardId, dashboardId))
-      .limit(1);
-
-    if (!draft) {
-      throw new AppError('not_found', {
-        code: 'draft_not_found',
-        internalMessage: `Dashboard ${dashboardId} has no draft row.`,
-      });
-    }
+    const draft = await this.requireDraft(dashboardId);
 
     const published = dashboard.publishedVersionId
       ? await this.versionById(dashboard.publishedVersionId)
@@ -198,16 +214,294 @@ export class DashboardService {
       hasUnpublishedChanges: draft.hasUnpublishedChanges === 1,
       publishedVersion: published?.version ?? null,
       updatedAt: draft.updatedAt.toISOString(),
+      lease: await this.describeLease(leaseOf(draft), callerUserId),
+      heartbeatSeconds: this.deps.leasePolicy.heartbeatSeconds,
     };
+  }
+
+  // --- editor lease --------------------------------------------------------
+
+  /**
+   * Claims the draft for one editor (Master Spec §21, D3).
+   *
+   * Returns rather than throws when somebody else holds it: the caller is told
+   * who and until when, so the UI can offer a takeover instead of a dead end.
+   * `force` performs that takeover and is audited, because it ends someone
+   * else's editing session.
+   */
+  async acquireLease(params: {
+    tenantId: string;
+    dashboardId: string;
+    userId: string;
+    force?: boolean;
+  }): Promise<LeaseResult> {
+    await this.requireDashboard(params.tenantId, params.dashboardId);
+    const now = this.deps.clock.now();
+
+    const decision = await this.deps.db.transaction(async (tx) => {
+      // FOR UPDATE: two editors arriving at the same instant must not both be
+      // told they got it.
+      const [row] = await tx
+        .select({
+          leaseUserId: dashboardDrafts.leaseUserId,
+          leaseExpiresAt: dashboardDrafts.leaseExpiresAt,
+        })
+        .from(dashboardDrafts)
+        .where(eq(dashboardDrafts.dashboardId, params.dashboardId))
+        .for('update')
+        .limit(1);
+
+      if (!row) {
+        throw new AppError('not_found', {
+          code: 'draft_not_found',
+          internalMessage: `Dashboard ${params.dashboardId} has no draft row.`,
+        });
+      }
+
+      const current: LeaseSnapshot = { userId: row.leaseUserId, expiresAt: row.leaseExpiresAt };
+      const outcome = decideLease({
+        current,
+        requesterId: params.userId,
+        now,
+        ttlSeconds: this.deps.leasePolicy.ttlSeconds,
+        ...(params.force ? { force: true } : {}),
+      });
+
+      if (outcome.kind === 'granted') {
+        await tx
+          .update(dashboardDrafts)
+          .set({ leaseUserId: params.userId, leaseExpiresAt: outcome.expiresAt })
+          .where(eq(dashboardDrafts.dashboardId, params.dashboardId));
+      }
+
+      return { outcome, previousUserId: current.userId };
+    });
+
+    if (decision.outcome.kind === 'held_by_other') {
+      return {
+        acquired: false,
+        lease: {
+          userId: decision.outcome.userId,
+          userName: await this.userName(decision.outcome.userId),
+          expiresAt: decision.outcome.expiresAt.toISOString(),
+          heldByCaller: false,
+        },
+      };
+    }
+
+    if (decision.outcome.reason === 'taken_over' && decision.previousUserId) {
+      await this.deps.audit.success('dashboard.editor_takeover', {
+        actorUserId: params.userId,
+        tenantId: params.tenantId,
+        targetType: 'dashboard',
+        targetId: params.dashboardId,
+        metadata: { fromUserId: decision.previousUserId },
+      });
+    }
+
+    return {
+      acquired: true,
+      lease: {
+        userId: params.userId,
+        userName: await this.userName(params.userId),
+        expiresAt: decision.outcome.expiresAt.toISOString(),
+        heldByCaller: true,
+      },
+    };
+  }
+
+  /** Releases the lease, but only for the editor who holds it. */
+  async releaseLease(params: {
+    tenantId: string;
+    dashboardId: string;
+    userId: string;
+  }): Promise<void> {
+    await this.requireDashboard(params.tenantId, params.dashboardId);
+
+    await this.deps.db
+      .update(dashboardDrafts)
+      .set({ leaseUserId: null, leaseExpiresAt: null })
+      .where(
+        and(
+          eq(dashboardDrafts.dashboardId, params.dashboardId),
+          eq(dashboardDrafts.leaseUserId, params.userId),
+        ),
+      );
+  }
+
+  // --- version history and rollback ----------------------------------------
+
+  async listVersions(tenantId: string, dashboardId: string): Promise<DashboardVersionRef[]> {
+    const dashboard = await this.requireDashboard(tenantId, dashboardId);
+
+    const rows = await this.deps.db
+      .select()
+      .from(dashboardVersions)
+      .where(eq(dashboardVersions.dashboardId, dashboardId))
+      .orderBy(desc(dashboardVersions.version));
+
+    return rows.map((row) => ({
+      version: row.version,
+      status: row.status,
+      publishedAt: row.createdAt.toISOString(),
+      publishedByUserId: row.publishedByUserId,
+      rolledBackFromVersion: row.rolledBackFromVersion,
+      isCurrent: row.id === dashboard.publishedVersionId,
+      widgetCount: (row.snapshot as unknown as DashboardSnapshot).widgets.length,
+    }));
+  }
+
+  /**
+   * Rolls back by publishing a NEW version from an older snapshot.
+   *
+   * Never by resurrecting the old row. A published version is immutable and
+   * history is append-only, so "we went back to version 2" stays visible as
+   * exactly that (Master Spec §21).
+   *
+   * The draft is left alone: an editor's work in progress is not somebody
+   * else's to discard.
+   */
+  async rollbackTo(params: {
+    tenantId: string;
+    dashboardId: string;
+    version: number;
+    actorUserId: string;
+  }): Promise<PublishedState> {
+    await this.requireDashboard(params.tenantId, params.dashboardId);
+
+    const [source] = await this.deps.db
+      .select()
+      .from(dashboardVersions)
+      .where(
+        and(
+          eq(dashboardVersions.dashboardId, params.dashboardId),
+          eq(dashboardVersions.version, params.version),
+        ),
+      )
+      .limit(1);
+
+    if (!source) {
+      throw new AppError('not_found', {
+        code: 'dashboard_version_not_found',
+        messageKey: 'dashboard.version_not_found',
+        messageParams: { version: params.version },
+        internalMessage: `Dashboard ${params.dashboardId} has no version ${params.version}.`,
+      });
+    }
+
+    const snapshot = source.snapshot as unknown as DashboardSnapshot;
+    const nextVersion = (await this.latestVersionNumber(params.dashboardId)) + 1;
+    const versionId = newId();
+
+    await this.deps.db.transaction(async (tx) => {
+      await tx.insert(dashboardVersions).values({
+        id: versionId,
+        dashboardId: params.dashboardId,
+        version: nextVersion,
+        status: 'published',
+        snapshot: snapshot as unknown as Record<string, unknown>,
+        pinnedSemanticVersionIds: source.pinnedSemanticVersionIds,
+        rolledBackFromVersion: params.version,
+        publishedByUserId: params.actorUserId,
+      });
+
+      await tx
+        .update(dashboards)
+        .set({ publishedVersionId: versionId, lifecycle: 'published' })
+        .where(eq(dashboards.id, params.dashboardId));
+    });
+
+    await this.deps.audit.success('dashboard.rolled_back', {
+      actorUserId: params.actorUserId,
+      tenantId: params.tenantId,
+      targetType: 'dashboard',
+      targetId: params.dashboardId,
+      metadata: { toVersion: nextVersion, fromVersion: params.version },
+    });
+
+    return {
+      dashboardId: params.dashboardId,
+      version: nextVersion,
+      snapshot,
+      publishedAt: this.deps.clock.now().toISOString(),
+    };
+  }
+
+  // --- archive and trash ---------------------------------------------------
+
+  /**
+   * Moves a dashboard between draft/published and archived/trash.
+   *
+   * Nothing is deleted. An archived dashboard is out of the way but intact; a
+   * trashed one is out of sight and still recoverable. Hard deletion is a
+   * separate, later decision and never a side effect of tidying up
+   * (Master Spec §21).
+   */
+  async changeLifecycle(params: {
+    tenantId: string;
+    dashboardId: string;
+    to: Extract<DashboardLifecycle, 'archived' | 'trash'> | 'restore';
+    actorUserId: string;
+  }): Promise<DashboardLifecycle> {
+    const dashboard = await this.requireDashboard(params.tenantId, params.dashboardId);
+    const now = this.deps.clock.now();
+
+    const next: DashboardLifecycle =
+      params.to === 'restore' ? (dashboard.publishedVersionId ? 'published' : 'draft') : params.to;
+
+    if (
+      params.to === 'restore' &&
+      dashboard.lifecycle !== 'archived' &&
+      dashboard.lifecycle !== 'trash'
+    ) {
+      throw new AppError('conflict', {
+        code: 'dashboard_not_restorable',
+        messageKey: 'dashboard.not_restorable',
+        internalMessage: `Dashboard ${params.dashboardId} is ${dashboard.lifecycle}.`,
+      });
+    }
+
+    await this.deps.db
+      .update(dashboards)
+      .set({
+        lifecycle: next,
+        archivedAt: next === 'archived' ? now : null,
+        trashedAt: next === 'trash' ? now : null,
+      })
+      .where(eq(dashboards.id, params.dashboardId));
+
+    const action =
+      params.to === 'archived'
+        ? 'dashboard.archived'
+        : params.to === 'trash'
+          ? 'dashboard.trashed'
+          : 'dashboard.restored';
+
+    await this.deps.audit.success(action, {
+      actorUserId: params.actorUserId,
+      tenantId: params.tenantId,
+      targetType: 'dashboard',
+      targetId: params.dashboardId,
+      metadata: { from: dashboard.lifecycle, to: next },
+    });
+
+    return next;
   }
 
   /**
    * Autosaves the draft.
    *
-   * Optimistic concurrency on `revisionId`: writing against a stale revision is
-   * rejected rather than silently overwriting whatever someone else saved. The
-   * editor lease and authorized takeover arrive with Phase 2; this is the
-   * safety net underneath them.
+   * Two independent guards, because they catch different mistakes:
+   *
+   *   - the editor lease stops a second editor from starting at all, and says
+   *     who is already in there;
+   *   - optimistic concurrency on `revisionId` catches everything the lease
+   *     cannot - a stale tab, a retried request, a takeover that happened
+   *     mid-edit - by refusing a write against a revision that has moved on.
+   *
+   * Saving on a free draft claims the lease implicitly. Someone who is typing
+   * is evidently editing, and making them press a button first would only
+   * teach them to press it without reading it.
    */
   async saveDraft(params: {
     tenantId: string;
@@ -217,6 +511,7 @@ export class DashboardService {
     actorUserId: string;
   }): Promise<DraftState> {
     await this.requireDashboard(params.tenantId, params.dashboardId);
+    await this.assertMayWriteDraft(params.dashboardId, params.actorUserId);
 
     const nextRevisionId = newId();
     const result = await this.deps.db
@@ -251,7 +546,38 @@ export class DashboardService {
       .set({ name: params.snapshot.name })
       .where(eq(dashboards.id, params.dashboardId));
 
-    return this.getDraft(params.tenantId, params.dashboardId);
+    // A save is a heartbeat: someone who is typing has not gone away.
+    await this.deps.db
+      .update(dashboardDrafts)
+      .set({
+        leaseUserId: params.actorUserId,
+        leaseExpiresAt: new Date(
+          this.deps.clock.now().getTime() + this.deps.leasePolicy.ttlSeconds * 1000,
+        ),
+      })
+      .where(eq(dashboardDrafts.dashboardId, params.dashboardId));
+
+    return this.getDraft(params.tenantId, params.dashboardId, params.actorUserId);
+  }
+
+  /**
+   * Refuses a write while another editor holds a live lease.
+   *
+   * `conflict` rather than `permission_denied`: the caller is allowed to edit
+   * this dashboard, just not at this moment, and the two situations must not
+   * look the same to a user (D10).
+   */
+  private async assertMayWriteDraft(dashboardId: string, userId: string): Promise<void> {
+    const draft = await this.requireDraft(dashboardId);
+    const current = leaseOf(draft);
+    if (!isHeldByOther(current, userId, this.deps.clock.now())) return;
+
+    throw new AppError('conflict', {
+      code: 'draft_locked',
+      messageKey: 'dashboard.draft_locked',
+      messageParams: { userName: await this.userName(current.userId!) },
+      internalMessage: `Draft of ${dashboardId} is leased by ${current.userId}.`,
+    });
   }
 
   /**
@@ -358,9 +684,12 @@ export class DashboardService {
         .set({ publishedVersionId: versionId, lifecycle: 'published' })
         .where(eq(dashboards.id, params.dashboardId));
 
+      // Publishing ends an editing session: the draft is clean, so the lease
+      // is released rather than left to expire on an empty desk. An editor
+      // who carries on editing re-acquires it implicitly on the next save.
       await tx
         .update(dashboardDrafts)
-        .set({ hasUnpublishedChanges: 0 })
+        .set({ hasUnpublishedChanges: 0, leaseUserId: null, leaseExpiresAt: null })
         .where(eq(dashboardDrafts.dashboardId, params.dashboardId));
     });
 
@@ -401,6 +730,62 @@ export class DashboardService {
     };
   }
 
+  private async requireDraft(dashboardId: string) {
+    const [draft] = await this.deps.db
+      .select()
+      .from(dashboardDrafts)
+      .where(eq(dashboardDrafts.dashboardId, dashboardId))
+      .limit(1);
+
+    if (!draft) {
+      throw new AppError('not_found', {
+        code: 'draft_not_found',
+        internalMessage: `Dashboard ${dashboardId} has no draft row.`,
+      });
+    }
+    return draft;
+  }
+
+  /** The lease as the API describes it, or null when nobody is editing. */
+  private async describeLease(
+    current: LeaseSnapshot,
+    callerUserId?: string,
+  ): Promise<EditorLease | null> {
+    const now = this.deps.clock.now();
+    if (!current.userId || !current.expiresAt || current.expiresAt.getTime() <= now.getTime()) {
+      return null;
+    }
+
+    return {
+      userId: current.userId,
+      userName: await this.userName(current.userId),
+      expiresAt: current.expiresAt.toISOString(),
+      heldByCaller: callerUserId !== undefined && holdsLease(current, callerUserId, now),
+    };
+  }
+
+  /** A display name for the lease holder. Never an email address. */
+  private async userName(userId: string): Promise<string> {
+    const [row] = await this.deps.db
+      .select({ firstName: users.firstName, lastName: users.lastName })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
+
+    return row ? `${row.firstName} ${row.lastName}`.trim() : 'Unbekannt';
+  }
+
+  private async latestVersionNumber(dashboardId: string): Promise<number> {
+    const [latest] = await this.deps.db
+      .select({ version: dashboardVersions.version })
+      .from(dashboardVersions)
+      .where(eq(dashboardVersions.dashboardId, dashboardId))
+      .orderBy(desc(dashboardVersions.version))
+      .limit(1);
+
+    return latest?.version ?? 0;
+  }
+
   private async versionById(versionId: string) {
     const [row] = await this.deps.db
       .select()
@@ -435,13 +820,26 @@ export class DashboardService {
   }
 }
 
+/** Reads the lease columns off a draft row. */
+function leaseOf(draft: {
+  leaseUserId: string | null;
+  leaseExpiresAt: Date | null;
+}): LeaseSnapshot {
+  return { userId: draft.leaseUserId, expiresAt: draft.leaseExpiresAt };
+}
+
 /**
- * Structural validation of widget placement.
+ * Structural validation of a layout (D3).
  *
- * Phase 1 checks what makes a layout impossible rather than merely ugly: sizes
- * below the family minimum, and placements that leave the 12-column raster.
- * Collision handling and minimal displacement are the grid engine's job in
- * Phase 2.
+ * Checks what makes a layout impossible rather than merely ugly, and checks it
+ * at every breakpoint - a dashboard that is valid on a desktop and broken on a
+ * phone is broken. The rules come from the grid engine rather than being
+ * restated here, so validation and the editor can never drift apart.
+ *
+ * Overlap is a blocking error. The engine cannot produce one, so an overlap in
+ * a draft means the snapshot came from somewhere else - an import, an older
+ * client, a hand-edited payload - and publishing it would put a broken layout
+ * in front of viewers.
  */
 export function validateWidgets(widgets: readonly WidgetConfig[]): PublishIssue[] {
   const issues: PublishIssue[] = [];
@@ -470,6 +868,37 @@ export function validateWidgets(widgets: readonly WidgetConfig[]): PublishIssue[
         messageKey: 'dashboard.publish.widget_out_of_grid',
         messageParams: { columns: GRID_COLUMNS.desktop },
       });
+    }
+  }
+
+  issues.push(...findOverlaps(widgets));
+  return issues;
+}
+
+/** Overlapping pairs at any breakpoint, reported once per widget. */
+function findOverlaps(widgets: readonly WidgetConfig[]): PublishIssue[] {
+  const issues: PublishIssue[] = [];
+  const reported = new Set<string>();
+
+  for (const breakpoint of BREAKPOINTS as readonly Breakpoint[]) {
+    const layout = [...resolveLayout(widgets, breakpoint).entries()];
+
+    for (let i = 0; i < layout.length; i += 1) {
+      for (let j = i + 1; j < layout.length; j += 1) {
+        const [idA, a] = layout[i]!;
+        const [idB, b] = layout[j]!;
+        if (!overlaps(a, b)) continue;
+
+        const key = `${breakpoint}:${idA}:${idB}`;
+        if (reported.has(key)) continue;
+        reported.add(key);
+
+        issues.push({
+          widgetId: idA,
+          messageKey: 'dashboard.publish.widgets_overlap',
+          messageParams: { breakpoint, other: idB },
+        });
+      }
     }
   }
 

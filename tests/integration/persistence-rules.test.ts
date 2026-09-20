@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { closeDatabase, listColumns, listTables, setupDatabase } from './harness';
+import { AUDIT_ACTIONS } from '@axp/contracts';
+import { closeDatabase, columnType, listColumns, listTables, setupDatabase } from './harness';
 
 /**
  * Guards the hard persistence rule (Master Spec §4, acceptance checklist A):
@@ -106,6 +107,22 @@ describe('product store persistence rules', () => {
     const sessionColumns = await listColumns('sessions');
     expect(sessionColumns).toContain('token_hash');
     expect(sessionColumns).not.toContain('token');
+  });
+
+  it('can store every audit action the product knows about', async () => {
+    /*
+     * `audit_events.action` is a MySQL enum, so a new action without a
+     * migration is not a type error - it is a write that fails at runtime.
+     * And the audit service swallows write failures on purpose, so the row
+     * would simply never appear while the operation reported success.
+     *
+     * This is the cheapest possible guard against that: the column and the
+     * contract must list exactly the same actions.
+     */
+    const type = await columnType('audit_events', 'action');
+    const inDatabase = [...type.matchAll(/'([^']+)'/g)].map((match) => match[1]!);
+
+    expect(inDatabase).toEqual([...AUDIT_ACTIONS]);
   });
 
   it('stores the Matomo credential only as ciphertext', async () => {

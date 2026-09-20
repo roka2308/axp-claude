@@ -139,7 +139,16 @@ export function createContainer(options: CreateContainerOptions): Container {
     maxParallelQueries: config.analytics.maxParallelQueries,
   });
 
-  const dashboards = new DashboardService({ db, clock, audit, semantics });
+  const dashboards = new DashboardService({
+    db,
+    clock,
+    audit,
+    semantics,
+    leasePolicy: {
+      ttlSeconds: config.editor.leaseTtlSeconds,
+      heartbeatSeconds: config.editor.leaseHeartbeatSeconds,
+    },
+  });
   const presentation = new PresentationBuilder({ clock, logger, engine: analytics, semantics });
 
   return {

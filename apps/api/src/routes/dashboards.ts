@@ -129,8 +129,112 @@ export function registerDashboardRoutes(app: FastifyInstance, container: Contain
     const auth = requireAuth(request);
     const { dashboardId } = z.object({ dashboardId: z.string() }).parse(request.params);
     const scope = await scopeForDashboard(container, auth, dashboardId, 'dashboard.edit_draft');
-    return container.dashboards.getDraft(scope.tenantId, dashboardId);
+    return container.dashboards.getDraft(scope.tenantId, dashboardId, auth.userId);
   });
+
+  /**
+   * Claims the draft for this editor (Master Spec §21).
+   *
+   * Answers 200 either way: "someone else has it" is information the editor
+   * needs in order to offer a takeover, not a failure. `force` performs the
+   * takeover and is audited.
+   */
+  app.post('/dashboards/:dashboardId/lease', { onRequest: [app.authenticate] }, async (request) => {
+    const auth = requireAuth(request);
+    const { dashboardId } = z.object({ dashboardId: z.string() }).parse(request.params);
+    const { force } = z.object({ force: z.boolean().default(false) }).parse(request.body ?? {});
+
+    const scope = await scopeForDashboard(container, auth, dashboardId, 'dashboard.edit_draft');
+    return container.dashboards.acquireLease({
+      tenantId: scope.tenantId,
+      dashboardId,
+      userId: auth.userId,
+      force,
+    });
+  });
+
+  app.delete(
+    '/dashboards/:dashboardId/lease',
+    { onRequest: [app.authenticate] },
+    async (request, reply) => {
+      const auth = requireAuth(request);
+      const { dashboardId } = z.object({ dashboardId: z.string() }).parse(request.params);
+      const scope = await scopeForDashboard(container, auth, dashboardId, 'dashboard.edit_draft');
+
+      await container.dashboards.releaseLease({
+        tenantId: scope.tenantId,
+        dashboardId,
+        userId: auth.userId,
+      });
+      void reply.status(204);
+    },
+  );
+
+  /** Published history, newest first. Reading it needs no publish right. */
+  app.get(
+    '/dashboards/:dashboardId/versions',
+    { onRequest: [app.authenticate] },
+    async (request) => {
+      const auth = requireAuth(request);
+      const { dashboardId } = z.object({ dashboardId: z.string() }).parse(request.params);
+      const scope = await scopeForDashboard(
+        container,
+        auth,
+        dashboardId,
+        'dashboard.read_published',
+      );
+
+      const versions = await container.dashboards.listVersions(scope.tenantId, dashboardId);
+      return { versions };
+    },
+  );
+
+  /** Rolls back by publishing a new version from an older snapshot. */
+  app.post(
+    '/dashboards/:dashboardId/rollback',
+    { onRequest: [app.authenticate] },
+    async (request) => {
+      const auth = requireAuth(request);
+      const { dashboardId } = z.object({ dashboardId: z.string() }).parse(request.params);
+      const { version } = z.object({ version: z.number().int().positive() }).parse(request.body);
+
+      const scope = await scopeForDashboard(container, auth, dashboardId, 'dashboard.publish');
+      const published = await container.dashboards.rollbackTo({
+        tenantId: scope.tenantId,
+        dashboardId,
+        version,
+        actorUserId: auth.userId,
+      });
+
+      return { dashboardId: published.dashboardId, version: published.version };
+    },
+  );
+
+  /**
+   * Archive, trash and restore.
+   *
+   * Nothing here deletes. An archived dashboard is out of the way, a trashed
+   * one is out of sight, and both are recoverable (Master Spec §21).
+   */
+  app.post(
+    '/dashboards/:dashboardId/lifecycle',
+    { onRequest: [app.authenticate] },
+    async (request) => {
+      const auth = requireAuth(request);
+      const { dashboardId } = z.object({ dashboardId: z.string() }).parse(request.params);
+      const { to } = z.object({ to: z.enum(['archived', 'trash', 'restore']) }).parse(request.body);
+
+      const scope = await scopeForDashboard(container, auth, dashboardId, 'dashboard.publish');
+      const lifecycle = await container.dashboards.changeLifecycle({
+        tenantId: scope.tenantId,
+        dashboardId,
+        to,
+        actorUserId: auth.userId,
+      });
+
+      return { dashboardId, lifecycle };
+    },
+  );
 
   /**
    * Autosave.
@@ -207,7 +311,7 @@ export function registerDashboardRoutes(app: FastifyInstance, container: Contain
 
       const state =
         query.source === 'draft'
-          ? await container.dashboards.getDraft(scope.tenantId, dashboardId)
+          ? await container.dashboards.getDraft(scope.tenantId, dashboardId, auth.userId)
           : await container.dashboards.getPublished(scope.tenantId, dashboardId);
 
       if (!state) {

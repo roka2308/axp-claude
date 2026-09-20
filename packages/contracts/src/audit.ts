@@ -53,6 +53,10 @@ export const AUDIT_ACTIONS = [
   'dashboard.rolled_back',
   'dashboard.archived',
   'dashboard.trashed',
+  'dashboard.restored',
+  // A takeover ends someone else's editing session, so it is recorded even
+  // though both parties were allowed to edit (Master Spec §21).
+  'dashboard.editor_takeover',
 ] as const;
 
 export const auditActionSchema = z.enum(AUDIT_ACTIONS);

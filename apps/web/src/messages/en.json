@@ -348,8 +348,12 @@
       "widget_without_data": "One widget has no metric configured.",
       "duplicate_widget_id": "A widget identifier appears more than once.",
       "widget_too_small": "The widget is below the minimum size of {minW}×{minH}.",
-      "widget_out_of_grid": "The widget lies outside the {columns}-column grid."
-    }
+      "widget_out_of_grid": "The widget lies outside the {columns}-column grid.",
+      "widgets_overlap": "Two widgets overlap on {breakpoint}."
+    },
+    "draft_locked": "{userName} is editing this dashboard right now.",
+    "version_not_found": "Version {version} does not exist for this dashboard.",
+    "not_restorable": "Only archived or trashed dashboards can be restored."
   },
   "semantic": {
     "version_not_found": "A referenced definition version does not exist.",

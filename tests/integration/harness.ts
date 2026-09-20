@@ -122,4 +122,16 @@ export async function listColumns(table: string): Promise<string[]> {
   return rows.map((row) => String(row.COLUMN_NAME)).sort();
 }
 
+/** The declared SQL type of a column, for enum and precision assertions. */
+export async function columnType(table: string, column: string): Promise<string> {
+  const handle = await setupDatabase();
+  const [rows] = await handle.pool.query<RowDataPacket[]>(
+    'SELECT COLUMN_TYPE FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?',
+    [table, column],
+  );
+
+  if (rows.length === 0) throw new Error(`Column ${table}.${column} does not exist.`);
+  return String(rows[0]!.COLUMN_TYPE);
+}
+
 export const STRONG_TEST_PASSWORD = 'korrekt-pferd-batterie-heftklammer';

@@ -72,6 +72,10 @@ function raw(env: NodeJS.ProcessEnv) {
       maxParallelQueries: env.ANALYTICS_MAX_PARALLEL_QUERIES,
     },
     matomo: { adapter: env.MATOMO_ADAPTER },
+    editor: {
+      leaseTtlSeconds: env.EDITOR_LEASE_TTL_SECONDS,
+      leaseHeartbeatSeconds: env.EDITOR_LEASE_HEARTBEAT_SECONDS,
+    },
     mail: {
       transport: env.MAIL_TRANSPORT,
       from: env.MAIL_FROM,

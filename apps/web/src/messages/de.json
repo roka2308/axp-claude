@@ -348,8 +348,12 @@
       "widget_without_data": "Für ein Widget ist keine Kennzahl konfiguriert.",
       "duplicate_widget_id": "Eine Widget-Kennung kommt mehrfach vor.",
       "widget_too_small": "Das Widget unterschreitet die Mindestgröße von {minW}×{minH}.",
-      "widget_out_of_grid": "Das Widget liegt außerhalb des {columns}-Spalten-Rasters."
-    }
+      "widget_out_of_grid": "Das Widget liegt außerhalb des {columns}-Spalten-Rasters.",
+      "widgets_overlap": "Zwei Widgets überlappen sich auf {breakpoint}."
+    },
+    "draft_locked": "{userName} bearbeitet dieses Dashboard gerade.",
+    "version_not_found": "Version {version} existiert für dieses Dashboard nicht.",
+    "not_restorable": "Nur archivierte oder gelöschte Dashboards können wiederhergestellt werden."
   },
   "semantic": {
     "version_not_found": "Eine referenzierte Definitionsversion existiert nicht.",

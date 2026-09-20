@@ -142,6 +142,33 @@ export interface DashboardSnapshot {
   readonly widgets: readonly WidgetConfig[];
 }
 
+/**
+ * A claim on the draft, held by one editor at a time (Master Spec §21).
+ *
+ * Never a security control: whether a user may edit at all is an authorization
+ * question, answered before a lease is ever considered. This only stops two
+ * people who are both allowed to edit from overwriting each other.
+ */
+export interface EditorLease {
+  readonly userId: string;
+  readonly userName: string;
+  readonly expiresAt: string;
+  /** True when the caller is the one holding it. */
+  readonly heldByCaller: boolean;
+}
+
+/** One published version, for the history list and for rollback. */
+export interface DashboardVersionRef {
+  readonly version: number;
+  readonly status: 'published' | 'archived';
+  readonly publishedAt: string;
+  readonly publishedByUserId: string | null;
+  /** Set when this version was produced by rolling back to an older one. */
+  readonly rolledBackFromVersion: number | null;
+  readonly isCurrent: boolean;
+  readonly widgetCount: number;
+}
+
 export interface DashboardRef {
   readonly id: string;
   readonly tenantId: string;

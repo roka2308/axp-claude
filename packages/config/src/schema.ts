@@ -92,6 +92,19 @@ export const configSchema = z.object({
     adapter: z.enum(['mock', 'http']).default('mock'),
   }),
 
+  editor: z.object({
+    /**
+     * How long an editor lease survives without a heartbeat (Master Spec §21).
+     *
+     * Short enough that a closed laptop does not block a colleague for long,
+     * long enough to survive a slow network. Takeover is available before it
+     * expires anyway, so this is the automatic case, not the only one.
+     */
+    leaseTtlSeconds: positiveInt.max(3600).default(120),
+    /** How often the editor refreshes its lease. */
+    leaseHeartbeatSeconds: positiveInt.max(600).default(30),
+  }),
+
   mail: z.object({
     transport: z.enum(['console', 'smtp']).default('console'),
     from: z.string().min(1).default('Analytics Experience <no-reply@example.invalid>'),
