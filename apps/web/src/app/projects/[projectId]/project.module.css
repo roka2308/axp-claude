@@ -94,3 +94,14 @@
     grid-column: 1;
   }
 }
+
+.setupCta {
+  font-size: var(--font-size-sm);
+  color: var(--text-link);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.setupCta:hover {
+  text-decoration: underline;
+}

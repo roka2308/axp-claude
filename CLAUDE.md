@@ -13,11 +13,10 @@ Read before changing anything substantial:
 4. `../analytics_experience_version_d_v1.0/acceptance/acceptance_checklist.md`
 5. `docs/adr/` — decisions already taken here
 
-Current milestone: **Phase 1 — First Vertical Slice**. Gate F1 is demonstrated
-(`npm run gate:f1`, see `docs/gates/F1.md`); the Phase 1 authoring screens —
-connect/test Matomo, select site, show compatibility, create a dashboard, add
-widgets, publish — are the remaining work before Phase 2. Gate criteria are in
-the development plan.
+Current milestone: **Phase 2 — Dashboard Core and Grid**. Phase 1 is complete
+and Gate F1 is demonstrated (`npm run gate:f1`, see `docs/gates/F1.md`); adding
+widgets was deliberately folded into Phase 2, because the widget gallery and the
+Inspector are that milestone. Gate criteria are in the development plan.
 
 ## Non-negotiable invariants
 

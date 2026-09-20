@@ -8,6 +8,7 @@
 export * from './tokens/theme-contract';
 export * from './components/Button';
 export * from './components/TextField';
+export * from './components/SelectField';
 export * from './components/Callout';
 export * from './components/Card';
 export * from './components/VisuallyHidden';

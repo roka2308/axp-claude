@@ -1,0 +1,48 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+}
+
+.requiredMark {
+  color: var(--status-critical-text);
+  margin-inline-start: var(--space-1);
+}
+
+.select {
+  min-height: var(--density-control-height);
+  padding: 0 var(--space-2);
+  background: var(--surface-card);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font: inherit;
+}
+
+.select:disabled {
+  background: var(--surface-disabled);
+  color: var(--text-disabled);
+}
+
+.invalid {
+  border-color: var(--status-critical);
+}
+
+.hint {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.error {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-1);
+  font-size: var(--font-size-xs);
+  color: var(--status-critical-text);
+}

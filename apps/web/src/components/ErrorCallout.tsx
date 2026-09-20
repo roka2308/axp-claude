@@ -5,7 +5,8 @@ import { Callout } from '@axp/ui';
 import styles from './ErrorCallout.module.css';
 
 export interface ErrorCalloutProps {
-  readonly title: string;
+  /** Headline for the failure. Falls back to a generic one when the context already says what was attempted. */
+  readonly title?: string;
   /** What happened, already resolved into the user's language. */
   readonly message: string;
   /** What the user can do about it, when there is something concrete. */
@@ -27,7 +28,7 @@ export function ErrorCallout({ title, message, action, correlationId }: ErrorCal
   const t = useTranslations('errors');
 
   return (
-    <Callout tone="critical" title={title}>
+    <Callout tone="critical" title={title ?? t('actionFailed')}>
       <div className="stack stack--tight">
         <span>{message}</span>
         {action ? <span className="text-muted">{action}</span> : null}

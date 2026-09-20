@@ -1,0 +1,86 @@
+.meta {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.heading {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+}
+
+.list {
+  margin: var(--space-1) 0 0;
+  padding-inline-start: var(--space-4);
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.limitations {
+  padding: var(--space-2) 0;
+}
+
+.probes {
+  border-top: 1px solid var(--border-subtle);
+  padding-top: var(--space-2);
+}
+
+.summary {
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.tier {
+  margin-top: var(--space-3);
+}
+
+.probeList {
+  list-style: none;
+  margin: var(--space-1) 0 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-1);
+}
+
+.probe {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-2);
+  align-items: baseline;
+  font-size: var(--font-size-sm);
+  padding: var(--space-1) 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.probeName {
+  color: var(--text-primary);
+}
+
+.probeState {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+}
+
+/*
+  Colour reinforces the state that the word already carries; it never replaces
+  it. A user who cannot distinguish the hues reads the same information.
+*/
+.probe[data-state='available'] .probeState {
+  color: var(--status-success-text);
+}
+
+.probe[data-state='unavailable'] .probeState {
+  color: var(--status-critical-text);
+}
+
+.probe[data-state='unknown'] .probeState {
+  color: var(--text-muted);
+}
+
+.probeDetail {
+  grid-column: 1 / -1;
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}

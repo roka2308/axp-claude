@@ -1,5 +1,6 @@
 import 'server-only';
 import type {
+  Capability,
   ComparisonMode,
   DashboardPresentation,
   DashboardRef,
@@ -51,6 +52,13 @@ export interface ProjectDetail {
     readonly steps: readonly SetupStep[];
   };
   readonly sites: readonly ProjectSite[];
+  /**
+   * What the caller may do here, decided by the server.
+   *
+   * The web app hides what it is not offered and never re-derives a decision;
+   * every write is authorized again on the server anyway.
+   */
+  readonly capabilities: readonly Capability[];
 }
 
 export async function listProjects(): Promise<ProjectSummary[]> {

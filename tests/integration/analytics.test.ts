@@ -245,6 +245,64 @@ describe('analytics slice', () => {
     });
   });
 
+  // --- what the UI may offer ----------------------------------------------
+
+  describe('granted capabilities', () => {
+    it('tells each caller what they may do here, and nothing more', async () => {
+      // The web app hides what it is not offered. It must never be offered an
+      // action the server would then refuse (Shared Contract §4).
+      const capabilitiesFor = async (token: string) => {
+        const response = await app.inject({
+          method: 'GET',
+          url: `/projects/${tenantA.projectId}`,
+          headers: as(token),
+        });
+        expect(response.statusCode).toBe(200);
+        return response.json().capabilities as string[];
+      };
+
+      const viewer = await capabilitiesFor(viewerA);
+      expect(viewer).toContain('dashboard.read_published');
+      expect(viewer).not.toContain('dashboard.create');
+      expect(viewer).not.toContain('dashboard.publish');
+      expect(viewer).not.toContain('tenant.settings.update');
+
+      const editor = await capabilitiesFor(editorA);
+      expect(editor).toEqual(
+        expect.arrayContaining(['dashboard.create', 'dashboard.edit_draft', 'dashboard.publish']),
+      );
+      expect(editor).not.toContain('tenant.settings.update');
+
+      // A tenant admin administers; it does not read dashboards. Roles are
+      // additive, not hierarchical (Master Spec §7).
+      const admin = await capabilitiesFor(adminA);
+      expect(admin).toContain('project.settings.update');
+      expect(admin).toContain('tenant.settings.update');
+      expect(admin).not.toContain('dashboard.read_published');
+      expect(admin).not.toContain('dashboard.create');
+    });
+
+    it('matches what the write routes actually enforce', async () => {
+      // The list is only trustworthy if it predicts the answer. A viewer is
+      // offered no publish, and publishing is refused.
+      const viewer = (
+        await app.inject({
+          method: 'GET',
+          url: `/projects/${tenantA.projectId}`,
+          headers: as(viewerA),
+        })
+      ).json().capabilities as string[];
+      expect(viewer).not.toContain('dashboard.publish');
+
+      const refused = await app.inject({
+        method: 'POST',
+        url: `/dashboards/${tenantA.dashboardId}/publish`,
+        headers: as(viewerA),
+      });
+      expect(refused.statusCode).toBe(403);
+    });
+  });
+
   // --- credentials ---------------------------------------------------------
 
   describe('credentials', () => {

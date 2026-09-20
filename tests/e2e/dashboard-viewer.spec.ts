@@ -138,7 +138,10 @@ test.describe('dashboard viewer', () => {
 
     const everything = [await page.content(), ...bodies].join(' ');
     expect(everything).not.toContain(DEMO_MATOMO_TOKEN);
-    expect(everything).not.toMatch(/token_auth/i);
+    // `token_auth=` is the leak shape - a Matomo request carrying the
+    // credential. The bare word is a legitimate UI label on the setup form,
+    // and next-intl ships every message to the client.
+    expect(everything).not.toMatch(/token_auth=/i);
   });
 
   test('states every widget status as text', async ({ page }) => {

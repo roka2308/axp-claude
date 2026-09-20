@@ -1,0 +1,91 @@
+.back {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.back:hover {
+  color: var(--text-primary);
+  text-decoration: underline;
+}
+
+.checklist {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.step {
+  display: grid;
+  grid-template-columns: 9rem 1fr;
+  gap: var(--space-1) var(--space-3);
+  align-items: baseline;
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.step:last-child {
+  border-bottom: none;
+}
+
+/*
+ * The state is a word. Setup is non-linear and resumable, so a reader has to
+ * be able to scan the states themselves rather than infer them from a colour
+ * (Master Spec §13, D10).
+ */
+.stepState {
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  color: var(--text-muted);
+}
+
+.step[data-state='done'] .stepState {
+  color: var(--status-success-text);
+}
+
+.step[data-state='in_progress'] .stepState {
+  color: var(--status-warning-text);
+}
+
+.step[data-state='review_required'] .stepState {
+  color: var(--status-serious-text);
+}
+
+.subheading {
+  margin: 0 0 var(--space-2);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+}
+
+.connection {
+  padding: var(--space-3);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--surface-sunken);
+}
+
+.connectionHeader {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.siteList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+@media (max-width: 767px) {
+  .step {
+    grid-template-columns: 1fr;
+  }
+}
