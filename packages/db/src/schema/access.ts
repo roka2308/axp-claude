@@ -1,11 +1,4 @@
-import {
-  char,
-  index,
-  mysqlEnum,
-  mysqlTable,
-  uniqueIndex,
-  varchar,
-} from 'drizzle-orm/mysql-core';
+import { char, index, mysqlEnum, mysqlTable, uniqueIndex, varchar } from 'drizzle-orm/mysql-core';
 import { OBJECT_ACCESS_LEVELS, SCOPE_TYPES, SUBJECT_TYPES, SYSTEM_ROLES } from '@axp/contracts';
 import { createdAt, idColumn, updatedAt } from './_shared';
 import { users } from './identity';

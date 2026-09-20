@@ -119,14 +119,30 @@
     },
     "internal_error": {
       "unexpected": "Es ist ein interner Fehler aufgetreten."
-    }
+    },
+    "technicalDetails": "Technische Details"
   },
   "roles": {
-    "viewer": { "label": "Viewer", "purpose": "Sieht ausdrücklich freigegebene veröffentlichte Dashboards." },
-    "dashboard_editor": { "label": "Dashboard Editor", "purpose": "Erstellt, bearbeitet und veröffentlicht Dashboards im erlaubten Bereich." },
-    "semantic_catalog_manager": { "label": "Semantic Catalog Manager", "purpose": "Verwaltet Definitionen, Formeln, Scores und Versionen." },
-    "tenant_admin": { "label": "Tenant Admin", "purpose": "Verwaltet Benutzer, Gruppen, Rollen und Kundenkonfiguration." },
-    "platform_admin": { "label": "Platform Admin", "purpose": "Verwaltet Plattform, Tenant-Lebenszyklus und globale Administration." }
+    "viewer": {
+      "label": "Viewer",
+      "purpose": "Sieht ausdrücklich freigegebene veröffentlichte Dashboards."
+    },
+    "dashboard_editor": {
+      "label": "Dashboard Editor",
+      "purpose": "Erstellt, bearbeitet und veröffentlicht Dashboards im erlaubten Bereich."
+    },
+    "semantic_catalog_manager": {
+      "label": "Semantic Catalog Manager",
+      "purpose": "Verwaltet Definitionen, Formeln, Scores und Versionen."
+    },
+    "tenant_admin": {
+      "label": "Tenant Admin",
+      "purpose": "Verwaltet Benutzer, Gruppen, Rollen und Kundenkonfiguration."
+    },
+    "platform_admin": {
+      "label": "Platform Admin",
+      "purpose": "Verwaltet Plattform, Tenant-Lebenszyklus und globale Administration."
+    }
   },
   "scopes": {
     "platform": "Plattform",

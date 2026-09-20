@@ -2,30 +2,25 @@
 
 import { useActionState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Button, Callout, TextField } from '@axp/ui';
+import { Button, TextField } from '@axp/ui';
 import { loginAction, type LoginFormState } from '@/app/login/actions';
+import { ErrorCallout } from './ErrorCallout';
 
 const INITIAL_STATE: LoginFormState = { status: 'idle' };
 
 export function LoginForm() {
   const t = useTranslations('login');
-  const tErrors = useTranslations('errors');
   const [state, formAction, pending] = useActionState(loginAction, INITIAL_STATE);
 
   return (
     <form action={formAction} className="stack" noValidate>
       {state.status === 'error' && state.message ? (
-        <Callout tone="critical" title={t('failed')}>
-          <div className="stack stack--tight">
-            <span>{state.message}</span>
-            {state.action ? <span className="text-muted">{state.action}</span> : null}
-            {state.correlationId ? (
-              <span className="text-muted">
-                {tErrors('correlationId', { id: state.correlationId })}
-              </span>
-            ) : null}
-          </div>
-        </Callout>
+        <ErrorCallout
+          title={t('failed')}
+          message={state.message}
+          action={state.action}
+          correlationId={state.correlationId}
+        />
       ) : null}
 
       <TextField
@@ -47,13 +42,7 @@ export function LoginForm() {
         error={state.fieldErrors?.password}
       />
 
-      <Button
-        type="submit"
-        variant="primary"
-        fullWidth
-        busy={pending}
-        busyLabel={t('submitting')}
-      >
+      <Button type="submit" variant="primary" fullWidth busy={pending} busyLabel={t('submitting')}>
         {t('submit')}
       </Button>
     </form>

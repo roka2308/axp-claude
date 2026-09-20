@@ -4,6 +4,7 @@ import { useActionState } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { Button, Callout, TextField } from '@axp/ui';
+import { ErrorCallout } from './ErrorCallout';
 import {
   completeBootstrapAction,
   completeRecoveryAction,
@@ -20,7 +21,6 @@ export interface SetupFormProps {
 export function SetupForm({ token, mode }: SetupFormProps) {
   const t = useTranslations('setup');
   const tRecover = useTranslations('recover');
-  const tErrors = useTranslations('errors');
 
   const [state, formAction, pending] = useActionState(
     mode === 'bootstrap' ? completeBootstrapAction : completeRecoveryAction,
@@ -30,7 +30,10 @@ export function SetupForm({ token, mode }: SetupFormProps) {
   if (state.status === 'success') {
     return (
       <div className="stack">
-        <Callout tone="success" title={mode === 'bootstrap' ? t('successTitle') : tRecover('successTitle')}>
+        <Callout
+          tone="success"
+          title={mode === 'bootstrap' ? t('successTitle') : tRecover('successTitle')}
+        >
           {mode === 'bootstrap' ? t('successBody') : tRecover('successBody')}
         </Callout>
         <Link href="/login">{t('toLogin')}</Link>
@@ -44,17 +47,12 @@ export function SetupForm({ token, mode }: SetupFormProps) {
       <input type="hidden" name="token" value={token} />
 
       {state.status === 'error' && state.message ? (
-        <Callout tone="critical" title={t('failed')}>
-          <div className="stack stack--tight">
-            <span>{state.message}</span>
-            {state.action ? <span className="text-muted">{state.action}</span> : null}
-            {state.correlationId ? (
-              <span className="text-muted">
-                {tErrors('correlationId', { id: state.correlationId })}
-              </span>
-            ) : null}
-          </div>
-        </Callout>
+        <ErrorCallout
+          title={t('failed')}
+          message={state.message}
+          action={state.action}
+          correlationId={state.correlationId}
+        />
       ) : null}
 
       <TextField

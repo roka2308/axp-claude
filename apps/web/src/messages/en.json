@@ -119,14 +119,30 @@
     },
     "internal_error": {
       "unexpected": "An internal error occurred."
-    }
+    },
+    "technicalDetails": "Technical details"
   },
   "roles": {
-    "viewer": { "label": "Viewer", "purpose": "Views explicitly granted published dashboards." },
-    "dashboard_editor": { "label": "Dashboard Editor", "purpose": "Creates, edits and publishes dashboards within the allowed scope." },
-    "semantic_catalog_manager": { "label": "Semantic Catalog Manager", "purpose": "Manages definitions, formulas, scores and versions." },
-    "tenant_admin": { "label": "Tenant Admin", "purpose": "Manages users, groups, roles and tenant configuration." },
-    "platform_admin": { "label": "Platform Admin", "purpose": "Manages the platform, tenant lifecycle and global administration." }
+    "viewer": {
+      "label": "Viewer",
+      "purpose": "Views explicitly granted published dashboards."
+    },
+    "dashboard_editor": {
+      "label": "Dashboard Editor",
+      "purpose": "Creates, edits and publishes dashboards within the allowed scope."
+    },
+    "semantic_catalog_manager": {
+      "label": "Semantic Catalog Manager",
+      "purpose": "Manages definitions, formulas, scores and versions."
+    },
+    "tenant_admin": {
+      "label": "Tenant Admin",
+      "purpose": "Manages users, groups, roles and tenant configuration."
+    },
+    "platform_admin": {
+      "label": "Platform Admin",
+      "purpose": "Manages the platform, tenant lifecycle and global administration."
+    }
   },
   "scopes": {
     "platform": "Platform",

@@ -21,7 +21,8 @@ services:
       - axp-mysql-data:/var/lib/mysql
       - ./docker/mysql/init:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-p${MYSQL_ROOT_PASSWORD:-axp_root_dev}']
+      test:
+        ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-p${MYSQL_ROOT_PASSWORD:-axp_root_dev}']
       interval: 5s
       timeout: 5s
       retries: 20

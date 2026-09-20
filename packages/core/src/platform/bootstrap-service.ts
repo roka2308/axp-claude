@@ -1,6 +1,7 @@
 import { and, eq, gt, isNull, sql } from 'drizzle-orm';
 import { AppError, type PlatformInitState } from '@axp/contracts';
 import {
+  affectedRows,
   authIdentities,
   bootstrapTokens,
   type Database,
@@ -172,7 +173,10 @@ export class BootstrapService {
    * True when the token is currently usable. Lets the setup page decide whether
    * to show the form at all, before asking anyone for a password.
    */
-  async isTokenUsable(token: string, purpose: BootstrapPurpose = 'initial_bootstrap'): Promise<boolean> {
+  async isTokenUsable(
+    token: string,
+    purpose: BootstrapPurpose = 'initial_bootstrap',
+  ): Promise<boolean> {
     const now = this.deps.clock.now();
     const [row] = await this.deps.db
       .select({ id: bootstrapTokens.id })
@@ -375,9 +379,7 @@ export class BootstrapService {
           const [identity] = await tx
             .select({ id: authIdentities.id })
             .from(authIdentities)
-            .where(
-              and(eq(authIdentities.userId, userId), eq(authIdentities.providerType, 'local')),
-            )
+            .where(and(eq(authIdentities.userId, userId), eq(authIdentities.providerType, 'local')))
             .limit(1);
 
           if (identity) {
@@ -475,6 +477,6 @@ export class BootstrapService {
       .where(
         sql`${bootstrapTokens.expiresAt} < ${now} OR ${bootstrapTokens.consumedAt} IS NOT NULL`,
       );
-    return Number((result as unknown as { affectedRows?: number }).affectedRows ?? 0);
+    return affectedRows(result);
   }
 }

@@ -1,0 +1,24 @@
+.details {
+  margin-top: var(--space-1);
+}
+
+.summary {
+  cursor: pointer;
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  /* A disclosure triangle is a control: it needs a real target size. */
+  padding: var(--space-1) 0;
+}
+
+.summary:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.correlationId {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-2xs);
+  color: var(--text-muted);
+  word-break: break-all;
+}

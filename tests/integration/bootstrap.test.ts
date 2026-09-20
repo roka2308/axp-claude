@@ -148,7 +148,9 @@ describe('secure initial bootstrap', () => {
         lastName: 'Plattform',
         password: 'kurz',
       }),
-    ).rejects.toSatisfy((error: unknown) => AppError.isAppError(error) && error.code === 'password_policy');
+    ).rejects.toSatisfy(
+      (error: unknown) => AppError.isAppError(error) && error.code === 'password_policy',
+    );
 
     expect(await ctx.container.bootstrap.getInitState()).toBe('uninitialized');
     // The token survives so the operator can retry with a valid password.

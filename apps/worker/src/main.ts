@@ -64,7 +64,11 @@ async function main(): Promise<void> {
           JSON.stringify({
             status: database.reachable ? 'ready' : 'not_ready',
             dependencies: [
-              { name: 'mysql', status: database.reachable ? 'up' : 'down', latencyMs: database.latencyMs },
+              {
+                name: 'mysql',
+                status: database.reachable ? 'up' : 'down',
+                latencyMs: database.latencyMs,
+              },
             ],
           }),
         );

@@ -169,15 +169,11 @@ export class TenantService {
     const [existing] = await this.deps.db
       .select({ id: tenantMemberships.id })
       .from(tenantMemberships)
-      .where(
-        and(eq(tenantMemberships.tenantId, tenantId), eq(tenantMemberships.userId, userId)),
-      )
+      .where(and(eq(tenantMemberships.tenantId, tenantId), eq(tenantMemberships.userId, userId)))
       .limit(1);
     if (existing) return;
 
-    await this.deps.db
-      .insert(tenantMemberships)
-      .values({ id: newId(), tenantId, userId });
+    await this.deps.db.insert(tenantMemberships).values({ id: newId(), tenantId, userId });
   }
 
   async findTenantBySlug(slug: string) {

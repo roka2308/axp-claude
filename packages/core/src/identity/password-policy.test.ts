@@ -19,9 +19,9 @@ describe('password policy', () => {
   });
 
   it('rejects a password containing the email local part', () => {
-    expect(
-      checkPassword('roberts-passwort-2026', { email: 'roberts@example.invalid' }),
-    ).toContain('password.contains_email');
+    expect(checkPassword('roberts-passwort-2026', { email: 'roberts@example.invalid' })).toContain(
+      'password.contains_email',
+    );
   });
 
   it('rejects a password containing the user name', () => {

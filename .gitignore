@@ -24,6 +24,9 @@ blob-report/
 .playwright/
 
 # local runtime artifacts
+# .local/ holds the portable MySQL distribution and its data directory
+# (scripts/local-mysql.mjs). Never committed.
+.local/
 tmp/
 .tmp/
 logs/

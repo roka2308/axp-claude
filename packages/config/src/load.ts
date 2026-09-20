@@ -18,7 +18,10 @@ export class ConfigurationError extends Error {
 function findRepoRoot(startDir: string): string {
   let dir = startDir;
   for (let i = 0; i < 8; i += 1) {
-    if (existsSync(path.join(dir, 'package.json')) && existsSync(path.join(dir, 'tsconfig.base.json'))) {
+    if (
+      existsSync(path.join(dir, 'package.json')) &&
+      existsSync(path.join(dir, 'tsconfig.base.json'))
+    ) {
       return dir;
     }
     const parent = path.dirname(dir);

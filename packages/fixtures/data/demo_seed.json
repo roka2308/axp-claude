@@ -19,11 +19,31 @@
     "timezone": "Europe/Berlin"
   },
   "users": [
-    {"key": "viewer", "email": "viewer.demo@example.invalid", "roles": [{"role": "viewer", "scope": "project"}]},
-    {"key": "editor", "email": "editor.demo@example.invalid", "roles": [{"role": "dashboard_editor", "scope": "project"}]},
-    {"key": "semantic", "email": "semantic.demo@example.invalid", "roles": [{"role": "semantic_catalog_manager", "scope": "tenant"}]},
-    {"key": "tenantAdmin", "email": "tenantadmin.demo@example.invalid", "roles": [{"role": "tenant_admin", "scope": "tenant"}]},
-    {"key": "platformAdmin", "email": "platformadmin.demo@example.invalid", "roles": [{"role": "platform_admin", "scope": "platform"}]}
+    {
+      "key": "viewer",
+      "email": "viewer.demo@example.invalid",
+      "roles": [{ "role": "viewer", "scope": "project" }]
+    },
+    {
+      "key": "editor",
+      "email": "editor.demo@example.invalid",
+      "roles": [{ "role": "dashboard_editor", "scope": "project" }]
+    },
+    {
+      "key": "semantic",
+      "email": "semantic.demo@example.invalid",
+      "roles": [{ "role": "semantic_catalog_manager", "scope": "tenant" }]
+    },
+    {
+      "key": "tenantAdmin",
+      "email": "tenantadmin.demo@example.invalid",
+      "roles": [{ "role": "tenant_admin", "scope": "tenant" }]
+    },
+    {
+      "key": "platformAdmin",
+      "email": "platformadmin.demo@example.invalid",
+      "roles": [{ "role": "platform_admin", "scope": "platform" }]
+    }
   ],
   "pulse": {
     "periodLabel": "reference-week",
@@ -41,8 +61,8 @@
       "pulseScore": 40.32
     },
     "weights": {
-      "interactionIndex": {"engagementRate": 0.8, "creationRate": 0.2},
-      "pulse": {"interactionIndex": 0.3, "adoptionRate": 0.7}
+      "interactionIndex": { "engagementRate": 0.8, "creationRate": 0.2 },
+      "pulse": { "interactionIndex": 0.3, "adoptionRate": 0.7 }
     },
     "portableIds": {
       "activeUsers": "pulse.active_users",

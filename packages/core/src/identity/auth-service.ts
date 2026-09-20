@@ -1,6 +1,7 @@
 import { and, eq, isNull, lt, or, sql } from 'drizzle-orm';
 import { AppError, type AuthContext, asUserId, type UserId } from '@axp/contracts';
 import {
+  affectedRows,
   authIdentities,
   type Database,
   loginAttempts,
@@ -146,10 +147,7 @@ export class AuthService {
       userAgent: input.userAgent,
     });
 
-    await this.deps.db
-      .update(users)
-      .set({ lastLoginAt: now })
-      .where(eq(users.id, row.userId));
+    await this.deps.db.update(users).set({ lastLoginAt: now }).where(eq(users.id, row.userId));
 
     await this.deps.audit.success('auth.login.succeeded', {
       actorUserId: row.userId,
@@ -173,7 +171,10 @@ export class AuthService {
   }): Promise<{ token: string; expiresAt: Date; sessionId: string }> {
     const token = generateSecretToken(32);
     const sessionId = newId();
-    const absoluteExpiresAt = addMs(params.now, hours(this.deps.sessionPolicy.absoluteLifetimeHours));
+    const absoluteExpiresAt = addMs(
+      params.now,
+      hours(this.deps.sessionPolicy.absoluteLifetimeHours),
+    );
     const idleExpiresAt = addMs(params.now, minutes(this.deps.sessionPolicy.idleTimeoutMinutes));
 
     await this.deps.db.insert(sessions).values({
@@ -273,7 +274,7 @@ export class AuthService {
       .set({ revokedAt: now, revokedReason: reason.slice(0, 64) })
       .where(and(eq(sessions.userId, userId), isNull(sessions.revokedAt)));
 
-    const affected = Number((result as unknown as { affectedRows?: number }).affectedRows ?? 0);
+    const affected = affectedRows(result);
     await this.deps.audit.success('auth.session.revoked', {
       actorUserId: userId,
       targetType: 'user',
@@ -295,7 +296,7 @@ export class AuthService {
           sql`${sessions.revokedAt} IS NOT NULL AND ${sessions.revokedAt} < ${addMs(now, -hours(24))}`,
         ),
       );
-    return Number((result as unknown as { affectedRows?: number }).affectedRows ?? 0);
+    return affectedRows(result);
   }
 
   private async assertNotLockedOut(subjectKeys: readonly string[], now: Date): Promise<void> {

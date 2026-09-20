@@ -6,6 +6,8 @@ export default tseslint.config(
   {
     ignores: [
       '**/node_modules/**',
+      // Portable MySQL distribution and other local-only runtime files.
+      '.local/**',
       '**/dist/**',
       '**/.next/**',
       '**/coverage/**',

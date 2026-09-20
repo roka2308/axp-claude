@@ -65,7 +65,13 @@ describe('product store persistence rules', () => {
   it('stores no analytics values on the tables that do exist', async () => {
     // Columns that would indicate normalised Matomo results leaking into the
     // product store rather than staying in the ephemeral RAM cache.
-    const forbiddenColumns = ['nb_visits', 'nb_pageviews', 'metric_value', 'result_payload', 'series'];
+    const forbiddenColumns = [
+      'nb_visits',
+      'nb_pageviews',
+      'metric_value',
+      'result_payload',
+      'series',
+    ];
 
     for (const table of await listTables()) {
       const columns = await listColumns(table);

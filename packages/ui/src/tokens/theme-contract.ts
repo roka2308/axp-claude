@@ -107,14 +107,54 @@ export const THEME_CONTRAST_PAIRS: readonly {
   readonly minimumRatio: number;
   readonly reason: string;
 }[] = [
-  { foreground: '--text-primary', background: '--surface-page', minimumRatio: 4.5, reason: 'body_text' },
-  { foreground: '--text-primary', background: '--surface-card', minimumRatio: 4.5, reason: 'body_text' },
-  { foreground: '--text-secondary', background: '--surface-card', minimumRatio: 4.5, reason: 'body_text' },
-  { foreground: '--text-muted', background: '--surface-card', minimumRatio: 4.5, reason: 'body_text' },
-  { foreground: '--accent-contrast', background: '--accent-default', minimumRatio: 4.5, reason: 'button_label' },
-  { foreground: '--text-link', background: '--surface-card', minimumRatio: 4.5, reason: 'link_text' },
-  { foreground: '--focus-ring-color', background: '--surface-card', minimumRatio: 3, reason: 'focus_indicator' },
-  { foreground: '--border-default', background: '--surface-card', minimumRatio: 3, reason: 'control_boundary' },
+  {
+    foreground: '--text-primary',
+    background: '--surface-page',
+    minimumRatio: 4.5,
+    reason: 'body_text',
+  },
+  {
+    foreground: '--text-primary',
+    background: '--surface-card',
+    minimumRatio: 4.5,
+    reason: 'body_text',
+  },
+  {
+    foreground: '--text-secondary',
+    background: '--surface-card',
+    minimumRatio: 4.5,
+    reason: 'body_text',
+  },
+  {
+    foreground: '--text-muted',
+    background: '--surface-card',
+    minimumRatio: 4.5,
+    reason: 'body_text',
+  },
+  {
+    foreground: '--accent-contrast',
+    background: '--accent-default',
+    minimumRatio: 4.5,
+    reason: 'button_label',
+  },
+  {
+    foreground: '--text-link',
+    background: '--surface-card',
+    minimumRatio: 4.5,
+    reason: 'link_text',
+  },
+  {
+    foreground: '--focus-ring-color',
+    background: '--surface-card',
+    minimumRatio: 3,
+    reason: 'focus_indicator',
+  },
+  {
+    foreground: '--border-default',
+    background: '--surface-card',
+    minimumRatio: 3,
+    reason: 'control_boundary',
+  },
 ];
 
 export type ThemeTokenValues = Partial<Record<ThemeableToken, string>>;
@@ -130,7 +170,8 @@ export type ThemeTokenValues = Partial<Record<ThemeableToken, string>>;
 const SAFE_COLOR = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
 const SAFE_RGB = /^rgb\(\s*\d{1,3}\s+\d{1,3}\s+\d{1,3}(?:\s*\/\s*\d{1,3}%)?\s*\)$/;
 const SAFE_LENGTH = /^-?\d+(?:\.\d+)?(?:px|rem|em|%)?$/;
-const SAFE_SHADOW = /^(?:none|(?:-?\d+(?:\.\d+)?px\s+){2,3}rgb\(\s*\d{1,3}\s+\d{1,3}\s+\d{1,3}\s*\/\s*\d{1,3}%\s*\))$/;
+const SAFE_SHADOW =
+  /^(?:none|(?:-?\d+(?:\.\d+)?px\s+){2,3}rgb\(\s*\d{1,3}\s+\d{1,3}\s+\d{1,3}\s*\/\s*\d{1,3}%\s*\))$/;
 const SAFE_FONT_STACK = /^[-\w\s,'"]+$/;
 
 export interface ThemeValidationIssue {

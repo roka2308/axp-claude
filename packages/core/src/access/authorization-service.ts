@@ -114,7 +114,8 @@ export class AuthorizationService {
 
     if (assignment.scopeType === 'tenant') {
       if (target.type === 'tenant') return assignment.scopeId === target.id;
-      if (target.type === 'project') return owningTenantId !== null && assignment.scopeId === owningTenantId;
+      if (target.type === 'project')
+        return owningTenantId !== null && assignment.scopeId === owningTenantId;
       return false;
     }
 

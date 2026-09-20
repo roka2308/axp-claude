@@ -17,7 +17,10 @@ describe('password hashing', () => {
   });
 
   it('salts each hash, so identical passwords do not collide', async () => {
-    const [a, b] = await Promise.all([hashPassword('gleiches-passwort'), hashPassword('gleiches-passwort')]);
+    const [a, b] = await Promise.all([
+      hashPassword('gleiches-passwort'),
+      hashPassword('gleiches-passwort'),
+    ]);
     expect(a).not.toBe(b);
   });
 

@@ -16,7 +16,10 @@
  * Destructive: it drops and recreates the development database. Refuses to run
  * against anything but a development environment.
  *
- * Usage:  node scripts/verify-gate-f0.mjs [--skip-e2e]
+ * Usage:  node scripts/verify-gate-f0.mjs [--skip-e2e] [--local-mysql]
+ *
+ * `--local-mysql` uses the portable MySQL from scripts/local-mysql.mjs instead
+ * of the docker stack, for machines where Docker Desktop is unavailable.
  */
 
 import { spawn } from 'node:child_process';
@@ -28,6 +31,7 @@ import { readFileSync } from 'node:fs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SKIP_E2E = process.argv.includes('--skip-e2e');
+const LOCAL_MYSQL = process.argv.includes('--local-mysql');
 
 const env = readEnvFile(path.join(ROOT, '.env'));
 const API_URL = env.API_PUBLIC_URL ?? 'http://localhost:4000';
@@ -45,36 +49,46 @@ async function main() {
     throw new Error(`Refusing to run: APP_ENV is "${env.APP_ENV}", expected "development".`);
   }
 
-  await step('docker engine reachable', async () => {
-    const { code, stdout } = await run('docker', ['info', '--format', '{{.ServerVersion}}']);
-    const version = stdout.trim();
-    if (code !== 0 || version.length === 0) {
-      throw new Error(
-        'The Docker engine is not answering. On Windows 10 Home this usually means WSL 2 ' +
-          'is missing: run "wsl --install --no-distribution" in an elevated PowerShell, reboot, ' +
-          'then start Docker Desktop.',
-      );
-    }
-    return `engine ${version}`;
-  });
+  if (LOCAL_MYSQL) {
+    await step('portable MySQL running', async () => {
+      await runOrThrow('node', ['scripts/local-mysql.mjs', 'start']);
+      const { stdout } = await runOrThrow('node', ['scripts/local-mysql.mjs', 'status']);
+      return stdout.trim();
+    });
+  } else {
+    await step('docker engine reachable', async () => {
+      const { code, stdout } = await run('docker', ['info', '--format', '{{.ServerVersion}}']);
+      const version = stdout.trim();
+      if (code !== 0 || version.length === 0) {
+        throw new Error(
+          'The Docker engine is not answering. On Windows 10 Home this usually means WSL 2 ' +
+            'is missing: run "wsl --install --no-distribution" in an elevated PowerShell, reboot, ' +
+            'then start Docker Desktop. Alternatively run this with --local-mysql.',
+        );
+      }
+      return `engine ${version}`;
+    });
 
-  await step('compose stack healthy', async () => {
-    await runOrThrow('docker', ['compose', 'up', '-d']);
-    const container = 'axp-mysql';
-    const deadline = Date.now() + 180_000;
-    for (;;) {
-      const { stdout } = await run('docker', [
-        'inspect',
-        '-f',
-        '{{.State.Health.Status}}',
-        container,
-      ]);
-      const status = stdout.trim();
-      if (status === 'healthy') return `${container} healthy`;
-      if (Date.now() > deadline) throw new Error(`${container} did not become healthy (${status})`);
-      await delay(2000);
-    }
-  });
+    await step('compose stack healthy', async () => {
+      await runOrThrow('docker', ['compose', 'up', '-d']);
+      const container = 'axp-mysql';
+      const deadline = Date.now() + 180_000;
+      for (;;) {
+        const { stdout } = await run('docker', [
+          'inspect',
+          '-f',
+          '{{.State.Health.Status}}',
+          container,
+        ]);
+        const status = stdout.trim();
+        if (status === 'healthy') return `${container} healthy`;
+        if (Date.now() > deadline) {
+          throw new Error(`${container} did not become healthy (${status})`);
+        }
+        await delay(2000);
+      }
+    });
+  }
 
   await step('migrations run from an empty database', async () => {
     await runOrThrow('npm', ['run', 'db:reset']);
@@ -164,7 +178,13 @@ async function main() {
 
   await step('bootstrap token is minted by the privileged process', async () => {
     const { stdout } = await runOrThrow('npm', ['run', 'bootstrap-admin', '--', '--json']);
-    const json = JSON.parse(stdout.slice(stdout.indexOf('{'), stdout.lastIndexOf('}') + 1));
+    const start = stdout.indexOf('{');
+    const end = stdout.lastIndexOf('}');
+    if (start === -1 || end === -1) {
+      throw new Error(`bootstrap-admin printed no JSON:
+${stdout.trim().slice(-400)}`);
+    }
+    const json = JSON.parse(stdout.slice(start, end + 1));
     bootstrapToken = json.token;
     if (!bootstrapToken || bootstrapToken.length < 40) throw new Error('Token looks too weak.');
     return `single-use token, valid until ${json.expiresAt}`;

@@ -8,6 +8,15 @@ export default defineConfig({
   outDir: 'dist',
   clean: true,
   sourcemap: true,
+  /**
+   * Bundle the workspace packages, because they ship TypeScript sources that
+   * Node cannot execute, and keep every third-party import external.
+   *
+   * The negative lookahead covers transitive dependencies too. Pulling a
+   * CommonJS package such as dotenv into an ESM bundle turns its `require()`
+   * calls into a dynamic require, which fails at runtime - so the rule is
+   * "bundle ours, load theirs" rather than a list that drifts.
+   */
   noExternal: [/^@axp\//],
-  external: ['@node-rs/argon2', 'mysql2', 'pino', 'pino-pretty'],
+  external: [/^(?!@axp\/|\.{1,2}\/|\/)/],
 });

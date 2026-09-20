@@ -16,7 +16,9 @@ export const systemClock: Clock = {
 };
 
 /** Test double: starts at a fixed instant and only moves when asked. */
-export function fixedClock(start: Date): Clock & { advance(ms: number): void; set(at: Date): void } {
+export function fixedClock(
+  start: Date,
+): Clock & { advance(ms: number): void; set(at: Date): void } {
   let current = new Date(start.getTime());
   return {
     now: () => new Date(current.getTime()),

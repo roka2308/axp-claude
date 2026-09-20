@@ -91,43 +91,122 @@ describe('tenant isolation and authorization', () => {
   }
 
   it('does not let a tenant admin of one tenant act on another tenant', async () => {
-    const { context } = await userWithRole('admin.a@example.invalid', 'tenant_admin', 'tenant', tenantA);
+    const { context } = await userWithRole(
+      'admin.a@example.invalid',
+      'tenant_admin',
+      'tenant',
+      tenantA,
+    );
 
-    expect(await ctx.container.authorization.can(context, 'tenant.read', { type: 'tenant', tenantId: tenantA })).toBe(true);
-    expect(await ctx.container.authorization.can(context, 'tenant.read', { type: 'tenant', tenantId: tenantB })).toBe(false);
+    expect(
+      await ctx.container.authorization.can(context, 'tenant.read', {
+        type: 'tenant',
+        tenantId: tenantA,
+      }),
+    ).toBe(true);
+    expect(
+      await ctx.container.authorization.can(context, 'tenant.read', {
+        type: 'tenant',
+        tenantId: tenantB,
+      }),
+    ).toBe(false);
   });
 
   it('does not let a tenant-scoped role reach a project of a different tenant', async () => {
-    const { context } = await userWithRole('admin.a@example.invalid', 'tenant_admin', 'tenant', tenantA);
+    const { context } = await userWithRole(
+      'admin.a@example.invalid',
+      'tenant_admin',
+      'tenant',
+      tenantA,
+    );
 
     // Ownership is resolved from the database, not from the supplied id.
-    expect(await ctx.container.authorization.can(context, 'project.read', { type: 'project', projectId: projectA })).toBe(true);
-    expect(await ctx.container.authorization.can(context, 'project.read', { type: 'project', projectId: projectB })).toBe(false);
+    expect(
+      await ctx.container.authorization.can(context, 'project.read', {
+        type: 'project',
+        projectId: projectA,
+      }),
+    ).toBe(true);
+    expect(
+      await ctx.container.authorization.can(context, 'project.read', {
+        type: 'project',
+        projectId: projectB,
+      }),
+    ).toBe(false);
   });
 
   it('confines a project-scoped role to its own project', async () => {
-    const { context } = await userWithRole('viewer.a@example.invalid', 'viewer', 'project', projectA);
+    const { context } = await userWithRole(
+      'viewer.a@example.invalid',
+      'viewer',
+      'project',
+      projectA,
+    );
 
-    expect(await ctx.container.authorization.can(context, 'dashboard.read_published', { type: 'project', projectId: projectA })).toBe(true);
-    expect(await ctx.container.authorization.can(context, 'dashboard.read_published', { type: 'project', projectId: projectB })).toBe(false);
+    expect(
+      await ctx.container.authorization.can(context, 'dashboard.read_published', {
+        type: 'project',
+        projectId: projectA,
+      }),
+    ).toBe(true);
+    expect(
+      await ctx.container.authorization.can(context, 'dashboard.read_published', {
+        type: 'project',
+        projectId: projectB,
+      }),
+    ).toBe(false);
     // A project role does not confer tenant administration.
-    expect(await ctx.container.authorization.can(context, 'tenant.read', { type: 'tenant', tenantId: tenantA })).toBe(false);
+    expect(
+      await ctx.container.authorization.can(context, 'tenant.read', {
+        type: 'tenant',
+        tenantId: tenantA,
+      }),
+    ).toBe(false);
   });
 
   it('gives a platform admin no automatic access to customer analytics', async () => {
-    const { context } = await userWithRole('platform@example.invalid', 'platform_admin', 'platform', '');
+    const { context } = await userWithRole(
+      'platform@example.invalid',
+      'platform_admin',
+      'platform',
+      '',
+    );
 
     // Platform administration is real...
-    expect(await ctx.container.authorization.can(context, 'platform.tenant.create', { type: 'platform' })).toBe(true);
+    expect(
+      await ctx.container.authorization.can(context, 'platform.tenant.create', {
+        type: 'platform',
+      }),
+    ).toBe(true);
     // ...but reading a customer's dashboards is not implied by it
     // (Master Spec §7, acceptance checklist A).
-    expect(await ctx.container.authorization.can(context, 'dashboard.read_published', { type: 'project', projectId: projectA })).toBe(false);
-    expect(await ctx.container.authorization.can(context, 'tenant.user.invite', { type: 'tenant', tenantId: tenantA })).toBe(false);
+    expect(
+      await ctx.container.authorization.can(context, 'dashboard.read_published', {
+        type: 'project',
+        projectId: projectA,
+      }),
+    ).toBe(false);
+    expect(
+      await ctx.container.authorization.can(context, 'tenant.user.invite', {
+        type: 'tenant',
+        tenantId: tenantA,
+      }),
+    ).toBe(false);
   });
 
   it('keeps roles additive rather than hierarchical', async () => {
-    const { userId, context } = await userWithRole('both@example.invalid', 'platform_admin', 'platform', '');
-    expect(await ctx.container.authorization.can(context, 'tenant.user.invite', { type: 'tenant', tenantId: tenantA })).toBe(false);
+    const { userId, context } = await userWithRole(
+      'both@example.invalid',
+      'platform_admin',
+      'platform',
+      '',
+    );
+    expect(
+      await ctx.container.authorization.can(context, 'tenant.user.invite', {
+        type: 'tenant',
+        tenantId: tenantA,
+      }),
+    ).toBe(false);
 
     // Granting the second role explicitly is what unlocks the capability.
     await ctx.container.users.assignRole({
@@ -138,11 +217,21 @@ describe('tenant isolation and authorization', () => {
       scopeId: tenantA,
     });
     const updated = await resolveAuthContext(ctx.container.db, asUserId(userId), ctx.clock.now());
-    expect(await ctx.container.authorization.can(updated!, 'tenant.user.invite', { type: 'tenant', tenantId: tenantA })).toBe(true);
+    expect(
+      await ctx.container.authorization.can(updated!, 'tenant.user.invite', {
+        type: 'tenant',
+        tenantId: tenantA,
+      }),
+    ).toBe(true);
   });
 
   it('explains why access exists, with the granting chain', async () => {
-    const { context } = await userWithRole('editor.a@example.invalid', 'dashboard_editor', 'project', projectA);
+    const { context } = await userWithRole(
+      'editor.a@example.invalid',
+      'dashboard_editor',
+      'project',
+      projectA,
+    );
 
     const entry = await ctx.container.authorization.explain(context, 'dashboard.publish', {
       type: 'project',
@@ -157,7 +246,12 @@ describe('tenant isolation and authorization', () => {
   });
 
   it('explains a denial as an empty reason list rather than a bare false', async () => {
-    const { context } = await userWithRole('viewer.a@example.invalid', 'viewer', 'project', projectA);
+    const { context } = await userWithRole(
+      'viewer.a@example.invalid',
+      'viewer',
+      'project',
+      projectA,
+    );
 
     const entry = await ctx.container.authorization.explain(context, 'dashboard.publish', {
       type: 'project',
@@ -168,7 +262,12 @@ describe('tenant isolation and authorization', () => {
   });
 
   it('raises permission_denied from assert(), with the capability named', async () => {
-    const { context } = await userWithRole('viewer.a@example.invalid', 'viewer', 'project', projectA);
+    const { context } = await userWithRole(
+      'viewer.a@example.invalid',
+      'viewer',
+      'project',
+      projectA,
+    );
 
     await expect(
       ctx.container.authorization.assert(context, 'dashboard.publish', {

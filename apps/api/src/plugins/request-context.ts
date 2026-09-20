@@ -1,9 +1,5 @@
 import type { FastifyInstance } from 'fastify';
-import {
-  CORRELATION_ID_HEADER,
-  REQUEST_ID_HEADER,
-  type CorrelationId,
-} from '@axp/contracts';
+import { CORRELATION_ID_HEADER, REQUEST_ID_HEADER, type CorrelationId } from '@axp/contracts';
 import { newCorrelationId, runWithContext, sanitizeCorrelationId } from '@axp/observability';
 
 /**

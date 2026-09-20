@@ -130,10 +130,7 @@ export class UserService {
       .from(authIdentities)
       .innerJoin(users, eq(users.id, authIdentities.userId))
       .where(
-        and(
-          eq(authIdentities.userId, params.userId),
-          eq(authIdentities.providerType, 'local'),
-        ),
+        and(eq(authIdentities.userId, params.userId), eq(authIdentities.providerType, 'local')),
       )
       .limit(1);
 

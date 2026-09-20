@@ -13,7 +13,10 @@ import { createDatabase } from '../client';
  */
 async function main(): Promise<void> {
   const config = loadConfig();
-  const migrationsFolder = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../migrations');
+  const migrationsFolder = path.resolve(
+    path.dirname(fileURLToPath(import.meta.url)),
+    '../../migrations',
+  );
   const handle = createDatabase(config);
 
   const redactedTarget = config.database.url.replace(/\/\/[^@]*@/, '//***@');

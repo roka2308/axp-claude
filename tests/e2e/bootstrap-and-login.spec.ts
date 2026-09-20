@@ -15,6 +15,13 @@ import { expect, test, type Page } from '@playwright/test';
  * the property under test.
  */
 
+/**
+ * Next.js injects its own `role="alert"` route announcer into every page, so a
+ * bare getByRole('alert') matches two elements. This selects the product's own
+ * alerts only.
+ */
+const productAlert = (page: Page) => page.locator('[role="alert"]:not(#__next-route-announcer__)');
+
 const TOKEN = process.env.E2E_BOOTSTRAP_TOKEN;
 const ADMIN_EMAIL = process.env.E2E_ADMIN_EMAIL ?? 'e2e.admin@example.invalid';
 const ADMIN_PASSWORD = process.env.E2E_ADMIN_PASSWORD ?? 'korrekt-pferd-batterie-heftklammer';
@@ -78,7 +85,7 @@ test.describe('sign-in', () => {
     await page.getByLabel('Passwort').fill('definitiv-falsches-passwort');
     await page.getByRole('button', { name: 'Anmelden' }).click();
 
-    await expect(page.getByRole('alert')).toContainText(/nicht korrekt/i);
+    await expect(productAlert(page)).toContainText(/nicht korrekt/i);
     // The address is preserved so the user does not retype it.
     await expect(page.getByLabel('E-Mail-Adresse')).toHaveValue(ADMIN_EMAIL);
   });
@@ -105,7 +112,12 @@ test.describe('sign-in', () => {
 test.describe('accessibility smoke checks', () => {
   test.skip(!TOKEN && !process.env.E2E_ADMIN_EMAIL, 'Requires a bootstrapped admin account.');
 
-  test('the login form is fully keyboard operable', async ({ page }) => {
+  test('the login form is fully keyboard operable', async ({ page, isMobile }) => {
+    // Tab traversal is a desktop input model: iOS WebKit does not move focus
+    // with Tab at all. Keyboard operability is required for the authoring
+    // classes (D10, G2); the mobile projects cover reflow and touch instead.
+    test.skip(isMobile === true, 'Tab focus traversal does not exist on iOS WebKit.');
+
     await page.goto('/login');
 
     // Skip link first, then the form controls, in a sensible order.
@@ -134,7 +146,7 @@ test.describe('accessibility smoke checks', () => {
     await page.getByRole('button', { name: 'Anmelden' }).click();
 
     // The message is text inside an alert, never a red border alone.
-    await expect(page.getByRole('alert')).toBeVisible();
+    await expect(productAlert(page)).toBeVisible();
   });
 
   test('the viewer reflows at a representative mobile width', async ({ page }) => {

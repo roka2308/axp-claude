@@ -31,8 +31,6 @@ export async function buildServer(options: BuildServerOptions): Promise<FastifyI
     // `register*` helper can take a plain `FastifyInstance`. pino satisfies
     // FastifyBaseLogger structurally; only the declared type differs.
     loggerInstance: logger as unknown as FastifyBaseLogger,
-    // Correlation and request ids are managed by our own context plugin.
-    disableRequestLogging: false,
     trustProxy: config.appEnv !== 'development',
     bodyLimit: 1_048_576,
     ajv: { customOptions: { removeAdditional: false } },
@@ -40,7 +38,9 @@ export async function buildServer(options: BuildServerOptions): Promise<FastifyI
 
   await app.register(helmet, {
     // The API serves JSON only; a restrictive CSP costs nothing here.
-    contentSecurityPolicy: { directives: { 'default-src': ["'none'"], 'frame-ancestors': ["'none'"] } },
+    contentSecurityPolicy: {
+      directives: { 'default-src': ["'none'"], 'frame-ancestors': ["'none'"] },
+    },
     crossOriginResourcePolicy: { policy: 'same-origin' },
   });
 

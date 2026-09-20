@@ -58,10 +58,7 @@ let cached: DemoSeed | undefined;
 
 export function loadDemoSeed(): DemoSeed {
   if (cached) return cached;
-  const file = path.resolve(
-    path.dirname(fileURLToPath(import.meta.url)),
-    '../data/demo_seed.json',
-  );
+  const file = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../data/demo_seed.json');
   cached = JSON.parse(readFileSync(file, 'utf8')) as DemoSeed;
   return cached;
 }

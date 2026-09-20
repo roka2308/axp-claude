@@ -8,13 +8,13 @@ The product specification lives outside this repository, in
 `../analytics_experience_version_d_v1.0/`. That handoff package is the source of
 truth; this repository implements it and never redefines it.
 
-| Document | Role |
-|---|---|
-| `01_Version_D_Master_Specification_v1.0.md` | Binding product specification (D1–D10) |
-| `02_Shared_Product_Engineering_Contract_v1.0.md` | Invariants shared with the Emergent track |
-| `03_Claude_Code_Development_Plan_v1.0.md` | Milestones F0–F10 and their gates |
-| `acceptance/acceptance_checklist.md` | Acceptance criteria, identical for both tracks |
-| `fixtures/demo_seed.json` | Canonical demo fixture (copied to `packages/fixtures/data/`) |
+| Document                                         | Role                                                         |
+| ------------------------------------------------ | ------------------------------------------------------------ |
+| `01_Version_D_Master_Specification_v1.0.md`      | Binding product specification (D1–D10)                       |
+| `02_Shared_Product_Engineering_Contract_v1.0.md` | Invariants shared with the Emergent track                    |
+| `03_Claude_Code_Development_Plan_v1.0.md`        | Milestones F0–F10 and their gates                            |
+| `acceptance/acceptance_checklist.md`             | Acceptance criteria, identical for both tracks               |
+| `fixtures/demo_seed.json`                        | Canonical demo fixture (copied to `packages/fixtures/data/`) |
 
 Current milestone: **Phase 0 — Foundation (Gate F0)**.
 
@@ -23,6 +23,9 @@ Current milestone: **Phase 0 — Foundation (Gate F0)**.
 - Node.js 22.12 or newer (developed on 24)
 - Docker Desktop, for MySQL 8.4 and the mail catcher
 - No local MySQL installation needed
+
+If Docker Desktop is unavailable — on Windows 10 Home it needs the WSL 2
+backend, which not every machine has — see [Without Docker](#without-docker).
 
 ## Getting started
 
@@ -61,14 +64,31 @@ break-glass path is:
 npm run recover-admin -- --requested-by "your name"
 ```
 
+### Without Docker
+
+`scripts/local-mysql.mjs` runs MySQL from the official Oracle ZIP distribution
+as an ordinary user process: no installer, no Windows service, no administrator
+rights, and nothing written outside `.local/`. Server settings are identical to
+`docker-compose.yml`, so behaviour does not differ between the two.
+
+```bash
+npm run db:local:setup -- --zip path/to/mysql-8.4.10-winx64.zip
+```
+
+Afterwards `npm run db:local:start`, `db:local:stop` and `db:local:status`
+manage it, and `npm run gate:f0:local` runs the milestone gate against it.
+Delete the whole thing with `node scripts/local-mysql.mjs remove`.
+
+The mail catcher and Adminer are Docker-only; neither is needed before Phase 8.
+
 ### Demo data
 
 ```bash
 npm run seed:demo
 ```
 
-Seeds the canonical fixture: tenant *Corporate Communications Demo*, project
-*Employee Portal* and the five demo accounts, each with its own random password
+Seeds the canonical fixture: tenant _Corporate Communications Demo_, project
+_Employee Portal_ and the five demo accounts, each with its own random password
 printed once. Refused when `APP_ENV=production` or `ENABLE_DEMO_FIXTURES` is off.
 
 ## Architecture
@@ -88,17 +108,18 @@ The browser never talks to the API or to Matomo directly. The session token
 lives in an httpOnly cookie on the web origin and is forwarded server-side as a
 bearer token, so the API needs neither CORS nor CSRF handling.
 
-| Package | Contents |
-|---|---|
-| `packages/contracts` | Canonical vocabulary: roles, scopes, lifecycles, value states, errors |
-| `packages/config` | Validated runtime configuration and build metadata |
-| `packages/observability` | Structured logging, correlation ids, telemetry redaction |
-| `packages/db` | Drizzle schema and deterministic MySQL migrations |
-| `packages/core` | Domain modules — identity, access, tenancy, platform, audit |
-| `packages/ui` | Design system: tokens, theme contract, accessible components |
-| `packages/fixtures` | Canonical demo fixture and seed runner |
+| Package                  | Contents                                                              |
+| ------------------------ | --------------------------------------------------------------------- |
+| `packages/contracts`     | Canonical vocabulary: roles, scopes, lifecycles, value states, errors |
+| `packages/config`        | Validated runtime configuration and build metadata                    |
+| `packages/observability` | Structured logging, correlation ids, telemetry redaction              |
+| `packages/db`            | Drizzle schema and deterministic MySQL migrations                     |
+| `packages/core`          | Domain modules — identity, access, tenancy, platform, audit           |
+| `packages/ui`            | Design system: tokens, theme contract, accessible components          |
+| `packages/fixtures`      | Canonical demo fixture and seed runner                                |
 
-Architecture decisions are recorded in `docs/adr/`.
+Architecture decisions are recorded in `docs/adr/`, and each milestone gate is
+documented with its evidence in `docs/gates/`.
 
 ## Invariants
 
@@ -119,19 +140,20 @@ These hold everywhere in this repository. Breaking one blocks MVP acceptance.
 
 ## Commands
 
-| Command | Purpose |
-|---|---|
-| `npm run dev` | Web, API and worker in watch mode |
-| `npm run typecheck` | TypeScript across every workspace and the test suite |
-| `npm run lint` | ESLint, including the architecture boundary rules |
-| `npm test` | Unit tests (no database) |
-| `npm run test:integration` | Integration tests against MySQL |
-| `npm run test:e2e` | Playwright end-to-end tests |
-| `npm run build` | Production build of all three processes |
-| `npm run verify` | Everything above, in CI order |
-| `npm run db:generate` | Generate a migration from schema changes |
-| `npm run db:migrate` | Apply pending migrations |
-| `npm run db:reset` | Drop all tables (non-production only) |
+| Command                    | Purpose                                              |
+| -------------------------- | ---------------------------------------------------- |
+| `npm run dev`              | Web, API and worker in watch mode                    |
+| `npm run typecheck`        | TypeScript across every workspace and the test suite |
+| `npm run lint`             | ESLint, including the architecture boundary rules    |
+| `npm test`                 | Unit tests (no database)                             |
+| `npm run test:integration` | Integration tests against MySQL                      |
+| `npm run test:e2e`         | Playwright end-to-end tests                          |
+| `npm run build`            | Production build of all three processes              |
+| `npm run verify`           | Everything above, in CI order                        |
+| `npm run gate:f0`          | Demonstrate the Phase 0 milestone gate end to end    |
+| `npm run db:generate`      | Generate a migration from schema changes             |
+| `npm run db:migrate`       | Apply pending migrations                             |
+| `npm run db:reset`         | Drop all tables (non-production only)                |
 
 ## Track discipline
 

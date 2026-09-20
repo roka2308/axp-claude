@@ -39,15 +39,14 @@ const HTTP_STATUS_BY_CATEGORY: Readonly<Record<ProductErrorCategory, number>> = 
   internal_error: 500,
 };
 
-const CAUSE_STATE_BY_CATEGORY: Readonly<
-  Partial<Record<ProductErrorCategory, ProductCauseState>>
-> = {
-  permission_denied: 'permission_denied',
-  entitlement_required: 'entitlement_required',
-  setup_required: 'setup_required',
-  capability_unsupported: 'capability_unsupported',
-  source_unavailable: 'temporarily_unavailable',
-};
+const CAUSE_STATE_BY_CATEGORY: Readonly<Partial<Record<ProductErrorCategory, ProductCauseState>>> =
+  {
+    permission_denied: 'permission_denied',
+    entitlement_required: 'entitlement_required',
+    setup_required: 'setup_required',
+    capability_unsupported: 'capability_unsupported',
+    source_unavailable: 'temporarily_unavailable',
+  };
 
 export interface ProductErrorBody {
   readonly category: ProductErrorCategory;
