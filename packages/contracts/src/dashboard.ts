@@ -78,8 +78,8 @@ export interface WidgetSizeRules {
 }
 
 export const WIDGET_SIZE_RULES: Readonly<Record<WidgetFamily, WidgetSizeRules>> = {
-  card: { minW: 2, minH: 2, recommendedW: 3, recommendedH: 2 },
-  time_series: { minW: 4, minH: 3, recommendedW: 6, recommendedH: 4 },
+  card: { minW: 2, minH: 2, recommendedW: 3, recommendedH: 3 },
+  time_series: { minW: 4, minH: 3, recommendedW: 6, recommendedH: 5 },
   bar: { minW: 3, minH: 3, recommendedW: 6, recommendedH: 4 },
   donut: { minW: 3, minH: 3, recommendedW: 4, recommendedH: 4 },
   flexible_table: { minW: 4, minH: 3, recommendedW: 6, recommendedH: 5 },

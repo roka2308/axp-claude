@@ -1,0 +1,96 @@
+.back {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.back:hover {
+  color: var(--text-primary);
+  text-decoration: underline;
+}
+
+.checklist {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  counter-reset: step;
+}
+
+.step {
+  display: grid;
+  grid-template-columns: 9rem 1fr;
+  gap: var(--space-1) var(--space-3);
+  align-items: baseline;
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.step:last-child {
+  border-bottom: none;
+}
+
+/*
+ * The checklist state is a word, not a colour or a tick. Non-linear and
+ * resumable means a reader has to be able to scan the states themselves
+ * (Master Spec §13).
+ */
+.stepState {
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  color: var(--text-muted);
+}
+
+.step[data-state='done'] .stepState {
+  color: var(--status-success-text);
+}
+
+.step[data-state='in_progress'] .stepState {
+  color: var(--status-warning-text);
+}
+
+.step[data-state='review_required'] .stepState {
+  color: var(--status-serious-text);
+}
+
+.stepLabel {
+  color: var(--text-primary);
+}
+
+.optional {
+  color: var(--text-muted);
+  font-size: var(--font-size-xs);
+}
+
+.stepDetail {
+  grid-column: 2;
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.dashboardRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-3);
+}
+
+.dashboardName {
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+.dashboardName:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 767px) {
+  .step {
+    grid-template-columns: 1fr;
+  }
+
+  .stepDetail {
+    grid-column: 1;
+  }
+}

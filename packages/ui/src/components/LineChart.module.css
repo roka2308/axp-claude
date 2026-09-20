@@ -1,0 +1,104 @@
+.figure {
+  position: relative;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.svg {
+  width: 100%;
+  height: auto;
+  background: var(--surface-chart);
+  overflow: visible;
+}
+
+/* Thin marks, recessive grid: the data is the figure, the scaffolding is not. */
+.grid {
+  stroke: var(--chart-grid);
+  stroke-width: 1;
+}
+
+.axisLabel {
+  fill: var(--chart-axis-label);
+  font-size: 11px;
+  font-family: var(--font-numeric);
+  font-feature-settings: var(--font-feature-numeric);
+}
+
+.line {
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+/*
+ * Comparison encoding: a neutral tone plus a dashed stroke. Two channels, so
+ * the distinction survives both colour blindness and a black-and-white print.
+ */
+.comparisonLine {
+  stroke: var(--chart-comparison);
+  stroke-width: 2;
+  stroke-dasharray: 4 3;
+  stroke-linejoin: round;
+}
+
+.crosshair {
+  stroke: var(--border-strong);
+  stroke-width: 1;
+  stroke-dasharray: 2 2;
+}
+
+.marker {
+  stroke: var(--surface-chart);
+  stroke-width: 2;
+}
+
+.tooltip {
+  position: absolute;
+  inset-block-start: var(--space-2);
+  inset-inline-end: var(--space-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  background: var(--surface-overlay);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
+  font-size: var(--font-size-xs);
+  pointer-events: none;
+}
+
+.tooltipDate {
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+}
+
+.tooltipRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--text-secondary);
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+}
+
+.legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  flex: none;
+}

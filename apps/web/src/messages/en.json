@@ -157,5 +157,200 @@
       "dedicated_single_customer": "Dedicated customer instance",
       "customer_hosted": "Customer-hosted"
     }
+  },
+  "projects": {
+    "title": "Projects",
+    "subtitle": "Projects you have access to.",
+    "emptyTitle": "No projects visible",
+    "emptyBody": "No project has been assigned to you yet. Contact your tenant administration.",
+    "backToList": "Back to project list"
+  },
+  "project": {
+    "timezone": "Time zone {timezone}",
+    "setupTitle": "Setup",
+    "optionalStep": "optional",
+    "dataSourceTitle": "Data source",
+    "noSiteTitle": "No site assigned",
+    "noSiteBody": "Assign a Matomo site to this project so dashboards can query data.",
+    "siteMeta": "Time zone {timezone} · Matomo site {matomoSiteId}",
+    "dashboardsTitle": "Dashboards",
+    "noDashboards": "No dashboard has been created for this project yet.",
+    "notPublished": "Not published yet",
+    "publishedVersion": "Published as version {version}",
+    "unpublishedChanges": "Draft has unpublished changes",
+    "not_found": "The project was not found."
+  },
+  "setupReadiness": {
+    "ready": "Ready",
+    "ready_with_limitations": "Ready with limitations",
+    "setup_required": "Setup required",
+    "not_available": "Not available"
+  },
+  "setupReadinessDescription": {
+    "ready": "All steps are complete.",
+    "ready_with_limitations": "The required steps are complete. Optional steps are still open.",
+    "setup_required": "Required steps are still open.",
+    "not_available": "Setup is currently not possible."
+  },
+  "setupStepState": {
+    "open": "Open",
+    "in_progress": "In progress",
+    "done": "Done",
+    "review_required": "Review required",
+    "not_relevant": "Not relevant"
+  },
+  "setupStep": {
+    "matomo_connection": "Set up the Matomo connection",
+    "site_assignment": "Assign a site to the project",
+    "first_dashboard": "Publish the first dashboard",
+    "context_profile": "Record the context profile",
+    "reporting": "Set up reporting"
+  },
+  "viewer": {
+    "controlsLabel": "Time range and comparison",
+    "timeRange": "Time range",
+    "comparison": "Comparison",
+    "apply": "Apply",
+    "version": "Version {version}",
+    "draftPreview": "Draft preview",
+    "updatedAt": "Updated {time}",
+    "definition": "Definition",
+    "definitionName": "Metric",
+    "definitionUnit": "Unit",
+    "definitionScope": "Scope",
+    "semanticVersion": "Definition version {version}",
+    "previousPeriod": "Previous period",
+    "comparedToPrevious": "vs previous period",
+    "noComparableValue": "No comparable value",
+    "showDataTable": "Show data as a table",
+    "chartTableCaption": "Data values for “{title}”",
+    "chartAria": "Line chart “{title}” with {points} data points. The values are available as a table below.",
+    "date": "Date",
+    "scopeSite": "Site",
+    "scopeTimezone": "Time zone",
+    "scopeRange": "Time range",
+    "scopeComparison": "Comparison period",
+    "emptyDashboardTitle": "This dashboard has no widgets yet",
+    "emptyDashboardBody": "A dashboard editor can add widgets in the editor and publish the dashboard.",
+    "loadFailedTitle": "The dashboard could not be loaded",
+    "permissionDeniedTitle": "No access to this dashboard",
+    "presets": {
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "last_7_days": "Last 7 days",
+      "last_14_days": "Last 14 days",
+      "last_30_days": "Last 30 days",
+      "current_week": "Current week",
+      "previous_week": "Previous week",
+      "current_month": "Current month",
+      "previous_month": "Previous month",
+      "current_quarter": "Current quarter",
+      "previous_quarter": "Previous quarter",
+      "current_year": "Current year",
+      "previous_year": "Previous year",
+      "custom": "Custom"
+    },
+    "comparisons": {
+      "none": "No comparison",
+      "previous_period": "Previous period",
+      "prior_year": "Same period last year",
+      "custom": "Custom"
+    }
+  },
+  "units": {
+    "count": "Count",
+    "percent": "Percent",
+    "ratio": "Ratio",
+    "seconds": "Seconds",
+    "currency": "Currency",
+    "score": "Score"
+  },
+  "scopesSemantic": {
+    "visit": "Visit",
+    "action": "Action",
+    "event": "Event",
+    "site": "Site"
+  },
+  "widget": {
+    "no_metric_configured": "No metric is configured for this widget yet.",
+    "no_metric_configured.action": "Choose a metric in the editor.",
+    "permission_denied": "You do not have permission for this widget's data.",
+    "entitlement_required": "This module is not enabled for your contract.",
+    "source_unavailable": "Data currently unavailable.",
+    "source_unavailable.action": "The data source is not responding right now. Try again shortly.",
+    "capability_unsupported.action": "The connected Matomo installation does not support this analysis.",
+    "setup_required.action": "Complete the project setup.",
+    "unexpected_error": "This widget could not be loaded."
+  },
+  "matomo": {
+    "unreachable": "The Matomo installation is unreachable.",
+    "auth_failed": "Matomo rejected the stored credentials.",
+    "api_error": "The Matomo API reported an error.",
+    "site_not_found": "The site is not visible to this connection.",
+    "connection_not_found": "The Matomo connection was not found.",
+    "capability": {
+      "page_ranking_unavailable": "Page rankings are not available in this Matomo installation.",
+      "unreachable": "Cannot be checked: the installation is unreachable.",
+      "optional_missing": "Optional capability not available.",
+      "no_tls": "The connection is not TLS encrypted.",
+      "no_sites_access": "The token has no access to the site list."
+    },
+    "limitation": {
+      "no_events": "Events are not available.",
+      "no_custom_dimensions": "Custom dimensions are not available.",
+      "no_page_ranking": "Page rankings are not available.",
+      "unreachable": "The installation was unreachable during the last test."
+    },
+    "test": {
+      "auth_failed": "The credentials were rejected.",
+      "unreachable": "The given address is unreachable.",
+      "api_failed": "The Matomo API could not be read."
+    },
+    "url": {
+      "invalid_url": "The address is not a valid URL.",
+      "unsupported_scheme": "Only http and https are allowed.",
+      "credentials_in_url": "The address must not contain credentials.",
+      "blocked_host": "This host is not allowed.",
+      "blocked_address": "This address is not allowed.",
+      "private_address": "Addresses on the internal network are not allowed."
+    }
+  },
+  "analytics": {
+    "site_not_configured": "No site is configured for this dashboard.",
+    "site_not_assigned": "The site is not assigned to this project.",
+    "timeout": "The query took too long.",
+    "unknown_timezone": "Unknown time zone: {timezone}.",
+    "invalid_date": "Invalid date.",
+    "custom_range_incomplete": "A custom time range needs both a start and an end.",
+    "custom_range_inverted": "The start date is after the end date.",
+    "custom_comparison_incomplete": "A custom comparison needs both a start and an end.",
+    "no_comparison_period": "No comparison period available.",
+    "unparsable_value": "The value could not be read."
+  },
+  "dashboard": {
+    "not_found": "The dashboard was not found.",
+    "not_published": "This dashboard has not been published yet.",
+    "stale_revision": "The draft changed in the meantime. Reload it.",
+    "publish": {
+      "blocked": "Publishing is blocked by errors.",
+      "empty": "The dashboard contains no widgets.",
+      "widget_without_data": "One widget has no metric configured.",
+      "duplicate_widget_id": "A widget identifier appears more than once.",
+      "widget_too_small": "The widget is below the minimum size of {minW}×{minH}.",
+      "widget_out_of_grid": "The widget lies outside the {columns}-column grid."
+    }
+  },
+  "semantic": {
+    "version_not_found": "A referenced definition version does not exist.",
+    "type_not_executable": "Definitions of type {kind} are evaluated from Phase 3 onwards."
+  },
+  "tenant": {
+    "not_found": "The tenant was not found.",
+    "not_active": "This tenant is currently not active.",
+    "invalid_lifecycle_transition": "The transition from {from} to {to} is not allowed.",
+    "not_accepting_changes": "No changes are possible for this tenant right now."
+  },
+  "user": {
+    "email_already_used": "This email address is already in use."
   }
 }

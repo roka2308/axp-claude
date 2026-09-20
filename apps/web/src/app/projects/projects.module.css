@@ -1,0 +1,51 @@
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.name {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+.name:hover {
+  text-decoration: underline;
+}
+
+/*
+ * Setup readiness is a text badge. The border weight differentiates at a
+ * glance; the label is what carries the meaning (D10: no colour-only status).
+ */
+.readiness {
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.readiness[data-state='ready'] {
+  border-color: var(--status-success);
+  color: var(--status-success-text);
+}
+
+.readiness[data-state='ready_with_limitations'] {
+  border-color: var(--status-warning);
+  color: var(--status-warning-text);
+}
+
+.readiness[data-state='setup_required'] {
+  border-color: var(--status-serious);
+  color: var(--status-serious-text);
+}

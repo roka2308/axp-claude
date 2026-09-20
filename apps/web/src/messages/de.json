@@ -157,5 +157,200 @@
       "dedicated_single_customer": "Dedizierte Kundeninstanz",
       "customer_hosted": "Customer-hosted"
     }
+  },
+  "projects": {
+    "title": "Projekte",
+    "subtitle": "Projekte, auf die Sie Zugriff haben.",
+    "emptyTitle": "Keine Projekte sichtbar",
+    "emptyBody": "Ihnen ist noch kein Projekt zugewiesen. Wenden Sie sich an die Administration Ihres Kunden.",
+    "backToList": "Zurück zur Projektübersicht"
+  },
+  "project": {
+    "timezone": "Zeitzone {timezone}",
+    "setupTitle": "Einrichtung",
+    "optionalStep": "optional",
+    "dataSourceTitle": "Datenquelle",
+    "noSiteTitle": "Keine Site zugeordnet",
+    "noSiteBody": "Ordnen Sie dem Projekt eine Matomo-Site zu, damit Dashboards Daten abfragen können.",
+    "siteMeta": "Zeitzone {timezone} · Matomo-Site {matomoSiteId}",
+    "dashboardsTitle": "Dashboards",
+    "noDashboards": "Für dieses Projekt wurde noch kein Dashboard angelegt.",
+    "notPublished": "Noch nicht veröffentlicht",
+    "publishedVersion": "Veröffentlicht in Version {version}",
+    "unpublishedChanges": "Entwurf mit nicht veröffentlichten Änderungen",
+    "not_found": "Das Projekt wurde nicht gefunden."
+  },
+  "setupReadiness": {
+    "ready": "Bereit",
+    "ready_with_limitations": "Bereit mit Einschränkungen",
+    "setup_required": "Einrichtung erforderlich",
+    "not_available": "Nicht verfügbar"
+  },
+  "setupReadinessDescription": {
+    "ready": "Alle Schritte sind abgeschlossen.",
+    "ready_with_limitations": "Die erforderlichen Schritte sind abgeschlossen. Optionale Schritte sind noch offen.",
+    "setup_required": "Es sind noch erforderliche Schritte offen.",
+    "not_available": "Die Einrichtung ist derzeit nicht möglich."
+  },
+  "setupStepState": {
+    "open": "Offen",
+    "in_progress": "In Bearbeitung",
+    "done": "Fertig",
+    "review_required": "Prüfung erforderlich",
+    "not_relevant": "Nicht relevant"
+  },
+  "setupStep": {
+    "matomo_connection": "Matomo-Verbindung einrichten",
+    "site_assignment": "Site dem Projekt zuordnen",
+    "first_dashboard": "Erstes Dashboard veröffentlichen",
+    "context_profile": "Kontextprofil hinterlegen",
+    "reporting": "Reporting einrichten"
+  },
+  "viewer": {
+    "controlsLabel": "Zeitraum und Vergleich",
+    "timeRange": "Zeitraum",
+    "comparison": "Vergleich",
+    "apply": "Anwenden",
+    "version": "Version {version}",
+    "draftPreview": "Vorschau des Entwurfs",
+    "updatedAt": "Aktualisiert {time}",
+    "definition": "Definition",
+    "definitionName": "Kennzahl",
+    "definitionUnit": "Einheit",
+    "definitionScope": "Bezug",
+    "semanticVersion": "Definitionsversion {version}",
+    "previousPeriod": "Vorperiode",
+    "comparedToPrevious": "ggü. Vorperiode",
+    "noComparableValue": "Kein Vergleichswert",
+    "showDataTable": "Daten als Tabelle anzeigen",
+    "chartTableCaption": "Datenwerte zu „{title}“",
+    "chartAria": "Liniendiagramm „{title}“ mit {points} Datenpunkten. Die Werte stehen darunter als Tabelle zur Verfügung.",
+    "date": "Datum",
+    "scopeSite": "Site",
+    "scopeTimezone": "Zeitzone",
+    "scopeRange": "Zeitraum",
+    "scopeComparison": "Vergleichszeitraum",
+    "emptyDashboardTitle": "Dieses Dashboard enthält noch keine Widgets",
+    "emptyDashboardBody": "Ein Dashboard Editor kann im Editor Widgets hinzufügen und das Dashboard veröffentlichen.",
+    "loadFailedTitle": "Dashboard konnte nicht geladen werden",
+    "permissionDeniedTitle": "Kein Zugriff auf dieses Dashboard",
+    "presets": {
+      "today": "Heute",
+      "yesterday": "Gestern",
+      "last_7_days": "Letzte 7 Tage",
+      "last_14_days": "Letzte 14 Tage",
+      "last_30_days": "Letzte 30 Tage",
+      "current_week": "Aktuelle Woche",
+      "previous_week": "Vorwoche",
+      "current_month": "Aktueller Monat",
+      "previous_month": "Vormonat",
+      "current_quarter": "Aktuelles Quartal",
+      "previous_quarter": "Vorquartal",
+      "current_year": "Aktuelles Jahr",
+      "previous_year": "Vorjahr",
+      "custom": "Benutzerdefiniert"
+    },
+    "comparisons": {
+      "none": "Kein Vergleich",
+      "previous_period": "Vorperiode",
+      "prior_year": "Vorjahreszeitraum",
+      "custom": "Benutzerdefiniert"
+    }
+  },
+  "units": {
+    "count": "Anzahl",
+    "percent": "Prozent",
+    "ratio": "Verhältnis",
+    "seconds": "Sekunden",
+    "currency": "Währung",
+    "score": "Score"
+  },
+  "scopesSemantic": {
+    "visit": "Besuch",
+    "action": "Aktion",
+    "event": "Ereignis",
+    "site": "Site"
+  },
+  "widget": {
+    "no_metric_configured": "Für dieses Widget ist noch keine Kennzahl konfiguriert.",
+    "no_metric_configured.action": "Wählen Sie im Editor eine Kennzahl aus.",
+    "permission_denied": "Sie haben keine Berechtigung für die Daten dieses Widgets.",
+    "entitlement_required": "Dieses Modul ist für Ihren Vertrag nicht freigeschaltet.",
+    "source_unavailable": "Daten aktuell nicht verfügbar.",
+    "source_unavailable.action": "Die Datenquelle antwortet gerade nicht. Versuchen Sie es in Kürze erneut.",
+    "capability_unsupported.action": "Diese Auswertung wird von der verbundenen Matomo-Instanz nicht unterstützt.",
+    "setup_required.action": "Vervollständigen Sie die Einrichtung des Projekts.",
+    "unexpected_error": "Dieses Widget konnte nicht geladen werden."
+  },
+  "matomo": {
+    "unreachable": "Die Matomo-Instanz ist nicht erreichbar.",
+    "auth_failed": "Matomo hat die hinterlegten Zugangsdaten abgelehnt.",
+    "api_error": "Die Matomo-API hat einen Fehler gemeldet.",
+    "site_not_found": "Die Site ist für diese Verbindung nicht sichtbar.",
+    "connection_not_found": "Die Matomo-Verbindung wurde nicht gefunden.",
+    "capability": {
+      "page_ranking_unavailable": "Seiten-Rankings sind in dieser Matomo-Instanz nicht verfügbar.",
+      "unreachable": "Nicht prüfbar, da die Instanz nicht erreichbar ist.",
+      "optional_missing": "Optionale Funktion nicht verfügbar.",
+      "no_tls": "Die Verbindung ist nicht TLS-verschlüsselt.",
+      "no_sites_access": "Das Token hat keinen Zugriff auf die Site-Liste."
+    },
+    "limitation": {
+      "no_events": "Ereignisse stehen nicht zur Verfügung.",
+      "no_custom_dimensions": "Custom Dimensions stehen nicht zur Verfügung.",
+      "no_page_ranking": "Seiten-Rankings stehen nicht zur Verfügung.",
+      "unreachable": "Die Instanz war beim letzten Test nicht erreichbar."
+    },
+    "test": {
+      "auth_failed": "Die Zugangsdaten wurden abgelehnt.",
+      "unreachable": "Die angegebene Adresse ist nicht erreichbar.",
+      "api_failed": "Die Matomo-API konnte nicht gelesen werden."
+    },
+    "url": {
+      "invalid_url": "Die Adresse ist keine gültige URL.",
+      "unsupported_scheme": "Nur http und https sind zulässig.",
+      "credentials_in_url": "Die Adresse darf keine Zugangsdaten enthalten.",
+      "blocked_host": "Dieser Host ist nicht zulässig.",
+      "blocked_address": "Diese Adresse ist nicht zulässig.",
+      "private_address": "Adressen im internen Netz sind nicht zulässig."
+    }
+  },
+  "analytics": {
+    "site_not_configured": "Für dieses Dashboard ist keine Site konfiguriert.",
+    "site_not_assigned": "Die Site ist diesem Projekt nicht zugeordnet.",
+    "timeout": "Die Abfrage hat zu lange gedauert.",
+    "unknown_timezone": "Unbekannte Zeitzone: {timezone}.",
+    "invalid_date": "Ungültiges Datum.",
+    "custom_range_incomplete": "Für einen benutzerdefinierten Zeitraum werden Start und Ende benötigt.",
+    "custom_range_inverted": "Das Startdatum liegt nach dem Enddatum.",
+    "custom_comparison_incomplete": "Für einen benutzerdefinierten Vergleich werden Start und Ende benötigt.",
+    "no_comparison_period": "Kein Vergleichszeitraum vorhanden.",
+    "unparsable_value": "Der Wert konnte nicht gelesen werden."
+  },
+  "dashboard": {
+    "not_found": "Das Dashboard wurde nicht gefunden.",
+    "not_published": "Dieses Dashboard wurde noch nicht veröffentlicht.",
+    "stale_revision": "Der Entwurf wurde zwischenzeitlich geändert. Laden Sie ihn neu.",
+    "publish": {
+      "blocked": "Die Veröffentlichung ist durch Fehler blockiert.",
+      "empty": "Das Dashboard enthält keine Widgets.",
+      "widget_without_data": "Für ein Widget ist keine Kennzahl konfiguriert.",
+      "duplicate_widget_id": "Eine Widget-Kennung kommt mehrfach vor.",
+      "widget_too_small": "Das Widget unterschreitet die Mindestgröße von {minW}×{minH}.",
+      "widget_out_of_grid": "Das Widget liegt außerhalb des {columns}-Spalten-Rasters."
+    }
+  },
+  "semantic": {
+    "version_not_found": "Eine referenzierte Definitionsversion existiert nicht.",
+    "type_not_executable": "Definitionen vom Typ {kind} werden ab Phase 3 ausgewertet."
+  },
+  "tenant": {
+    "not_found": "Der Kunde wurde nicht gefunden.",
+    "not_active": "Dieser Kunde ist derzeit nicht aktiv.",
+    "invalid_lifecycle_transition": "Der Wechsel von {from} nach {to} ist nicht zulässig.",
+    "not_accepting_changes": "Für diesen Kunden sind derzeit keine Änderungen möglich."
+  },
+  "user": {
+    "email_already_used": "Diese E-Mail-Adresse wird bereits verwendet."
   }
 }

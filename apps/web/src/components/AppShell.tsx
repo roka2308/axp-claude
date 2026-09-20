@@ -26,8 +26,10 @@ interface NavEntry {
 
 const NAV_ENTRIES: readonly NavEntry[] = [
   { key: 'home', href: '/' },
-  { key: 'projects', pendingPhase: 'Phase 1' },
-  { key: 'dashboards', pendingPhase: 'Phase 1' },
+  { key: 'projects', href: '/projects' },
+  // Dashboards are reached through their project until the cross-project
+  // library lands with the viewer work in Phase 4.
+  { key: 'dashboards', href: '/projects' },
   { key: 'templates', pendingPhase: 'Phase 6' },
   { key: 'administration', pendingPhase: 'Phase 5' },
 ];

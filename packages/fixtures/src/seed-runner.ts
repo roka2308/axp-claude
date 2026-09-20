@@ -167,6 +167,21 @@ export async function seedDemoData(
     });
   }
 
+  // The fixture has just provisioned a platform admin, so the instance is
+  // initialized: leaving the state row untouched would keep the setup screen
+  // open and bounce every sign-in attempt to it.
+  const platformAdmin = accounts.find((account) => account.key === 'platformAdmin');
+  const platformAdminUserId = platformAdmin
+    ? await findUserId(container, platformAdmin.email)
+    : null;
+
+  if (platformAdminUserId) {
+    await container.bootstrap.markInitializedByProvisioning({
+      byUserId: platformAdminUserId,
+      reason: 'canonical_demo_fixture',
+    });
+  }
+
   // The editor owns the seeded dashboard: it is the role that would create it.
   const editor = accounts.find((account) => account.key === 'editor');
   const editorUserId = editor ? await findUserId(container, editor.email) : null;

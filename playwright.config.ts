@@ -7,8 +7,13 @@ const BASE_URL = process.env.E2E_BASE_URL ?? `http://localhost:${WEB_PORT}`;
  * End-to-end acceptance.
  *
  * Phase 0 covers the bootstrap and sign-in journey plus the accessibility
- * smoke checks Gate F0 asks for. The seven D10 journeys are added as their
- * milestones land; the browser matrix widens in Phase 10.
+ * smoke checks Gate F0 asks for; Phase 1 adds the dashboard viewer journey.
+ * The remaining D10 journeys are added as their milestones land; the browser
+ * matrix widens in Phase 10.
+ *
+ * The `setup` project signs in once and hands the session to the specs that
+ * only need to be signed in - `/auth/login` is rate limited on purpose, and a
+ * suite that signs in per case would trip that safeguard.
  */
 export default defineConfig({
   testDir: './tests/e2e',
@@ -27,8 +32,17 @@ export default defineConfig({
     timezoneId: 'Europe/Berlin',
   },
   projects: [
-    { name: 'chromium-desktop', use: { ...devices['Desktop Chrome'] } },
+    { name: 'setup', testMatch: /.*\.setup\.ts/ },
+    {
+      name: 'chromium-desktop',
+      use: { ...devices['Desktop Chrome'] },
+      dependencies: ['setup'],
+    },
     // The viewer is fully responsive on phones; authoring is desktop-first.
-    { name: 'mobile-safari', use: { ...devices['iPhone 14'] } },
+    {
+      name: 'mobile-safari',
+      use: { ...devices['iPhone 14'] },
+      dependencies: ['setup'],
+    },
   ],
 });

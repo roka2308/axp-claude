@@ -72,7 +72,9 @@
   --grid-columns-tablet: 8;
   --grid-columns-mobile: 4;
   --grid-gap: var(--space-4);
-  --grid-row-height: 2.5rem;
+  /* One row unit. Sized so a two-row card holds a title and a KPI value
+     without scrolling; widget minimum heights are expressed in these units. */
+  --grid-row-height: 5rem;
 
   /* --- Radius ----------------------------------------------------------- */
   --radius-xs: 2px;

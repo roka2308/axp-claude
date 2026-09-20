@@ -118,7 +118,7 @@ function buildWidgets(visitsVersionId: string, pageviewsVersionId: string): Widg
       id: 'kpi-visits',
       family: 'card',
       title: 'Besuche',
-      placement: { desktop: { x: 0, y: 0, w: 3, h: 2 } },
+      placement: { desktop: { x: 0, y: 0, w: 3, h: 3 } },
       data: { semanticVersionIds: [visitsVersionId], fixedFilters: [] },
       presentation: { variant: 'kpi_comparison', showComparison: true, decimals: 0 },
       context: {
@@ -130,7 +130,7 @@ function buildWidgets(visitsVersionId: string, pageviewsVersionId: string): Widg
       id: 'kpi-pageviews',
       family: 'card',
       title: 'Seitenaufrufe',
-      placement: { desktop: { x: 3, y: 0, w: 3, h: 2 } },
+      placement: { desktop: { x: 3, y: 0, w: 3, h: 3 } },
       data: { semanticVersionIds: [pageviewsVersionId], fixedFilters: [] },
       presentation: { variant: 'kpi_comparison', showComparison: true, decimals: 0 },
       context: {
@@ -142,7 +142,7 @@ function buildWidgets(visitsVersionId: string, pageviewsVersionId: string): Widg
       id: 'series-visits',
       family: 'time_series',
       title: 'Besuche im Zeitverlauf',
-      placement: { desktop: { x: 6, y: 0, w: 6, h: 4 } },
+      placement: { desktop: { x: 6, y: 0, w: 6, h: 5 } },
       data: { semanticVersionIds: [visitsVersionId], fixedFilters: [] },
       presentation: { showComparison: true },
       context: { showDefinition: true },
@@ -151,7 +151,7 @@ function buildWidgets(visitsVersionId: string, pageviewsVersionId: string): Widg
       id: 'table-top-pages',
       family: 'flexible_table',
       title: 'Meistbesuchte Seiten',
-      placement: { desktop: { x: 0, y: 2, w: 6, h: 4 } },
+      placement: { desktop: { x: 0, y: 3, w: 6, h: 5 } },
       data: {
         semanticVersionIds: [pageviewsVersionId],
         dimension: 'page_url',

@@ -6,8 +6,8 @@
   "description": "Next.js frontend. Holds the user session and proxies to the API; never reaches the database or Matomo directly.",
   "scripts": {
     "dev": "next dev --port ${WEB_PORT:-3000}",
-    "build": "next build",
-    "start": "next start --port ${WEB_PORT:-3000}",
+    "build": "next build && node scripts/prepare-standalone.mjs",
+    "start": "node .next/standalone/apps/web/server.js",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

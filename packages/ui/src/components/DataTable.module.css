@@ -1,0 +1,50 @@
+/*
+ * Wide tables scroll inside their own container: the page body must never
+ * scroll horizontally (D10 zoom/reflow).
+ */
+.scroll {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+
+.table caption {
+  text-align: start;
+  padding-bottom: var(--space-2);
+  color: var(--text-secondary);
+  font-size: var(--font-size-xs);
+}
+
+.table th,
+.table td {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--border-subtle);
+  text-align: start;
+}
+
+.table th {
+  color: var(--text-secondary);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+}
+
+.numeric {
+  text-align: end;
+  font-family: var(--font-numeric);
+  font-feature-settings: var(--font-feature-numeric);
+  white-space: nowrap;
+}
+
+.table tbody tr:hover {
+  background: var(--surface-hover);
+}
+
+.empty {
+  padding: var(--space-4);
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+}

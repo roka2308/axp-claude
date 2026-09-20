@@ -40,3 +40,6 @@ Thumbs.db
 .vscode/*
 !.vscode/extensions.json
 !.vscode/settings.shared.json
+
+# Playwright session state, created by tests/e2e/auth.setup.ts
+tests/e2e/.auth/

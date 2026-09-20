@@ -116,10 +116,13 @@ async function main() {
   });
 
   await step('api, worker and web start and report health', async () => {
+    await assertPortsFree();
     startProcess('api', 'node', ['apps/api/dist/main.js']);
     startProcess('worker', 'node', ['apps/worker/dist/main.js']);
-    startProcess('web', process.platform === 'win32' ? 'npx.cmd' : 'npx', ['next', 'start'], {
-      cwd: path.join(ROOT, 'apps', 'web'),
+    // The standalone build is served by its own emitted server; `next start`
+    // does not serve an `output: "standalone"` build.
+    startProcess('web', 'node', ['apps/web/.next/standalone/apps/web/server.js'], {
+      env: { PORT: String(env.WEB_PORT ?? 3000) },
     });
 
     await waitForHttp(`${API_URL}/livez`);
@@ -314,11 +317,36 @@ function startProcess(name, command, args, options = {}) {
   const child = spawn(command, args, {
     cwd: options.cwd ?? ROOT,
     env: { ...process.env, ...options.env },
-    shell: process.platform === 'win32',
+    // Deliberately no shell. On Windows a shell wrapper survives `kill()` and
+    // the real server keeps the port, so a "restart" would silently reuse the
+    // old process and every check after it would be meaningless.
     stdio: 'ignore',
   });
   children.push({ name, child });
   return child;
+}
+
+/** Stops a child and everything it spawned, and waits for the port to go. */
+async function stopProcess(child) {
+  if (child.exitCode !== null || child.signalCode !== null) return;
+  if (process.platform === 'win32' && child.pid) {
+    await run('taskkill', ['/PID', String(child.pid), '/T', '/F']);
+  } else {
+    child.kill();
+  }
+  await Promise.race([once(child, 'close'), delay(5000)]);
+}
+
+/** Refuses to start on top of a server that is already listening. */
+async function assertPortsFree() {
+  for (const url of [`${API_URL}/livez`, WEB_URL]) {
+    try {
+      await fetch(url, { signal: AbortSignal.timeout(2000) });
+    } catch {
+      continue;
+    }
+    throw new Error(`${url} is still answering: a previous process was not stopped.`);
+  }
 }
 
 async function waitForHttp(url, timeoutMs = 90_000) {
@@ -361,10 +389,8 @@ function readEnvFile(file) {
 }
 
 async function shutdown() {
-  for (const { child } of children) {
-    child.kill();
-    await Promise.race([once(child, 'close'), delay(3000)]);
-  }
+  const running = children.splice(0, children.length);
+  for (const { child } of running) await stopProcess(child);
 }
 
 main()

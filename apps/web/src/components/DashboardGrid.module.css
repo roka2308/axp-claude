@@ -1,0 +1,48 @@
+/*
+ * The binding raster (D2): 12 columns on desktop, 8 on tablet, 4 on mobile.
+ *
+ * Placement is carried by custom properties rather than inline styles, because
+ * an inline style would win over the breakpoint rules below and the derived
+ * tablet and mobile layouts would never apply.
+ */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-auto-rows: var(--grid-row-height);
+  gap: var(--grid-gap);
+}
+
+.cell {
+  min-width: 0;
+  min-height: 0;
+  grid-column: var(--widget-x) / span var(--widget-w);
+  grid-row: var(--widget-y) / span var(--widget-h);
+}
+
+/*
+ * Tablet: eight columns, automatic flow in reading order. A widget never grows
+ * past the raster, and the authored row position is dropped because the
+ * narrower grid reflows anyway.
+ */
+@media (max-width: 1279px) {
+  .grid {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+  }
+
+  .cell {
+    grid-column: auto / span min(var(--widget-w), 8);
+    grid-row: auto / span var(--widget-h);
+  }
+}
+
+/* Phone: one widget per row. Stacking beats shrinking. */
+@media (max-width: 767px) {
+  .grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .cell {
+    grid-column: 1 / -1;
+    grid-row: auto / span var(--widget-h);
+  }
+}

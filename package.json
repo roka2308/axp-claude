@@ -41,7 +41,9 @@
     "db:local:start": "node scripts/local-mysql.mjs start",
     "db:local:stop": "node scripts/local-mysql.mjs stop",
     "db:local:status": "node scripts/local-mysql.mjs status",
-    "gate:f0:local": "node scripts/verify-gate-f0.mjs --local-mysql"
+    "gate:f0:local": "node scripts/verify-gate-f0.mjs --local-mysql",
+    "gate:f1": "node scripts/verify-gate-f1.mjs",
+    "gate:f1:local": "node scripts/verify-gate-f1.mjs --local-mysql"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

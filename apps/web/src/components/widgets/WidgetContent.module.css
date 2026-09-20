@@ -1,0 +1,75 @@
+.metrics {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.metric {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.value {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+  color: var(--text-primary);
+}
+
+.comparison {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+/*
+ * Direction is carried by the glyph and the signed number. Colour is a fourth,
+ * redundant channel - and deliberately muted, because "down" is not
+ * automatically bad: that judgement belongs to an evaluation scheme, not to a
+ * comparison arrow (D9 keeps status, chart and evaluation colours separate).
+ */
+.comparison[data-direction='up'] {
+  color: var(--status-success-text);
+}
+
+.comparison[data-direction='down'] {
+  color: var(--status-serious-text);
+}
+
+.comparisonLabel {
+  color: var(--text-muted);
+  font-size: var(--font-size-xs);
+}
+
+.chart {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-height: 0;
+}
+
+.dataAlternative {
+  border-top: 1px solid var(--border-subtle);
+  padding-top: var(--space-2);
+}
+
+.dataAlternativeSummary {
+  cursor: pointer;
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  padding: var(--space-1) 0;
+}
+
+.dataAlternativeSummary:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.text {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+}

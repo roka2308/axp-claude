@@ -155,18 +155,18 @@ export class ProjectService {
 
     const steps: SetupStep[] = [
       {
-        key: 'setup.matomo_connection',
+        key: 'setupStep.matomo_connection',
         state: connectionCount.length > 0 ? 'done' : 'open',
         required: true,
       },
       {
-        key: 'setup.site_assignment',
+        key: 'setupStep.site_assignment',
         state: siteRows.length > 0 ? 'done' : 'open',
         required: true,
         ...(siteRows[0] ? { detail: siteRows[0].name } : {}),
       },
       {
-        key: 'setup.first_dashboard',
+        key: 'setupStep.first_dashboard',
         state: dashboardRows.some((row) => row.publishedVersionId)
           ? 'done'
           : dashboardRows.length > 0
@@ -175,12 +175,12 @@ export class ProjectService {
         required: true,
       },
       {
-        key: 'setup.context_profile',
+        key: 'setupStep.context_profile',
         state: 'open',
         required: false,
       },
       {
-        key: 'setup.reporting',
+        key: 'setupStep.reporting',
         // Reporting arrives in Phase 8; marking it "not relevant" now would be
         // dishonest, so it stays open and non-blocking.
         state: 'open',

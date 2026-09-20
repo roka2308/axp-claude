@@ -1,0 +1,127 @@
+.widget {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  height: 100%;
+  padding: var(--density-card-padding);
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.header {
+  flex: none;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.title {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+}
+
+.freshness {
+  font-size: var(--font-size-2xs);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.body {
+  /*
+   * Content scrolls inside its allotted height instead of being clipped: a
+   * table with more rows than fit must stay reachable, and the page body must
+   * never scroll horizontally (D10).
+   */
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.context {
+  flex: none;
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+/*
+ * Non-ready states are text, never a colour or an icon alone (D10).
+ * The left rule differentiates at a glance; the label carries the meaning.
+ */
+.state {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  border-inline-start: 3px solid var(--border-default);
+  background: var(--surface-sunken);
+  border-radius: var(--radius-sm);
+}
+
+.state[data-state='unavailable'] {
+  border-inline-start-color: var(--status-warning);
+}
+
+.state[data-state='missing'],
+.state[data-state='unknown'] {
+  border-inline-start-color: var(--status-serious);
+}
+
+.state[data-state='empty'],
+.state[data-state='not_applicable'],
+.state[data-state='not_tracked'] {
+  border-inline-start-color: var(--border-strong);
+}
+
+.stateLabel {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.stateAction {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.definition {
+  flex: none;
+  border-top: 1px solid var(--border-subtle);
+  padding-top: var(--space-2);
+}
+
+.definitionSummary {
+  cursor: pointer;
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  padding: var(--space-1) 0;
+}
+
+.definitionSummary:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.definitionList {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-1) var(--space-3);
+  margin: var(--space-2) 0 0;
+  font-size: var(--font-size-xs);
+}
+
+.definitionList dt {
+  color: var(--text-muted);
+}
+
+.definitionList dd {
+  margin: 0;
+  color: var(--text-secondary);
+}

@@ -469,6 +469,57 @@ export class BootstrapService {
     return { userId };
   }
 
+  /**
+   * Records that initialization happened through a provisioning path.
+   *
+   * The canonical demo fixture creates a platform admin directly, so the
+   * instance is initialized in every meaningful sense - but the state row would
+   * still say otherwise, leaving the setup screen open and the sign-in page
+   * redirecting to it.
+   *
+   * Guarded by the only condition that makes the claim true: the named user
+   * must actually hold platform_admin at platform scope. There is no way to
+   * close the setup path without a platform admin existing first.
+   */
+  async markInitializedByProvisioning(params: { byUserId: string; reason: string }): Promise<void> {
+    const [assignment] = await this.deps.db
+      .select({ id: roleAssignments.id })
+      .from(roleAssignments)
+      .where(
+        and(
+          eq(roleAssignments.subjectType, 'user'),
+          eq(roleAssignments.subjectId, params.byUserId),
+          eq(roleAssignments.role, 'platform_admin'),
+          eq(roleAssignments.scopeType, 'platform'),
+        ),
+      )
+      .limit(1);
+
+    if (!assignment) {
+      throw new AppError('conflict', {
+        code: 'no_platform_admin',
+        internalMessage:
+          `Refused to mark the platform initialized: user ${params.byUserId} ` +
+          'does not hold platform_admin at platform scope.',
+      });
+    }
+
+    const state = await this.readStateRow();
+    if (state.initState === 'initialized') return;
+
+    const now = this.deps.clock.now();
+    await this.deps.db
+      .update(platformState)
+      .set({ initState: 'initialized', initializedAt: now, initializedByUserId: params.byUserId })
+      .where(eq(platformState.id, PLATFORM_STATE_ID));
+
+    await this.deps.audit.success('platform.bootstrap.completed', {
+      actorUserId: params.byUserId,
+      targetType: 'platform',
+      metadata: { via: 'provisioning', reason: params.reason },
+    });
+  }
+
   /** Removes consumed and expired tokens. Runs as a worker maintenance task. */
   async purgeExpiredTokens(): Promise<number> {
     const now = this.deps.clock.now();

@@ -69,7 +69,7 @@ export default tseslint.config(
   },
   {
     // CLI entry points and operator scripts are allowed to write to stdout.
-    files: ['**/cli/**/*.ts', 'scripts/**/*.{ts,mjs}', '**/*.config.{ts,js,mjs}'],
+    files: ['**/cli/**/*.ts', '**/scripts/**/*.{ts,mjs}', '**/*.config.{ts,js,mjs}'],
     languageOptions: {
       globals: {
         console: 'readonly',
@@ -77,6 +77,7 @@ export default tseslint.config(
         fetch: 'readonly',
         AbortSignal: 'readonly',
         URL: 'readonly',
+        URLSearchParams: 'readonly',
       },
     },
     rules: { 'no-console': 'off' },
