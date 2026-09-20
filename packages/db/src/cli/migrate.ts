@@ -32,5 +32,10 @@ async function main(): Promise<void> {
 
 main().catch((error: unknown) => {
   console.error('Migration failed:', error instanceof Error ? error.message : error);
+  // DDL is not transactional in MySQL: a partially applied migration leaves
+  // tables behind, and the driver's own message is what says which statement
+  // actually refused. Without it the next run only reports "table exists".
+  const cause = (error as { cause?: unknown })?.cause;
+  if (cause instanceof Error) console.error('Cause:', cause.message);
   process.exitCode = 1;
 });

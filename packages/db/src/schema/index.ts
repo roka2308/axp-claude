@@ -12,4 +12,7 @@ export * from './platform';
 export * from './identity';
 export * from './tenancy';
 export * from './access';
+export * from './matomo';
+export * from './semantic';
+export * from './dashboard';
 export * from './audit';

@@ -14,3 +14,8 @@ export * from './errors';
 export * from './identity';
 export * from './audit';
 export * from './api';
+export * from './analytics';
+export * from './matomo';
+export * from './semantic';
+export * from './dashboard';
+export * from './presentation';

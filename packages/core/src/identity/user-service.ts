@@ -200,6 +200,25 @@ export class UserService {
     });
   }
 
+  /**
+   * Whether a local account already has this exact password.
+   *
+   * Used by idempotent provisioning (the demo fixture) so re-running does not
+   * try to "change" a password to the value it already holds - which the
+   * history rule would correctly refuse. Internal domain API only: there is no
+   * route that exposes it.
+   */
+  async passwordMatches(userId: string, candidate: string): Promise<boolean> {
+    const [identity] = await this.deps.db
+      .select({ passwordHash: authIdentities.passwordHash })
+      .from(authIdentities)
+      .where(and(eq(authIdentities.userId, userId), eq(authIdentities.providerType, 'local')))
+      .limit(1);
+
+    if (!identity?.passwordHash) return false;
+    return verifyPassword(identity.passwordHash, candidate);
+  }
+
   async deactivate(userId: string, actorUserId?: string): Promise<void> {
     const now = this.deps.clock.now();
     await this.deps.db

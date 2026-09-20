@@ -3,6 +3,7 @@ import { AppError } from '@axp/contracts';
 import { users } from '@axp/db';
 import { type Container, generateSecretToken } from '@axp/core';
 import { DEMO_USER_NAMES, type DemoSeed, loadDemoSeed } from './demo-seed';
+import { seedReferenceDashboard, type SeedDashboardResult } from './seed-dashboard';
 
 export interface SeedOptions {
   /**
@@ -26,6 +27,7 @@ export interface SeedResult {
   readonly tenantId: string;
   readonly projectId: string;
   readonly accounts: readonly SeededAccount[];
+  readonly dashboard?: SeedDashboardResult;
 }
 
 /**
@@ -34,9 +36,11 @@ export interface SeedResult {
  * Idempotent: re-running updates nothing that already exists, so a developer
  * can seed repeatedly without duplicate tenants or users.
  *
- * Phase 0 applies the tenancy and identity part of the fixture. The Matomo
- * site, semantic definitions and Pulse solution are seeded by later milestones;
- * their values already live in `demo_seed.json` so both tracks stay aligned.
+ * Phase 1 adds the first vertical slice on top of the Phase 0 tenancy and
+ * identity data: a mock Matomo connection, the demo site, the core native
+ * metrics and the published `Portal Overview` dashboard. The Pulse solution
+ * and its formulas follow in Phase 6; their values already live in
+ * `demo_seed.json` so both tracks stay aligned.
  */
 export async function seedDemoData(
   container: Container,
@@ -110,10 +114,11 @@ export async function seedDemoData(
 
     if (existing) {
       userId = existing.id;
-      if (options.password) {
-        // Only reset an existing demo account when an explicit password was
-        // requested; otherwise a re-run would silently invalidate credentials
-        // the developer is currently using.
+      // Only reset an existing demo account when an explicit password was
+      // requested; otherwise a re-run would silently invalidate credentials
+      // the developer is currently using. Setting the same value again would
+      // also hit the password-history rule, so skip when it already matches.
+      if (options.password && !(await container.users.passwordMatches(userId, options.password))) {
         await container.users.changePassword({
           userId,
           newPassword: options.password,
@@ -162,5 +167,24 @@ export async function seedDemoData(
     });
   }
 
-  return { tenantId, projectId, accounts };
+  // The editor owns the seeded dashboard: it is the role that would create it.
+  const editor = accounts.find((account) => account.key === 'editor');
+  const editorUserId = editor ? await findUserId(container, editor.email) : null;
+
+  const dashboard = editorUserId
+    ? await seedReferenceDashboard(container, { tenantId, projectId, actorUserId: editorUserId })
+    : undefined;
+
+  await container.projects.refreshSetupState(tenantId, projectId);
+
+  return { tenantId, projectId, accounts, ...(dashboard ? { dashboard } : {}) };
+}
+
+async function findUserId(container: Container, email: string): Promise<string | null> {
+  const [row] = await container.db
+    .select({ id: users.id })
+    .from(users)
+    .where(eq(users.emailNormalized, email.toLowerCase()))
+    .limit(1);
+  return row?.id ?? null;
 }

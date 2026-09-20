@@ -36,6 +36,23 @@ export const AUDIT_ACTIONS = [
   'role_assignment.removed',
   'group.membership.changed',
   'object_grant.changed',
+  // Matomo connections and sites (Phase 1)
+  'matomo_connection.created',
+  'matomo_connection.credential_replaced',
+  'matomo_connection.capabilities_refreshed',
+  'matomo_connection.removed',
+  'matomo_site.imported',
+  'project.site_assigned',
+  // Semantic catalog (Phase 1 model, Phase 3 builders)
+  'semantic.version_activated',
+  'semantic.version_deprecated',
+  'source_binding.changed',
+  // Dashboards (Phase 1)
+  'dashboard.created',
+  'dashboard.published',
+  'dashboard.rolled_back',
+  'dashboard.archived',
+  'dashboard.trashed',
 ] as const;
 
 export const auditActionSchema = z.enum(AUDIT_ACTIONS);

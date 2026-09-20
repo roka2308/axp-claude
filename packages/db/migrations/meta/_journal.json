@@ -8,6 +8,13 @@
       "when": 1789760465857,
       "tag": "0000_initial_product_store",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1789897981128,
+      "tag": "0001_matomo_semantic_dashboard",
+      "breakpoints": true
     }
   ]
 }

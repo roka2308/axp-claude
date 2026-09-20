@@ -10,6 +10,9 @@ import { registerAuthentication } from './plugins/authentication';
 import { registerHealthRoutes } from './routes/health';
 import { registerPlatformRoutes } from './routes/platform';
 import { registerAuthRoutes } from './routes/auth';
+import { registerProjectRoutes } from './routes/projects';
+import { registerMatomoRoutes } from './routes/matomo';
+import { registerDashboardRoutes } from './routes/dashboards';
 
 export interface BuildServerOptions {
   readonly config: AppConfig;
@@ -57,6 +60,9 @@ export async function buildServer(options: BuildServerOptions): Promise<FastifyI
   registerHealthRoutes(app, container);
   registerPlatformRoutes(app, container);
   registerAuthRoutes(app, container);
+  registerProjectRoutes(app, container);
+  registerMatomoRoutes(app, container);
+  registerDashboardRoutes(app, container);
 
   // No CORS plugin on purpose: the browser never calls this service directly.
   // Requests arrive from the Next.js server, which holds the session cookie.
