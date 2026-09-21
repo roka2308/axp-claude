@@ -73,8 +73,9 @@ export interface CustomMetricDefinition {
  * Formula AST (Shared Contract §7).
  *
  * A controlled tree, never SQL, JavaScript, regex or any other executable
- * string. The full builder, cycle and unit validation arrive with Phase 3; the
- * shape is fixed here so nothing else is invented in the meantime.
+ * string. There is no expression parser anywhere in the product: a formula is
+ * built as a tree and stored as a tree, so there is nothing to escape and
+ * nothing to sandbox.
  */
 export type FormulaNode =
   | { readonly type: 'constant'; readonly value: number }
@@ -100,8 +101,82 @@ export interface FormulaDefinition {
   readonly decimals: number;
 }
 
+/**
+ * How a raw measurement becomes points on a 0-100 scale.
+ *
+ * Declared per component rather than inferred, because "what counts as good"
+ * is a business decision and the product must not guess it. Both shapes are
+ * things a visual builder can draw: a line between two ends, or a staircase.
+ */
+export type ScoreNormalisation =
+  | {
+      readonly kind: 'linear';
+      /** The value that scores 0. May be above `best` for lower-is-better. */
+      readonly worst: number;
+      /** The value that scores 100. */
+      readonly best: number;
+    }
+  | {
+      readonly kind: 'bands';
+      /** Ascending thresholds; the highest one the value reaches wins. */
+      readonly bands: readonly { readonly atLeast: number; readonly points: number }[];
+    };
+
+/**
+ * One weighted input of a score.
+ *
+ * Every component is required. A score that quietly renormalised the weights
+ * around a missing input would report a number that means "out of the parts we
+ * could measure" while looking like "out of 100" - which is exactly the
+ * failure Gate F3 exists to prevent. A missing input makes the whole score
+ * `not_calculable`, and says which input was missing.
+ */
+export interface ScoreComponent {
+  readonly semanticVersionId: string;
+  /** Relative weight. Normalised across components at evaluation time. */
+  readonly weight: number;
+  readonly normalisation: ScoreNormalisation;
+  /** Shown in the calculation trace. Falls back to the definition's name. */
+  readonly label?: string;
+}
+
+/**
+ * Evaluation band: what a score number means in words (Master Spec §14).
+ *
+ * `band` picks one of the five evaluation token slots, so the colour comes
+ * from the design system and the label always travels with it - a band is
+ * never a colour alone (D9, D10).
+ */
+export interface EvaluationBand {
+  /** i18n key suffix under `evaluation.`, e.g. `good`. */
+  readonly key: string;
+  /** Inclusive lower bound on the 0-100 scale. */
+  readonly atLeast: number;
+  readonly band: 1 | 2 | 3 | 4 | 5;
+}
+
+export interface ScoreDefinition {
+  readonly kind: 'score';
+  readonly components: readonly ScoreComponent[];
+  /** Ascending by `atLeast`. May be empty: a score without an interpretation. */
+  readonly evaluation: readonly EvaluationBand[];
+  readonly unit: 'score';
+  readonly scope: SemanticScope;
+  readonly direction: SemanticDirection;
+  readonly decimals: number;
+}
+
 export type SemanticDefinitionBody =
-  NativeMetricDefinition | CustomMetricDefinition | FormulaDefinition;
+  NativeMetricDefinition | CustomMetricDefinition | FormulaDefinition | ScoreDefinition;
+
+/** The unit and scope a definition produces, whatever kind it is. */
+export function semanticUnitOf(body: SemanticDefinitionBody): SemanticUnit {
+  return body.unit;
+}
+
+export function semanticScopeOf(body: SemanticDefinitionBody): SemanticScope {
+  return body.scope;
+}
 
 export interface SemanticDefinitionRef {
   readonly id: string;
@@ -119,6 +194,49 @@ export interface SemanticVersionRef {
   readonly status: SemanticLifecycle;
   readonly body: SemanticDefinitionBody;
   readonly dependencyVersionIds: readonly string[];
+}
+
+/**
+ * How a requirement is satisfied on one site (Master Spec §13).
+ *
+ * Deliberately separate from the semantic version: correcting a mapping is a
+ * technical fix, and a new business version must not silently rewire it.
+ */
+export type SourceBindingDescriptor =
+  | { readonly kind: 'native_metric'; readonly sourceMetric: string }
+  | { readonly kind: 'event'; readonly category: string; readonly action?: string }
+  | { readonly kind: 'custom_dimension'; readonly index: number }
+  | { readonly kind: 'goal'; readonly goalId: number }
+  | { readonly kind: 'site_search' }
+  | { readonly kind: 'not_available' };
+
+export interface SourceBindingRef {
+  readonly id: string;
+  readonly requirementKey: string;
+  readonly siteId: string | null;
+  readonly binding: SourceBindingDescriptor;
+  readonly updatedAt: string;
+}
+
+/**
+ * Whether what a binding points at still exists on the site.
+ *
+ * Drift is detected, never repaired automatically: a custom dimension that
+ * disappeared may have been renamed, retired or broken, and only a person can
+ * say which (Master Spec §13).
+ */
+export const DRIFT_STATES = ['ok', 'review_required', 'unresolved'] as const;
+export const driftStateSchema = z.enum(DRIFT_STATES);
+export type DriftState = z.infer<typeof driftStateSchema>;
+
+export interface BindingHealth {
+  readonly requirementKey: string;
+  readonly siteId: string | null;
+  readonly state: DriftState;
+  /** i18n key explaining a non-ok state. */
+  readonly detailKey?: string;
+  /** What the site currently offers, for the person deciding what to do. */
+  readonly availableSample?: readonly string[];
 }
 
 /**

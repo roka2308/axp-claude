@@ -8,6 +8,7 @@ import {
   type FilterSpec,
   type AnalyticsQueryKind,
   type SemanticDefinitionBody,
+  type SemanticVersionRef,
   type TimeGranularity,
   type TimeRangePreset,
 } from '@axp/contracts';
@@ -19,6 +20,7 @@ import type { MatomoConnector, ResolvedQuery, ResolvedSourceMetric } from '../ma
 import type { SemanticService } from '../semantic/semantic-service';
 import { granularityFor, resolveComparison, resolveTimeRange } from './calendar';
 import { cacheKeyFor } from './memory-cache';
+import { applyDerivations, type Derivation, type DerivationContext } from './derive';
 
 export interface AnalyticsQueryRequest {
   readonly kind: AnalyticsQueryKind;
@@ -74,7 +76,7 @@ export class AnalyticsQueryEngine {
   constructor(private readonly deps: AnalyticsQueryEngineDeps) {}
 
   async execute(request: AnalyticsQueryRequest): Promise<AnalyticsResult> {
-    const query = await this.resolve(request);
+    const { query, derivation } = await this.resolve(request);
     const key = cacheKeyFor(query);
 
     const cached = await this.deps.cache.get(key);
@@ -85,12 +87,16 @@ export class AnalyticsQueryEngine {
     const existing = this.inFlight.get(key);
     if (existing) return existing;
 
-    const pending = this.run(query, key).finally(() => this.inFlight.delete(key));
+    const pending = this.run(query, derivation, key).finally(() => this.inFlight.delete(key));
     this.inFlight.set(key, pending);
     return pending;
   }
 
-  private async run(query: ResolvedQuery, key: string): Promise<AnalyticsResult> {
+  private async run(
+    query: ResolvedQuery,
+    derivation: DerivationContext,
+    key: string,
+  ): Promise<AnalyticsResult> {
     await this.acquire();
     const startedAt = Date.now();
 
@@ -101,7 +107,9 @@ export class AnalyticsQueryEngine {
       );
       const connector = this.deps.connectorFor(connection.baseUrl);
 
-      const result = await this.withTimeout(connector.execute(connection, query));
+      const raw = await this.withTimeout(connector.execute(connection, query));
+      const result = applyDerivations(raw, derivation);
+
       await this.deps.cache.set(key, result, this.deps.cacheTtlMs);
 
       this.deps.logger.debug(
@@ -137,7 +145,9 @@ export class AnalyticsQueryEngine {
    * is resolved in the site's time zone, and semantic versions are translated
    * into normalised source metrics. Neither is left to the connector.
    */
-  private async resolve(request: AnalyticsQueryRequest): Promise<ResolvedQuery> {
+  private async resolve(
+    request: AnalyticsQueryRequest,
+  ): Promise<{ query: ResolvedQuery; derivation: DerivationContext }> {
     const [site] = await this.deps.db
       .select()
       .from(matomoSites)
@@ -175,14 +185,22 @@ export class AnalyticsQueryEngine {
       to: request.comparisonTo,
     });
 
-    const versions = await this.deps.semantics.resolveVersions(request.semanticVersionIds);
-    const sourceMetrics: ResolvedSourceMetric[] = versions.map((version) => ({
+    /*
+     * Expand what was asked for into what Matomo can answer.
+     *
+     * A formula or a score is not a question Matomo understands, so the leaves
+     * underneath it are fetched instead and the derivation happens here once
+     * the answers are back.
+     */
+    const { leaves, derivations, names } = await this.expand(request.semanticVersionIds);
+
+    const sourceMetrics: ResolvedSourceMetric[] = leaves.map((version) => ({
       semanticVersionId: version.id,
       sourceMetric: sourceMetricFor(version.body),
       decimals: 'decimals' in version.body ? version.body.decimals : 0,
     }));
 
-    return {
+    const query: ResolvedQuery = {
       kind: request.kind,
       tenantId: request.tenantId,
       projectId: request.projectId,
@@ -192,6 +210,7 @@ export class AnalyticsQueryEngine {
       siteTimezone: site.timezone,
       semanticVersionIds: request.semanticVersionIds,
       sourceMetrics,
+      derivedVersionIds: derivations.map((derivation) => derivation.semanticVersionId),
       dimensions: request.dimensions ?? [],
       timeRange,
       granularity: request.granularity ?? granularityFor(timeRange),
@@ -203,6 +222,61 @@ export class AnalyticsQueryEngine {
       limit: request.limit,
       permissionContextId: request.permissionContextId,
     };
+
+    return {
+      query,
+      derivation: { derivations, names, requested: request.semanticVersionIds },
+    };
+  }
+
+  /**
+   * Resolves requested versions into the leaves to fetch and what to derive.
+   *
+   * Walks the dependency graph: a score depends on formulas, a formula on
+   * native metrics, and only the natives reach Matomo. The walk is breadth
+   * first over already-resolved dependency ids, so a diamond is fetched once.
+   */
+  private async expand(requestedIds: readonly string[]): Promise<{
+    leaves: SemanticVersionRef[];
+    derivations: Derivation[];
+    names: Map<string, string>;
+  }> {
+    const seen = new Map<string, SemanticVersionRef>();
+    const queue = [...requestedIds];
+
+    while (queue.length > 0) {
+      const batch = queue.splice(0, queue.length).filter((id) => !seen.has(id));
+      if (batch.length === 0) break;
+
+      for (const version of await this.deps.semantics.resolveVersions(batch)) {
+        seen.set(version.id, version);
+        queue.push(...version.dependencyVersionIds.filter((id) => !seen.has(id)));
+      }
+    }
+
+    const described = await this.deps.semantics.describeVersions([...seen.keys()]);
+    const names = new Map([...described].map(([id, entry]) => [id, entry.name]));
+
+    const leaves: SemanticVersionRef[] = [];
+    const derivations: Derivation[] = [];
+
+    for (const version of seen.values()) {
+      if (version.body.kind === 'formula' || version.body.kind === 'score') {
+        derivations.push({
+          semanticVersionId: version.id,
+          body: version.body,
+          decimals: version.body.decimals,
+        });
+      } else {
+        leaves.push(version);
+      }
+    }
+
+    // Derive in dependency order, so a score built on a formula sees the
+    // formula's value rather than an absence.
+    derivations.sort((a, b) => depth(a, seen) - depth(b, seen));
+
+    return { leaves, derivations, names };
   }
 
   private async withTimeout(work: Promise<AnalyticsResult>): Promise<AnalyticsResult> {
@@ -259,4 +333,30 @@ function sourceMetricFor(body: SemanticDefinitionBody): string {
     messageParams: { kind: body.kind },
     internalMessage: `Semantic definitions of kind "${body.kind}" are evaluated from Phase 3 onwards.`,
   });
+}
+
+/**
+ * How deep a derivation sits in the dependency graph.
+ *
+ * Used only for ordering, so an approximate walk is enough: what matters is
+ * that a score built on a formula is evaluated after it.
+ */
+function depth(
+  derivation: Derivation,
+  versions: ReadonlyMap<string, { dependencyVersionIds: readonly string[] }>,
+  guard = 0,
+): number {
+  if (guard > 16) return guard;
+
+  const dependencies = versions.get(derivation.semanticVersionId)?.dependencyVersionIds ?? [];
+  if (dependencies.length === 0) return 0;
+
+  return (
+    1 +
+    Math.max(
+      ...dependencies.map((id) =>
+        depth({ ...derivation, semanticVersionId: id }, versions, guard + 1),
+      ),
+    )
+  );
 }

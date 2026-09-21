@@ -82,6 +82,8 @@ export function cacheKeyFor(query: ResolvedQuery): CacheKey {
     site: query.siteId,
     matomoSite: query.matomoSiteId,
     metrics: query.sourceMetrics.map((metric) => metric.sourceMetric).sort(),
+    // Same leaves, different formula, different answer.
+    derived: [...(query.derivedVersionIds ?? [])].sort(),
     dimensions: [...query.dimensions].sort(),
     range: [query.timeRange.from, query.timeRange.to],
     granularity: query.granularity ?? null,

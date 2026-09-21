@@ -67,8 +67,20 @@ export interface ResolvedQuery extends NormalizedAnalyticsQuery {
   readonly connectionId: string;
   readonly matomoSiteId: number;
   readonly siteTimezone: string;
-  /** Normalised source metric per semantic version id, in the same order. */
+  /**
+   * Normalised source metrics to fetch.
+   *
+   * The leaves of the request: native metrics, plus whatever a formula or a
+   * score needs underneath. A connector never sees a formula.
+   */
   readonly sourceMetrics: readonly ResolvedSourceMetric[];
+  /**
+   * Version ids the caller asked for, which may include derived ones.
+   *
+   * Part of the cache key: two widgets over the same leaves but different
+   * formulas are different questions.
+   */
+  readonly derivedVersionIds?: readonly string[];
   /** Resolved comparison dates, when a comparison was requested. */
   readonly comparisonRange?: { readonly from: string; readonly to: string };
 }
