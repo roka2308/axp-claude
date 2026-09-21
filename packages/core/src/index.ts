@@ -28,8 +28,11 @@ export * from './matomo/url-guard';
 export * from './analytics/calendar';
 export * from './analytics/memory-cache';
 export * from './analytics/query-engine';
+export * from './analytics/derive';
 
 export * from './semantic/semantic-service';
+export * from './semantic/formula';
+export * from './semantic/score';
 
 export * from './dashboard/dashboard-service';
 export * from './dashboard/presentation-builder';

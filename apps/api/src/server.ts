@@ -13,6 +13,7 @@ import { registerAuthRoutes } from './routes/auth';
 import { registerProjectRoutes } from './routes/projects';
 import { registerMatomoRoutes } from './routes/matomo';
 import { registerDashboardRoutes } from './routes/dashboards';
+import { registerSemanticRoutes } from './routes/semantic';
 
 export interface BuildServerOptions {
   readonly config: AppConfig;
@@ -62,6 +63,7 @@ export async function buildServer(options: BuildServerOptions): Promise<FastifyI
   registerAuthRoutes(app, container);
   registerProjectRoutes(app, container);
   registerMatomoRoutes(app, container);
+  registerSemanticRoutes(app, container);
   registerDashboardRoutes(app, container);
 
   // No CORS plugin on purpose: the browser never calls this service directly.

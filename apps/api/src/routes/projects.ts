@@ -57,24 +57,6 @@ export function registerProjectRoutes(app: FastifyInstance, container: Container
     return { project, setup, sites, capabilities };
   });
 
-  /**
-   * Semantic definitions available in the project.
-   *
-   * The catalog itself is not analytics data, so `semantic.read` is enough;
-   * seeing a definition does not imply being able to query with it.
-   */
-  app.get(
-    '/projects/:projectId/semantic-definitions',
-    { onRequest: [app.authenticate] },
-    async (request) => {
-      const auth = requireAuth(request);
-      const { projectId } = projectParams.parse(request.params);
-      const scope = await requireProjectScope(container, auth, projectId, 'semantic.read');
-
-      const definitions = await container.semantics.listForProject(scope.tenantId, scope.projectId);
-      return { definitions };
-    },
-  );
 }
 
 /**

@@ -351,6 +351,40 @@ export class MatomoConnectionService {
    * The only place a Matomo token exists in plaintext. The returned object is
    * request-scoped and must not be stored, logged or returned.
    */
+  /**
+   * What a site currently exposes, for the mapping surfaces.
+   *
+   * Read live rather than stored: the point of a drift check is to compare a
+   * recorded binding against what is true now.
+   */
+  async describeSiteMetadata(
+    tenantId: string,
+    siteId: string,
+  ): Promise<{ metrics: string[]; dimensions: string[] }> {
+    const [site] = await this.deps.db
+      .select()
+      .from(matomoSites)
+      .where(and(eq(matomoSites.id, siteId), eq(matomoSites.tenantId, tenantId)))
+      .limit(1);
+
+    if (!site) {
+      throw new AppError('not_found', {
+        code: 'matomo_site_not_found',
+        messageKey: 'matomo.site_not_found',
+        internalMessage: `Site ${siteId} not found for tenant ${tenantId}.`,
+      });
+    }
+
+    const connection = await this.resolveConnection(tenantId, site.connectionId);
+    const connector = this.deps.connectorFor(connection.baseUrl);
+    const snapshot = await connector.refreshMetadata(connection, site.matomoSiteId);
+
+    return {
+      metrics: [...snapshot.availableMetrics],
+      dimensions: [...snapshot.availableDimensions],
+    };
+  }
+
   async resolveConnection(tenantId: string, connectionId: string): Promise<ResolvedConnection> {
     const row = await this.requireConnectionRow(tenantId, connectionId);
 

@@ -1,4 +1,5 @@
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
+import type { FastifyInstance } from 'fastify';
 import type { RowDataPacket } from 'mysql2';
 import {
   AppError,
@@ -14,6 +15,7 @@ import {
   STRONG_TEST_PASSWORD,
   type TestContext,
 } from './harness';
+import { buildServer } from '../../apps/api/src/server';
 
 /**
  * Semantic catalog (Master Spec §13, Gate F3).
@@ -32,9 +34,16 @@ describe('semantic catalog', () => {
   let visitsVersionId: string;
   let pageviewsVersionId: string;
 
+  let app: FastifyInstance;
+  let manager: string;
+  let reader: string;
+  let viewerToken: string;
+
   beforeEach(async () => {
     await resetDatabase();
     ctx = await createTestContext();
+    app = await buildServer({ config: ctx.config, container: ctx.container, logger: ctx.logger });
+    await app.ready();
 
     tenantId = (
       await ctx.container.tenants.createTenant({
@@ -64,12 +73,76 @@ describe('semantic catalog', () => {
       })
     ).userId;
 
+    await ctx.container.users.assignRole({
+      subjectType: 'user',
+      subjectId: actorUserId,
+      role: 'semantic_catalog_manager',
+      scopeType: 'project',
+      scopeId: projectId,
+    });
+    manager = await signIn('semantik@example.invalid');
+
+    /*
+     * A dashboard editor, not a viewer: `semantic.read` belongs to the
+     * authoring roles. A viewer sees the definition behind a number on a
+     * dashboard they may already read; browsing the catalog is a different
+     * question with a different answer (Master Spec §7).
+     */
+    const readerId = (
+      await ctx.container.users.createLocalUser({
+        email: 'leser@example.invalid',
+        firstName: 'Lena',
+        lastName: 'Leser',
+        password: STRONG_TEST_PASSWORD,
+        status: 'active',
+      })
+    ).userId;
+    await ctx.container.users.assignRole({
+      subjectType: 'user',
+      subjectId: readerId,
+      role: 'dashboard_editor',
+      scopeType: 'project',
+      scopeId: projectId,
+    });
+    reader = await signIn('leser@example.invalid');
+
+    const viewerId = (
+      await ctx.container.users.createLocalUser({
+        email: 'betrachter@example.invalid',
+        firstName: 'Bea',
+        lastName: 'Betrachter',
+        password: STRONG_TEST_PASSWORD,
+        status: 'active',
+      })
+    ).userId;
+    await ctx.container.users.assignRole({
+      subjectType: 'user',
+      subjectId: viewerId,
+      role: 'viewer',
+      scopeType: 'project',
+      scopeId: projectId,
+    });
+    viewerToken = await signIn('betrachter@example.invalid');
+
     await ctx.container.semantics.ensureCoreNativeMetrics();
     visitsVersionId = (await activeVersionOf(CORE_NATIVE_METRICS.visits)).id;
     pageviewsVersionId = (await activeVersionOf(CORE_NATIVE_METRICS.pageviews)).id;
   });
 
+  async function signIn(email: string): Promise<string> {
+    const response = await app.inject({
+      method: 'POST',
+      url: '/auth/login',
+      payload: { email, password: STRONG_TEST_PASSWORD },
+    });
+    expect(response.statusCode, email).toBe(200);
+    return response.json().token as string;
+  }
+
+  const as = (token: string) => ({ authorization: `Bearer ${token}` });
+
   afterAll(async () => {
+    await app?.close();
     await closeDatabase();
   });
 
@@ -277,7 +350,7 @@ describe('semantic catalog', () => {
 
     it('stores the dependency graph so the next check can use it', async () => {
       const { version } = await createFormula();
-      expect(version.dependencyVersionIds.sort()).toEqual(
+      expect([...version.dependencyVersionIds].sort()).toEqual(
         [pageviewsVersionId, visitsVersionId].sort(),
       );
     });
@@ -364,7 +437,7 @@ describe('semantic catalog', () => {
       const { versionId } = await createScore();
       const [version] = await ctx.container.semantics.resolveVersions([versionId]);
 
-      expect(version!.dependencyVersionIds.sort()).toEqual(
+      expect([...version!.dependencyVersionIds].sort()).toEqual(
         [pageviewsVersionId, visitsVersionId].sort(),
       );
     });
@@ -530,6 +603,169 @@ describe('semantic catalog', () => {
       });
       // `unresolved`, not `review_required`: the review already happened.
       expect(health[0]).toMatchObject({ state: 'unresolved' });
+    });
+  });
+
+  // --- the API surface -----------------------------------------------------
+
+  describe('over the API', () => {
+    const apiBody = () => ({
+      kind: 'formula' as const,
+      ast: {
+        type: 'binary' as const,
+        op: '/' as const,
+        left: { type: 'reference' as const, semanticVersionId: pageviewsVersionId },
+        right: { type: 'reference' as const, semanticVersionId: visitsVersionId },
+      },
+      unit: 'ratio' as const,
+      scope: 'visit' as const,
+      direction: 'higher_is_better' as const,
+      decimals: 2,
+    });
+
+    const create = (token: string, portableId = 'demo.api-formula') =>
+      app.inject({
+        method: 'POST',
+        url: `/projects/${projectId}/semantic-definitions`,
+        headers: as(token),
+        payload: { portableId, type: 'formula', name: 'Seiten pro Besuch', body: apiBody() },
+      });
+
+    const versionsOf = (definitionId: string, token: string) =>
+      app.inject({
+        method: 'GET',
+        url: `/projects/${projectId}/semantic-definitions/${definitionId}/versions`,
+        headers: as(token),
+      });
+
+    it('lets a catalog manager create and activate a definition', async () => {
+      const created = await create(manager);
+      expect(created.statusCode).toBe(201);
+
+      const { definition, version } = created.json();
+      const activated = await app.inject({
+        method: 'POST',
+        url: `/projects/${projectId}/semantic-definitions/${definition.id}/versions/${version.id}/status`,
+        headers: as(manager),
+        payload: { to: 'active' },
+      });
+
+      expect(activated.statusCode).toBe(200);
+      expect(activated.json()).toMatchObject({ status: 'active' });
+    });
+
+    it('lets an editor read the catalog but not redefine it', async () => {
+      // Seeing what a number means is not being able to change what it means.
+      const listed = await app.inject({
+        method: 'GET',
+        url: `/projects/${projectId}/semantic-definitions`,
+        headers: as(reader),
+      });
+      expect(listed.statusCode).toBe(200);
+
+      expect((await create(reader, 'demo.reader-attempt')).statusCode).toBe(403);
+    });
+
+    it('keeps the catalog out of a plain viewer\u2019s reach', async () => {
+      // The catalog is an authoring surface. A viewer still sees the
+      // definition behind a number on a dashboard they may read.
+      const listed = await app.inject({
+        method: 'GET',
+        url: `/projects/${projectId}/semantic-definitions`,
+        headers: as(viewerToken),
+      });
+      expect(listed.statusCode).toBe(403);
+    });
+
+    it('refuses a formula that cannot combine, with a usable message', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        url: `/projects/${projectId}/semantic-definitions`,
+        headers: as(manager),
+        payload: {
+          portableId: 'demo.api-nonsense',
+          type: 'formula',
+          name: 'Unsinn',
+          body: {
+            ...apiBody(),
+            ast: {
+              type: 'binary',
+              op: '*',
+              left: { type: 'reference', semanticVersionId: visitsVersionId },
+              right: { type: 'reference', semanticVersionId: pageviewsVersionId },
+            },
+          },
+        },
+      });
+
+      expect(response.statusCode).toBe(422);
+      // Visits are counted over visits and pageviews over actions, so the
+      // scope rule bites before the unit rule does. Either way the message is
+      // specific enough to act on.
+      expect(response.json()).toMatchObject({
+        error: { code: 'formula_invalid', messageKey: 'semantic.formula.scope_mismatch' },
+      });
+    });
+
+    it('refuses a payload that is not a formula tree at all', async () => {
+      // The schema is closed: no node type carries a string to be interpreted,
+      // so an attempt to smuggle one in fails at the boundary (Gate F3).
+      const response = await app.inject({
+        method: 'POST',
+        url: `/projects/${projectId}/semantic-definitions`,
+        headers: as(manager),
+        payload: {
+          portableId: 'demo.api-injection',
+          type: 'formula',
+          name: 'Injektion',
+          body: { ...apiBody(), ast: { type: 'expression', source: 'process.exit(1)' } },
+        },
+      });
+
+      expect(response.statusCode).toBe(422);
+      expect(response.json().error.category).toBe('validation_failed');
+    });
+
+    it('lists the version history', async () => {
+      const { definition } = (await create(manager, 'demo.api-history')).json();
+
+      const versions = await versionsOf(definition.id, reader);
+      expect(versions.statusCode).toBe(200);
+      expect(versions.json().versions).toHaveLength(1);
+    });
+
+    it('records a mapping without writing a semantic version', async () => {
+      const { definition } = (await create(manager, 'demo.api-mapping')).json();
+      const before = (await versionsOf(definition.id, manager)).json().versions;
+
+      const bound = await app.inject({
+        method: 'PUT',
+        url: `/projects/${projectId}/source-bindings`,
+        headers: as(manager),
+        payload: {
+          requirementKey: 'pulse.engaged_users',
+          siteId: null,
+          binding: { kind: 'custom_dimension', index: 4 },
+        },
+      });
+      expect(bound.statusCode).toBe(200);
+
+      const after = (await versionsOf(definition.id, manager)).json().versions;
+      expect(after).toEqual(before);
+    });
+
+    it('refuses a mapping change from someone who may only read', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/projects/${projectId}/source-bindings`,
+        headers: as(reader),
+        payload: {
+          requirementKey: 'pulse.engaged_users',
+          siteId: null,
+          binding: { kind: 'site_search' },
+        },
+      });
+      expect(response.statusCode).toBe(403);
     });
   });
 
