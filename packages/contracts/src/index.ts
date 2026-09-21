@@ -18,4 +18,5 @@ export * from './analytics';
 export * from './matomo';
 export * from './semantic';
 export * from './dashboard';
+export * from './layout';
 export * from './presentation';

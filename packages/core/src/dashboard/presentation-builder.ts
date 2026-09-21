@@ -135,6 +135,24 @@ export class PresentationBuilder {
       };
     }
 
+    /*
+     * An annotation list shows product annotations, not measurements, so it
+     * asks Matomo nothing. Until annotations exist (Phase 4) the list is
+     * genuinely empty - which is a state, not a failure, and says so.
+     */
+    if (widget.family === 'annotation_event_list') {
+      return {
+        widgetId: widget.id,
+        family: widget.family,
+        title: widget.title,
+        placement: widget.placement,
+        state: 'empty',
+        content: { kind: 'annotations', entries: [] },
+        dataQuality: [],
+        ...(widget.context.description ? { context: widget.context.description } : {}),
+      };
+    }
+
     if (widget.data.semanticVersionIds.length === 0) {
       return {
         widgetId: widget.id,
@@ -261,6 +279,8 @@ export class PresentationBuilder {
 
 /** Which query shape a widget family needs. */
 function queryKindFor(widget: WidgetConfig): 'scalar' | 'series' | 'breakdown' {
+  // Bar and donut are the same question drawn differently: a breakdown.
+
   switch (widget.family) {
     case 'time_series':
       return 'series';

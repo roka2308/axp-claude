@@ -366,6 +366,66 @@ describe('dashboard authoring', () => {
     });
   });
 
+  describe('the listing shows what is published', () => {
+    const listed = async () => {
+      const response = await app.inject({
+        method: 'GET',
+        url: `/projects/${projectId}/dashboards`,
+        headers: as(viewer),
+      });
+      expect(response.statusCode).toBe(200);
+      return (response.json().dashboards as { id: string; name: string }[]).find(
+        (entry) => entry.id === dashboardId,
+      )!;
+    };
+
+    it('keeps the published name while the draft carries another one', async () => {
+      // Renaming a draft must not rename the thing everyone else is looking
+      // at. The same rule as the presentation, applied to the listing
+      // (Master Spec §21).
+      const before = await listed();
+      await save(anna, rename('Arbeitstitel'));
+
+      const after = await listed();
+      expect(after.name).toBe(before.name);
+      expect(after).toMatchObject({ hasUnpublishedChanges: true });
+    });
+
+    it('shows the draft name before anything has been published', async () => {
+      const created = await app.inject({
+        method: 'POST',
+        url: `/projects/${projectId}/dashboards`,
+        headers: as(anna),
+        payload: { name: 'Noch unveröffentlicht', siteId },
+      });
+      expect(created.statusCode).toBe(201);
+
+      const response = await app.inject({
+        method: 'GET',
+        url: `/projects/${projectId}/dashboards`,
+        headers: as(viewer),
+      });
+      const entry = (response.json().dashboards as { id: string; name: string }[]).find(
+        (candidate) => candidate.id === created.json().dashboardId,
+      );
+
+      // Nothing is published yet, so the draft name is all there is - and a
+      // dashboard nobody can find is worse than one named provisionally.
+      expect(entry?.name).toBe('Noch unveröffentlicht');
+    });
+
+    it('follows the new name once it is published', async () => {
+      await save(anna, rename('Endgültig'));
+      await app.inject({
+        method: 'POST',
+        url: `/dashboards/${dashboardId}/publish`,
+        headers: as(anna),
+      });
+
+      expect((await listed()).name).toBe('Endgültig');
+    });
+  });
+
   // --- archive and trash ---------------------------------------------------
 
   describe('archive and trash', () => {

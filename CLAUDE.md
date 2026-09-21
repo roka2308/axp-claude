@@ -13,10 +13,11 @@ Read before changing anything substantial:
 4. `../analytics_experience_version_d_v1.0/acceptance/acceptance_checklist.md`
 5. `docs/adr/` — decisions already taken here
 
-Current milestone: **Phase 2 — Dashboard Core and Grid**. Phase 1 is complete
-and Gate F1 is demonstrated (`npm run gate:f1`, see `docs/gates/F1.md`); adding
-widgets was deliberately folded into Phase 2, because the widget gallery and the
-Inspector are that milestone. Gate criteria are in the development plan.
+Current milestone: **Phase 3 — Semantic Core**. Phases 0–2 are complete and
+their gates are demonstrated (`npm run gate:f0|f1|f2`, see `docs/gates/`).
+Phase 2 left widget _data_ configuration deliberately thin: choosing a metric,
+a dimension and filters per widget belongs with the semantic builders. Gate
+criteria are in the development plan.
 
 ## Non-negotiable invariants
 

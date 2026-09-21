@@ -7,7 +7,7 @@ import {
   type WidgetConfig,
   type WidgetFamily,
   WIDGET_SIZE_RULES,
-} from '@axp/contracts';
+} from './dashboard';
 
 /**
  * The grid engine (D2, Master Spec §20).
@@ -26,6 +26,11 @@ import {
  *
  * Every function here is pure and deterministic: the same input always yields
  * the same layout, which is what Gate F2 asks to demonstrate.
+ *
+ * It lives in the contracts package rather than in the domain layer because
+ * both sides need it: the API validates a layout with it, the editor moves
+ * widgets with it in the browser, and the Emergent track implements the same
+ * rules from the same description.
  */
 
 export interface PlacedWidget {

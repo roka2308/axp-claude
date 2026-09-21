@@ -19,8 +19,8 @@ export interface DashboardActionsProps {
  * an unchanged draft is a no-op that only produces a confusing new version
  * number (Master Spec §21).
  *
- * The editor itself arrives in Phase 2; until then this is the whole authoring
- * surface, and it is deliberately small rather than a half-built editor.
+ * The editor is a page of its own; these are the entry points to it from the
+ * project list, where a reader is deciding which dashboard to work on.
  */
 export async function DashboardActions({
   dashboardId,
@@ -34,9 +34,14 @@ export async function DashboardActions({
   return (
     <span className={styles.actions}>
       {canPreview ? (
-        <Link href={`/dashboards/${dashboardId}?source=draft`} className={styles.link}>
-          {t('previewDraft')}
-        </Link>
+        <>
+          <Link href={`/dashboards/${dashboardId}/edit`} className={styles.link}>
+            {t('editDashboard')}
+          </Link>
+          <Link href={`/dashboards/${dashboardId}?source=draft`} className={styles.link}>
+            {t('previewDraft')}
+          </Link>
+        </>
       ) : null}
 
       {canPublish && hasUnpublishedChanges ? (

@@ -85,6 +85,10 @@ export type WidgetContent =
       readonly totalRows: number;
       readonly hasMore: boolean;
     }
+  | {
+      readonly kind: 'annotations';
+      readonly entries: readonly AnnotationPresentation[];
+    }
   | { readonly kind: 'text'; readonly body: string };
 
 /**

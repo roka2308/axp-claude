@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { GRID_COLUMNS, type GridPlacement, type WidgetConfig } from '@axp/contracts';
+import { GRID_COLUMNS, type GridPlacement, type WidgetConfig } from './dashboard';
 import {
   applyPlacement,
   clampToGrid,

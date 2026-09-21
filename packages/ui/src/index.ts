@@ -13,4 +13,6 @@ export * from './components/Callout';
 export * from './components/Card';
 export * from './components/VisuallyHidden';
 export * from './components/LineChart';
+export * from './components/BarChart';
+export * from './components/DonutChart';
 export * from './components/DataTable';

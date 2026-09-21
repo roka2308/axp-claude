@@ -9,6 +9,8 @@ import {
   type DashboardVersionRef,
   type EditorLease,
   GRID_COLUMNS,
+  overlaps,
+  resolveLayout,
   type PublishImpact,
   type PublishIssue,
   type WidgetConfig,
@@ -28,7 +30,6 @@ import type { Clock } from '../clock';
 import type { AuditService } from '../audit/audit-service';
 import type { SemanticService } from '../semantic/semantic-service';
 import { decideLease, holdsLease, isHeldByOther, type LeaseSnapshot } from './draft-lease';
-import { overlaps, resolveLayout } from './layout';
 
 export interface DashboardServiceDeps {
   readonly db: Database;
@@ -52,6 +53,7 @@ export interface CreateDashboardInput {
 
 export interface DraftState {
   readonly dashboardId: string;
+  readonly projectId: string;
   readonly revisionId: string;
   readonly snapshot: DashboardSnapshot;
   readonly hasUnpublishedChanges: boolean;
@@ -150,6 +152,7 @@ export class DashboardService {
 
     return {
       dashboardId,
+      projectId: input.projectId,
       revisionId,
       snapshot,
       hasUnpublishedChanges: true,
@@ -185,7 +188,16 @@ export class DashboardService {
         id: row.id,
         tenantId: row.tenantId,
         projectId: row.projectId,
-        name: row.name,
+        /*
+         * The published name once there is one (Master Spec §21).
+         *
+         * `dashboards.name` follows the draft so a dashboard can be found
+         * while it is still being built, but once something is published that
+         * is what a reader is looking at - and renaming a draft must not
+         * rename the thing everyone else sees. `hasUnpublishedChanges` is how
+         * an editor learns that newer work exists.
+         */
+        name: published?.snapshot.name ?? row.name,
         lifecycle: row.lifecycle,
         publishedVersion: published?.version ?? null,
         hasUnpublishedChanges: (row.hasUnpublishedChanges ?? 0) === 1,
@@ -209,6 +221,7 @@ export class DashboardService {
 
     return {
       dashboardId,
+      projectId: dashboard.projectId,
       revisionId: draft.revisionId,
       snapshot: draft.snapshot as unknown as DashboardSnapshot,
       hasUnpublishedChanges: draft.hasUnpublishedChanges === 1,

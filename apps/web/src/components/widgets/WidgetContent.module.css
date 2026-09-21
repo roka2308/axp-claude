@@ -73,3 +73,46 @@
   color: var(--text-secondary);
   font-size: var(--font-size-sm);
 }
+
+.annotations {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.annotation {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: var(--space-1) var(--space-2);
+  align-items: baseline;
+  padding-block-end: var(--space-2);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.annotation:last-child {
+  border-bottom: none;
+}
+
+.annotationDate {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.annotationTitle {
+  color: var(--text-primary);
+}
+
+.annotationCategory {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+}
+
+.annotationDescription {
+  grid-column: 1 / -1;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}

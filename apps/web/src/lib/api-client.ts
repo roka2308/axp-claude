@@ -44,7 +44,7 @@ export class ApiUnreachableError extends Error {
 }
 
 export interface ApiRequestOptions {
-  readonly method?: 'GET' | 'POST' | 'PATCH' | 'DELETE';
+  readonly method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   readonly body?: unknown;
   /** Send the caller's session token. Off for public endpoints. */
   readonly authenticated?: boolean;

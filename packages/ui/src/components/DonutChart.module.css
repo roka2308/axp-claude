@@ -1,0 +1,68 @@
+.chart {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.svg {
+  inline-size: 11rem;
+  block-size: 11rem;
+  flex: 0 0 auto;
+}
+
+.total {
+  font-size: 1.25rem;
+  font-weight: var(--font-weight-semibold);
+  fill: var(--text-primary);
+}
+
+.totalLabel {
+  font-size: 0.6875rem;
+  fill: var(--text-muted);
+}
+
+.legend {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex: 1 1 10rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-inline-size: 0;
+}
+
+.legendItem {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+}
+
+.swatch {
+  inline-size: 0.625rem;
+  block-size: 0.625rem;
+  border-radius: var(--radius-xs);
+  align-self: center;
+}
+
+/* Text stays in ink; the swatch beside it carries the identity. */
+.legendLabel {
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.legendValue {
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.empty {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+}

@@ -1,0 +1,116 @@
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+}
+
+.group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+/*
+ * The breakpoint toggle uses aria-pressed rather than a styled radio, so the
+ * pressed state is announced and not only drawn.
+ */
+.toggle {
+  padding: var(--space-1) var(--space-3);
+  min-block-size: var(--target-size-min);
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.toggle[aria-pressed='true'] {
+  background: var(--surface-selected);
+  border-color: var(--accent-default);
+  color: var(--text-primary);
+  font-weight: var(--font-weight-medium);
+}
+
+.status {
+  margin-inline-start: auto;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.previewLink {
+  padding-inline: var(--space-2);
+  font-size: var(--font-size-sm);
+  color: var(--text-link);
+  text-decoration: none;
+}
+
+.previewLink:hover {
+  text-decoration: underline;
+}
+
+.workbench {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--layout-inspector-width);
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.publish {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--surface-card);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+}
+
+.publishHeading {
+  margin: 0;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+}
+
+.changes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin: 0;
+}
+
+.changes > div {
+  display: flex;
+  gap: var(--space-2);
+  align-items: baseline;
+}
+
+.changes dt {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.changes dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}
+
+.issues {
+  margin: 0;
+  padding-inline-start: var(--space-4);
+}
+
+@media (max-width: 1023px) {
+  .workbench {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .status {
+    margin-inline-start: 0;
+  }
+}

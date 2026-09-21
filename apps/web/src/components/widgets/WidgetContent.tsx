@@ -1,5 +1,5 @@
 import { getTranslations } from 'next-intl/server';
-import { DataTable, LineChart, type LineSeries } from '@axp/ui';
+import { BarChart, DataTable, DonutChart, LineChart, type LineSeries } from '@axp/ui';
 import { hasNumericValue, type WidgetPresentation } from '@axp/contracts';
 import styles from './WidgetContent.module.css';
 
@@ -15,8 +15,19 @@ export async function WidgetContent({ widget }: { readonly widget: WidgetPresent
       return <CardContent widget={widget} />;
     case 'time_series':
       return <SeriesContent widget={widget} />;
+    // Bar, donut and table all ask Matomo the same question - a breakdown -
+    // and differ only in how the answer is drawn. The family, not the content
+    // kind, decides which.
     case 'table':
-      return <TableContent widget={widget} />;
+      return widget.family === 'bar' ? (
+        <BarContent widget={widget} />
+      ) : widget.family === 'donut' ? (
+        <DonutContent widget={widget} />
+      ) : (
+        <TableContent widget={widget} />
+      );
+    case 'annotations':
+      return <AnnotationContent widget={widget} />;
     case 'text':
       return <p className={styles.text}>{widget.content.body}</p>;
     default:
@@ -142,6 +153,102 @@ async function SeriesContent({ widget }: { readonly widget: WidgetPresentation }
         />
       </details>
     </div>
+  );
+}
+
+async function BarContent({ widget }: { readonly widget: WidgetPresentation }) {
+  const t = await getTranslations();
+  if (widget.content?.kind !== 'table') return null;
+
+  const { rows, columns } = widget.content;
+  const measure = columns[1]?.key;
+
+  return (
+    <div className={styles.chart}>
+      <BarChart
+        ariaLabel={t('viewer.barAria', { title: widget.title, categories: rows.length })}
+        emptyLabel={t('states.empty')}
+        comparisonLabel={t('viewer.previousPeriod')}
+        numberFormat={{ locale: 'de-DE' }}
+        data={rows.map((row) => {
+          const metric =
+            row.metrics.find((entry) => entry.semanticVersionId === measure) ?? row.metrics[0];
+          return {
+            key: row.key,
+            label: row.label,
+            value: metric && hasNumericValue(metric.value) ? metric.value.value : null,
+            ...(metric?.comparison && hasNumericValue(metric.comparison.value)
+              ? { comparisonValue: metric.comparison.value.value }
+              : {}),
+          };
+        })}
+      />
+
+      {/* Every chart ships its values as a table (D10). */}
+      <details className={styles.dataAlternative}>
+        <summary className={styles.dataAlternativeSummary}>{t('viewer.showDataTable')}</summary>
+        <TableContent widget={widget} />
+      </details>
+    </div>
+  );
+}
+
+async function DonutContent({ widget }: { readonly widget: WidgetPresentation }) {
+  const t = await getTranslations();
+  if (widget.content?.kind !== 'table') return null;
+
+  const { rows, columns } = widget.content;
+  const measure = columns[1]?.key;
+
+  return (
+    <div className={styles.chart}>
+      <DonutChart
+        ariaLabel={t('viewer.donutAria', { title: widget.title, categories: rows.length })}
+        emptyLabel={t('states.empty')}
+        otherLabel={t('viewer.otherCategories')}
+        totalLabel={columns[1]?.label ?? t('viewer.definitionName')}
+        numberFormat={{ locale: 'de-DE' }}
+        slices={rows.flatMap((row) => {
+          const metric =
+            row.metrics.find((entry) => entry.semanticVersionId === measure) ?? row.metrics[0];
+          // A slice needs a number; a missing value is not a zero-width wedge.
+          if (!metric || !hasNumericValue(metric.value)) return [];
+          return [{ key: row.key, label: row.label, value: metric.value.value }];
+        })}
+      />
+
+      <details className={styles.dataAlternative}>
+        <summary className={styles.dataAlternativeSummary}>{t('viewer.showDataTable')}</summary>
+        <TableContent widget={widget} />
+      </details>
+    </div>
+  );
+}
+
+async function AnnotationContent({ widget }: { readonly widget: WidgetPresentation }) {
+  const t = await getTranslations();
+  if (widget.content?.kind !== 'annotations') return null;
+
+  const { entries } = widget.content;
+  if (entries.length === 0) {
+    return <p className={styles.text}>{t('viewer.noAnnotations')}</p>;
+  }
+
+  return (
+    <ul className={styles.annotations}>
+      {entries.map((entry) => (
+        <li key={entry.id} className={styles.annotation}>
+          <span className={styles.annotationDate}>{formatShortDate(entry.date)}</span>
+          <span className={styles.annotationTitle}>{entry.title}</span>
+          {entry.category ? (
+            <span className={styles.annotationCategory}>{entry.category}</span>
+          ) : null}
+          {entry.description ? (
+            <span className={styles.annotationDescription}>{entry.description}</span>
+          ) : null}
+        </li>
+      ))}
+    </ul>
   );
 }
 
