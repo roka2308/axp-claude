@@ -36,6 +36,16 @@ export interface DerivationContext {
   readonly names: ReadonlyMap<string, string>;
   /** The version ids the caller actually asked for, in order. */
   readonly requested: readonly string[];
+  /**
+   * Leaves that were never asked of Matomo, and why.
+   *
+   * A custom metric whose requirement has no source mapping cannot be
+   * fetched - but it is not an error either, and it is certainly not zero. It
+   * enters the result as the absence it is, so that anything built on top of
+   * it (a formula, a score) sees a missing input and says so (Master Spec
+   * §13).
+   */
+  readonly placeholders?: ReadonlyMap<string, ValueEnvelope>;
 }
 
 /**
@@ -48,32 +58,85 @@ export function applyDerivations(
   result: AnalyticsResult,
   context: DerivationContext,
 ): AnalyticsResult {
-  if (context.derivations.length === 0) return selectRequested(result, context.requested);
+  const seeded = withPlaceholders(result, context);
+  if (context.derivations.length === 0) return selectRequested(seeded, context.requested);
 
-  switch (result.kind) {
+  switch (seeded.kind) {
     case 'scalar':
       return selectRequested(
-        { ...result, metrics: deriveMetrics(result.metrics, context) },
+        { ...seeded, metrics: deriveMetrics(seeded.metrics, context) },
         context.requested,
       );
 
     case 'series':
       return selectRequested(
-        { ...result, series: deriveSeries(result.series, context) },
+        { ...seeded, series: deriveSeries(seeded.series, context) },
         context.requested,
       );
 
     case 'breakdown':
       return selectRequested(
         {
-          ...result,
-          rows: result.rows.map((row) => ({
+          ...seeded,
+          rows: seeded.rows.map((row) => ({
             ...row,
             metrics: deriveMetrics(row.metrics, context),
           })) satisfies BreakdownRow[],
         },
         context.requested,
       );
+  }
+}
+
+/**
+ * Adds the leaves that were never fetched, as the absences they are.
+ *
+ * The same envelope at every point in time: "there is no mapping for this"
+ * does not vary by day.
+ */
+function withPlaceholders(result: AnalyticsResult, context: DerivationContext): AnalyticsResult {
+  const placeholders = context.placeholders;
+  if (!placeholders || placeholders.size === 0) return result;
+
+  const metrics = [...placeholders].map(
+    ([semanticVersionId, value]) => ({ semanticVersionId, value }) satisfies MetricValue,
+  );
+
+  switch (result.kind) {
+    case 'scalar':
+      return { ...result, metrics: [...result.metrics, ...metrics] };
+
+    case 'series': {
+      const template = result.series[0];
+      if (!template) return result;
+
+      const series = [...placeholders].map(
+        ([semanticVersionId, value]) =>
+          ({
+            semanticVersionId,
+            granularity: template.granularity,
+            points: template.points.map((point) => ({ date: point.date, value })),
+            ...(template.comparisonPoints
+              ? {
+                  comparisonPoints: template.comparisonPoints.map((point) => ({
+                    date: point.date,
+                    value,
+                  })),
+                }
+              : {}),
+          }) satisfies TimeSeries,
+      );
+      return { ...result, series: [...result.series, ...series] };
+    }
+
+    case 'breakdown':
+      return {
+        ...result,
+        rows: result.rows.map((row) => ({
+          ...row,
+          metrics: [...row.metrics, ...metrics],
+        })) satisfies BreakdownRow[],
+      };
   }
 }
 

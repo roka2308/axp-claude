@@ -7,6 +7,7 @@ import type {
   ScoreDefinition,
   SemanticDefinitionBody,
   SemanticDefinitionRef,
+  SemanticUsage,
   SemanticVersionRef,
 } from '@axp/contracts';
 import { Button, Callout, Card, SelectField, TextField } from '@axp/ui';
@@ -27,6 +28,8 @@ export interface SemanticLibraryProps {
   readonly definitions: readonly SemanticDefinitionRef[];
   /** Active version per definition id, for showing what each one means today. */
   readonly active: Readonly<Record<string, SemanticVersionRef>>;
+  /** Where each definition is used, keyed by definition id. */
+  readonly usage: Readonly<Record<string, SemanticUsage>>;
   readonly siteId: string | null;
   readonly canManage: boolean;
 }
@@ -47,6 +50,7 @@ export function SemanticLibrary({
   projectId,
   definitions,
   active,
+  usage,
   siteId,
   canManage,
 }: SemanticLibraryProps) {
@@ -70,6 +74,7 @@ export function SemanticLibrary({
   const firstMetric = usable[0]?.currentVersionId ?? '';
 
   const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
   const [draft, setDraft] = useState<Draft>({
     kind: 'formula',
     ast: blankNode('binary', firstMetric),
@@ -94,6 +99,7 @@ export function SemanticLibrary({
         portableId: `project.${slug(name)}`,
         type: draft.kind === 'score' ? 'score' : 'formula',
         name,
+        ...(description ? { description } : {}),
         body: body(),
       });
 
@@ -102,7 +108,10 @@ export function SemanticLibrary({
           ? { tone: 'success', text: t('savedAsDraft') }
           : { tone: 'critical', text: result.message ?? t('saveFailed') },
       );
-      if (result.status === 'saved') setName('');
+      if (result.status === 'saved') {
+        setName('');
+        setDescription('');
+      }
     });
   }
 
@@ -144,6 +153,7 @@ export function SemanticLibrary({
                 <th scope="col">{t('columnName')}</th>
                 <th scope="col">{t('columnType')}</th>
                 <th scope="col">{t('columnStatus')}</th>
+                <th scope="col">{t('columnUsage')}</th>
                 <th scope="col">{t('columnMeaning')}</th>
               </tr>
             </thead>
@@ -171,6 +181,7 @@ export function SemanticLibrary({
                         ? t('statusActive', { version: version.version })
                         : t('statusDraftOnly')}
                     </td>
+                    <td>{usageOf(usage[definition.id], t)}</td>
                     <td className={styles.meaning}>{meaningOf(version, names, t)}</td>
                   </tr>
                 );
@@ -185,6 +196,7 @@ export function SemanticLibrary({
           projectId={projectId}
           definition={selected}
           version={active[selected.id]}
+          usage={usage[selected.id]}
           names={names}
           showHistory={showHistory}
           onToggleHistory={() => setShowHistory((open) => !open)}
@@ -204,6 +216,18 @@ export function SemanticLibrary({
                 value={name}
                 onChange={(event) => setName(event.target.value)}
                 required
+              />
+
+              {/*
+                The glossary entry. Optional in the form but asked for here
+                rather than later: a definition explained in the business's own
+                words is the difference between a catalog and a list of names.
+              */}
+              <TextField
+                label={t('definitionDescription')}
+                hint={t('definitionDescriptionHint')}
+                value={description}
+                onChange={(event) => setDescription(event.target.value)}
               />
 
               <SelectField
@@ -266,6 +290,7 @@ function DefinitionDetail({
   projectId,
   definition,
   version,
+  usage,
   names,
   showHistory,
   onToggleHistory,
@@ -275,6 +300,7 @@ function DefinitionDetail({
   readonly projectId: string;
   readonly definition: SemanticDefinitionRef;
   readonly version: SemanticVersionRef | undefined;
+  readonly usage: SemanticUsage | undefined;
   readonly names: ReadonlyMap<string, string>;
   readonly showHistory: boolean;
   readonly onToggleHistory: () => void;
@@ -298,6 +324,12 @@ function DefinitionDetail({
     <Card title={definition.name} description={t(`type.${definition.type}`)}>
       <div className="stack">
         <dl className={styles.facts}>
+          {definition.description ? (
+            <>
+              <dt>{t('glossary')}</dt>
+              <dd>{definition.description}</dd>
+            </>
+          ) : null}
           <dt>{t('portableId')}</dt>
           <dd>{definition.portableId}</dd>
           <dt>{t('columnMeaning')}</dt>
@@ -310,7 +342,24 @@ function DefinitionDetail({
               <dd>{t(`scopeName.${version.body.scope}`)}</dd>
             </>
           ) : null}
+          <dt>{t('columnUsage')}</dt>
+          <dd>{usageOf(usage, t)}</dd>
         </dl>
+
+        {/*
+          Which version each published dashboard holds. This is what pinning
+          means in practice: activating a new version changes nothing here
+          until a dashboard is published again (Gate F3).
+        */}
+        {usage && usage.pinnedVersions.length > 0 ? (
+          <ul className={styles.pinned} aria-label={t('pinnedVersions')}>
+            {usage.pinnedVersions.map((pinned) => (
+              <li key={pinned.versionId}>
+                {t('pinnedVersion', { version: pinned.version, count: pinned.dashboards })}
+              </li>
+            ))}
+          </ul>
+        ) : null}
 
         {/* History on demand: the usual question is what it means now. */}
         <div>
@@ -337,6 +386,23 @@ function DefinitionDetail({
       </div>
     </Card>
   );
+}
+
+/**
+ * Where a definition is used, in one line.
+ *
+ * Published and draft are named separately because they behave differently: a
+ * published dashboard holds the version it pinned, a draft will take whatever
+ * is active when it is next published.
+ */
+function usageOf(usage: SemanticUsage | undefined, t: Translator): string {
+  if (!usage) return t('usageUnknown');
+  if (usage.publishedDashboards === 0 && usage.draftDashboards === 0) return t('usageNone');
+
+  return t('usageSummary', {
+    published: usage.publishedDashboards,
+    drafts: usage.draftDashboards,
+  });
 }
 
 /** The preview result: the number, and how it came about. */

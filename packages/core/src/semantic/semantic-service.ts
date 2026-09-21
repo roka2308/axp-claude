@@ -2,6 +2,7 @@ import { and, desc, eq, inArray, isNull, or } from 'drizzle-orm';
 import {
   AppError,
   type BindingHealth,
+  type BindingReview,
   CORE_NATIVE_METRICS,
   type DriftState,
   type NativeMetricDefinition,
@@ -9,16 +10,21 @@ import {
   type SemanticDefinitionRef,
   type SemanticLifecycle,
   type SemanticType,
+  type SemanticUsage,
   type SemanticVersionRef,
   type SourceBindingDescriptor,
   type SourceBindingRef,
 } from '@axp/contracts';
 import {
   type Database,
+  dashboardDrafts,
+  dashboardVersions,
+  dashboards,
   newId,
   semanticDefinitions,
   semanticVersions,
   sourceBindings,
+  users,
 } from '@axp/db';
 import type { Clock } from '../clock';
 import { NORMALIZED_METRICS } from '../matomo/connector';
@@ -52,10 +58,20 @@ export class SemanticService {
    * catalog rather than being redefined per project.
    */
   async ensureCoreNativeMetrics(): Promise<SemanticDefinitionRef[]> {
-    const specs: { portableId: string; name: string; body: NativeMetricDefinition }[] = [
+    const specs: {
+      portableId: string;
+      name: string;
+      description: string;
+      body: NativeMetricDefinition;
+    }[] = [
       {
         portableId: CORE_NATIVE_METRICS.visits,
         name: 'Besuche',
+        // The glossary entry ships with the definition: a number whose meaning
+        // has to be looked up somewhere else is a number nobody trusts.
+        description:
+          'Ein Besuch ist eine zusammenhängende Folge von Aufrufen derselben Person. ' +
+          'Eine neue Sitzung beginnt nach 30 Minuten ohne Aktivität.',
         body: {
           kind: 'native',
           sourceMetric: NORMALIZED_METRICS.visits,
@@ -68,6 +84,9 @@ export class SemanticService {
       {
         portableId: CORE_NATIVE_METRICS.pageviews,
         name: 'Seitenaufrufe',
+        description:
+          'Jeder Aufruf einer Seite wird gezählt, auch mehrfache Aufrufe derselben Seite ' +
+          'innerhalb eines Besuchs.',
         body: {
           kind: 'native',
           sourceMetric: NORMALIZED_METRICS.pageviews,
@@ -81,7 +100,9 @@ export class SemanticService {
 
     const refs: SemanticDefinitionRef[] = [];
     for (const spec of specs) {
-      refs.push(await this.ensureGlobalDefinition(spec.portableId, spec.name, spec.body));
+      refs.push(
+        await this.ensureGlobalDefinition(spec.portableId, spec.name, spec.description, spec.body),
+      );
     }
     return refs;
   }
@@ -89,6 +110,7 @@ export class SemanticService {
   private async ensureGlobalDefinition(
     portableId: string,
     name: string,
+    description: string,
     body: SemanticDefinitionBody,
   ): Promise<SemanticDefinitionRef> {
     const [existing] = await this.deps.db
@@ -104,11 +126,23 @@ export class SemanticService {
       .limit(1);
 
     if (existing?.currentVersionId) {
+      // The glossary text ships with the product, so a later release may carry
+      // a better wording for a definition that already exists here. Updating
+      // it is deliberately NOT a new semantic version: what the number means
+      // did not change, only how well it is explained (Master Spec §13).
+      if (existing.name !== name || existing.description !== description) {
+        await this.deps.db
+          .update(semanticDefinitions)
+          .set({ name, description })
+          .where(eq(semanticDefinitions.id, existing.id));
+      }
+
       return {
         id: existing.id,
         portableId: existing.portableId,
         type: existing.type,
-        name: existing.name,
+        name,
+        description,
         currentVersionId: existing.currentVersionId,
       };
     }
@@ -125,6 +159,7 @@ export class SemanticService {
           projectId: null,
           type: 'native_metric',
           name,
+          description,
         });
       }
 
@@ -148,6 +183,7 @@ export class SemanticService {
       portableId,
       type: 'native_metric',
       name,
+      description,
       currentVersionId: versionId,
     };
   }
@@ -185,6 +221,7 @@ export class SemanticService {
       portableId: row.portableId,
       type: row.type,
       name: row.name,
+      description: row.description,
       currentVersionId: row.currentVersionId,
     }));
   }
@@ -247,6 +284,7 @@ export class SemanticService {
         portableId: match.portableId,
         type: match.type,
         name: match.name,
+        description: match.description,
         currentVersionId: match.currentVersionId,
       },
       version,
@@ -308,6 +346,7 @@ export class SemanticService {
         portableId: input.portableId,
         type: input.type,
         name: input.name,
+        description: input.description ?? null,
         currentVersionId: null,
       },
       version: {
@@ -500,7 +539,14 @@ export class SemanticService {
     if (existing) {
       await this.deps.db
         .update(sourceBindings)
-        .set({ binding: input.binding as unknown as Record<string, unknown> })
+        .set({
+          binding: input.binding as unknown as Record<string, unknown>,
+          // Repointing a mapping answers the question the review was about, so
+          // the old review no longer applies to anything.
+          reviewedAt: null,
+          reviewedByUserId: null,
+          reviewedFingerprint: null,
+        })
         .where(eq(sourceBindings.id, id));
     } else {
       await this.deps.db.insert(sourceBindings).values({
@@ -558,20 +604,205 @@ export class SemanticService {
     projectId: string,
     available: { metrics: readonly string[]; dimensions: readonly string[] },
   ): Promise<BindingHealth[]> {
-    const bindings = await this.listSourceBindings(projectId);
+    const rows = await this.deps.db
+      .select({
+        binding: sourceBindings,
+        reviewerFirstName: users.firstName,
+        reviewerLastName: users.lastName,
+      })
+      .from(sourceBindings)
+      .leftJoin(users, eq(users.id, sourceBindings.reviewedByUserId))
+      .where(eq(sourceBindings.projectId, projectId));
 
-    return bindings.map((binding) => {
-      const state = driftOf(binding.binding, available);
+    return rows.map(({ binding: row, reviewerFirstName, reviewerLastName }) => {
+      const descriptor = row.binding as unknown as SourceBindingDescriptor;
+      const detected = driftOf(descriptor, available);
+      const fingerprint = bindingFingerprint(descriptor, available);
+
+      const review: BindingReview | undefined = row.reviewedAt
+        ? {
+            reviewedAt: row.reviewedAt.toISOString(),
+            reviewedBy: reviewerFirstName
+              ? `${reviewerFirstName} ${reviewerLastName ?? ''}`.trim()
+              : null,
+            current: row.reviewedFingerprint === fingerprint,
+          }
+        : undefined;
+
+      // A current review settles the question: somebody looked at exactly this
+      // situation and accepted it. It never repairs the mapping - `unresolved`
+      // still says the number cannot be produced here (Master Spec 13).
+      const state: DriftState =
+        detected === 'review_required' && review?.current ? 'unresolved' : detected;
+
       return {
-        requirementKey: binding.requirementKey,
-        siteId: binding.siteId,
+        requirementKey: row.requirementKey,
+        siteId: row.siteId,
         state,
-        ...(state === 'ok'
+        ...(detected === 'ok'
           ? {}
           : {
-              detailKey: `semantic.drift.${binding.binding.kind}`,
+              detailKey: `semantic.drift.${descriptor.kind}`,
               availableSample: available.dimensions.slice(0, 8),
             }),
+        ...(review ? { review } : {}),
+      };
+    });
+  }
+
+  /**
+   * Records that somebody looked at a mapping and accepted the situation.
+   *
+   * Writes to `source_bindings` and nothing else. Acknowledging that a custom
+   * dimension is really gone is a technical fact about this installation; the
+   * business definition it serves is untouched, and no semantic version is
+   * created (Gate F3).
+   *
+   * The fingerprint is what the review was about. When the site changes, the
+   * review goes stale and the warning comes back rather than staying silently
+   * signed off.
+   */
+  async reviewSourceBinding(input: {
+    tenantId: string;
+    projectId: string;
+    requirementKey: string;
+    available: { metrics: readonly string[]; dimensions: readonly string[] };
+    actorUserId: string;
+  }): Promise<BindingHealth> {
+    const [row] = await this.deps.db
+      .select()
+      .from(sourceBindings)
+      .where(
+        and(
+          eq(sourceBindings.projectId, input.projectId),
+          eq(sourceBindings.requirementKey, input.requirementKey),
+        ),
+      )
+      .limit(1);
+
+    if (!row) {
+      throw new AppError('not_found', {
+        code: 'binding_not_found',
+        messageKey: 'semantic.binding_not_found',
+      });
+    }
+
+    const descriptor = row.binding as unknown as SourceBindingDescriptor;
+    const fingerprint = bindingFingerprint(descriptor, input.available);
+    const reviewedAt = this.deps.clock.now();
+
+    await this.deps.db
+      .update(sourceBindings)
+      .set({
+        reviewedAt,
+        reviewedByUserId: input.actorUserId,
+        reviewedFingerprint: fingerprint,
+      })
+      .where(eq(sourceBindings.id, row.id));
+
+    await this.deps.audit.success('source_binding.reviewed', {
+      actorUserId: input.actorUserId,
+      tenantId: input.tenantId,
+      projectId: input.projectId,
+      targetType: 'source_binding',
+      targetId: row.id,
+      metadata: { requirementKey: row.requirementKey, fingerprint },
+    });
+
+    const detected = driftOf(descriptor, input.available);
+    return {
+      requirementKey: row.requirementKey,
+      siteId: row.siteId,
+      state: detected === 'review_required' ? 'unresolved' : detected,
+      ...(detected === 'ok' ? {} : { detailKey: `semantic.drift.${descriptor.kind}` }),
+      review: { reviewedAt: reviewedAt.toISOString(), reviewedBy: null, current: true },
+    };
+  }
+
+  // --- usage ---------------------------------------------------------------
+
+  /**
+   * Where each definition is actually used in this project (D6).
+   *
+   * Draft and published are counted apart because they answer different
+   * questions. A draft will pick up whichever version is active at its next
+   * publish; a published dashboard holds the version it pinned and keeps
+   * holding it. That difference is the whole point of pinning, so a usage
+   * summary that blurred the two would be worse than none.
+   */
+  async describeUsage(projectId: string): Promise<SemanticUsage[]> {
+    const definitions = await this.deps.db
+      .select({ id: semanticDefinitions.id })
+      .from(semanticDefinitions);
+
+    const versionRows = await this.deps.db
+      .select({
+        id: semanticVersions.id,
+        definitionId: semanticVersions.definitionId,
+        version: semanticVersions.version,
+      })
+      .from(semanticVersions);
+
+    const definitionOfVersion = new Map(versionRows.map((row) => [row.id, row.definitionId]));
+    const numberOfVersion = new Map(versionRows.map((row) => [row.id, row.version]));
+
+    const draftRows = await this.deps.db
+      .select({ dashboardId: dashboards.id, snapshot: dashboardDrafts.snapshot })
+      .from(dashboardDrafts)
+      .innerJoin(dashboards, eq(dashboards.id, dashboardDrafts.dashboardId))
+      .where(eq(dashboards.projectId, projectId));
+
+    const publishedRows = await this.deps.db
+      .select({
+        dashboardId: dashboards.id,
+        pinned: dashboardVersions.pinnedSemanticVersionIds,
+      })
+      .from(dashboards)
+      .innerJoin(dashboardVersions, eq(dashboardVersions.id, dashboards.publishedVersionId))
+      .where(eq(dashboards.projectId, projectId));
+
+    /** definitionId or versionId -> the dashboards that use it. */
+    const draftUse = new Map<string, Set<string>>();
+    const publishedUse = new Map<string, Set<string>>();
+    const pinnedUse = new Map<string, Set<string>>();
+
+    const record = (into: Map<string, Set<string>>, key: string, dashboardId: string) => {
+      const current = into.get(key) ?? new Set<string>();
+      current.add(dashboardId);
+      into.set(key, current);
+    };
+
+    for (const row of draftRows) {
+      for (const versionId of snapshotVersionIds(row.snapshot)) {
+        const definitionId = definitionOfVersion.get(versionId);
+        if (definitionId) record(draftUse, definitionId, row.dashboardId);
+      }
+    }
+
+    for (const row of publishedRows) {
+      for (const versionId of row.pinned) {
+        const definitionId = definitionOfVersion.get(versionId);
+        if (!definitionId) continue;
+        record(publishedUse, definitionId, row.dashboardId);
+        record(pinnedUse, versionId, row.dashboardId);
+      }
+    }
+
+    return definitions.map((definition) => {
+      const pinnedVersions = [...pinnedUse.entries()]
+        .filter(([versionId]) => definitionOfVersion.get(versionId) === definition.id)
+        .map(([versionId, dashboardIds]) => ({
+          versionId,
+          version: numberOfVersion.get(versionId) ?? 0,
+          dashboards: dashboardIds.size,
+        }))
+        .sort((a, b) => b.version - a.version);
+
+      return {
+        definitionId: definition.id,
+        draftDashboards: draftUse.get(definition.id)?.size ?? 0,
+        publishedDashboards: publishedUse.get(definition.id)?.size ?? 0,
+        pinnedVersions,
       };
     });
   }
@@ -706,6 +937,51 @@ function dependenciesOf(body: SemanticDefinitionBody): string[] {
  * requirement cannot be satisfied here - so it is `unresolved` rather than
  * drift, and it does not ask for a review that has already happened.
  */
+/**
+ * What a review was about: the target, and whether the site had it.
+ *
+ * Deliberately narrow. A review of "dimension3 is gone" should survive every
+ * unrelated change to the site, and expire the moment dimension3 comes back or
+ * the mapping is pointed somewhere else.
+ */
+function bindingFingerprint(
+  binding: SourceBindingDescriptor,
+  available: { metrics: readonly string[]; dimensions: readonly string[] },
+): string {
+  return `${binding.kind}:${bindingTarget(binding)}:${driftOf(binding, available)}`;
+}
+
+function bindingTarget(binding: SourceBindingDescriptor): string {
+  switch (binding.kind) {
+    case 'native_metric':
+      return binding.sourceMetric;
+    case 'custom_dimension':
+      return String(binding.index);
+    case 'event':
+      return `${binding.category}/${binding.action ?? '*'}`;
+    case 'goal':
+      return String(binding.goalId);
+    case 'site_search':
+    case 'not_available':
+      return '-';
+  }
+}
+
+/** The semantic versions a stored dashboard snapshot refers to. */
+function snapshotVersionIds(snapshot: Record<string, unknown>): string[] {
+  const widgets = snapshot['widgets'];
+  if (!Array.isArray(widgets)) return [];
+
+  const ids: string[] = [];
+  for (const widget of widgets) {
+    const data = (widget as { data?: { semanticVersionIds?: unknown } }).data;
+    if (Array.isArray(data?.semanticVersionIds)) {
+      for (const id of data.semanticVersionIds) if (typeof id === 'string') ids.push(id);
+    }
+  }
+  return ids;
+}
+
 function driftOf(
   binding: SourceBindingDescriptor,
   available: { metrics: readonly string[]; dimensions: readonly string[] },

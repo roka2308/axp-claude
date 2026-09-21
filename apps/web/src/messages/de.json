@@ -342,7 +342,8 @@
     "custom_range_inverted": "Das Startdatum liegt nach dem Enddatum.",
     "custom_comparison_incomplete": "Für einen benutzerdefinierten Vergleich werden Start und Ende benötigt.",
     "no_comparison_period": "Kein Vergleichszeitraum vorhanden.",
-    "unparsable_value": "Der Wert konnte nicht gelesen werden."
+    "unparsable_value": "Der Wert konnte nicht gelesen werden.",
+    "binding_kind_not_executable": "Diese Zuordnungsart kann noch nicht aus Matomo abgerufen werden. Die Zuordnung bleibt gespeichert."
   },
   "dashboard": {
     "not_found": "Das Dashboard wurde nicht gefunden.",
@@ -394,7 +395,8 @@
       "empty_bands": "Ein Bestandteil mit Bewertungsstufen braucht mindestens eine Stufe.",
       "duplicate_band": "Zwei Bewertungsstufen beginnen beim selben Wert. Die Stufen müssen sich unterscheiden.",
       "input_missing": "Ein Bestandteil dieses Scores liegt nicht vor. Der Score wird deshalb nicht berechnet – die fehlende Zahl würde sonst stillschweigend auf die übrigen Bestandteile umverteilt."
-    }
+    },
+    "binding_not_found": "Für diese Anforderung gibt es keine Zuordnung, die geprüft werden könnte."
   },
   "tenant": {
     "not_found": "Der Kunde wurde nicht gefunden.",
@@ -779,6 +781,23 @@
       "input_missing": "Für diesen Bestandteil liegt kein Wert vor."
     },
     "drift_detail": {},
-    "preview_no_inputs": "Für eine Vorschau wird mindestens eine referenzierte Kennzahl benötigt."
+    "preview_no_inputs": "Für eine Vorschau wird mindestens eine referenzierte Kennzahl benötigt.",
+    "columnUsage": "Verwendung",
+    "usageUnknown": "Nicht ermittelbar",
+    "usageNone": "In keinem Dashboard",
+    "usageSummary": "{published, plural, =0 {Kein veröffentlichtes Dashboard} =1 {1 veröffentlichtes Dashboard} other {# veröffentlichte Dashboards}}, {drafts, plural, =0 {kein Entwurf} =1 {1 Entwurf} other {# Entwürfe}}",
+    "pinnedVersions": "Festgehaltene Versionen",
+    "pinnedVersion": "Version {version} · {count, plural, =1 {1 veröffentlichtes Dashboard hält sie fest} other {# veröffentlichte Dashboards halten sie fest}}",
+    "glossary": "Bedeutung im Klartext",
+    "definitionDescription": "Erklärung",
+    "definitionDescriptionHint": "In eigenen Worten: was diese Zahl bedeutet. Erscheint überall dort, wo jemand fragt, wofür sie steht.",
+    "markReviewed": "Als geprüft markieren",
+    "reviewRecorded": "Die Prüfung wurde vermerkt. Die Definition bleibt unverändert.",
+    "reviewedOn": "Geprüft am {date} von {who}",
+    "reviewStale": "Geprüft am {date} von {who} – seitdem hat sich die Quelle verändert",
+    "reviewedByUnknown": "unbekannt",
+    "noMapping": "Keine Quelle zugeordnet",
+    "sourceFieldAbsent": "Auf dieser Website nicht vorhanden",
+    "requirementNamed": "Benötigt: {requirement}"
   }
 }

@@ -9,7 +9,7 @@ import {
   varchar,
 } from 'drizzle-orm/mysql-core';
 import { SEMANTIC_LIFECYCLE_STATES, SEMANTIC_TYPES } from '@axp/contracts';
-import { createdAt, idColumn, updatedAt } from './_shared';
+import { createdAt, idColumn, updatedAt, utcTimestamp } from './_shared';
 import { users } from './identity';
 import { projects, tenants } from './tenancy';
 import { matomoSites } from './matomo';
@@ -110,6 +110,24 @@ export const sourceBindings = mysqlTable(
     createdByUserId: char('created_by_user_id', { length: 36 }).references(() => users.id, {
       onDelete: 'set null',
     }),
+    /**
+     * When somebody last looked at this mapping after drift was reported.
+     *
+     * Kept here rather than on a semantic version: acknowledging a technical
+     * fact must not create a business version (Gate F3).
+     */
+    reviewedAt: utcTimestamp(),
+    reviewedByUserId: char('reviewed_by_user_id', { length: 36 }).references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    /**
+     * What the site looked like at the moment of the review.
+     *
+     * A review is an answer to a specific situation. When the situation
+     * changes the answer goes stale, and the warning returns rather than
+     * staying silently acknowledged.
+     */
+    reviewedFingerprint: varchar('reviewed_fingerprint', { length: 256 }),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },

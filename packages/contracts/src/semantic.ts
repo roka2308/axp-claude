@@ -184,6 +184,14 @@ export interface SemanticDefinitionRef {
   readonly portableId: string;
   readonly type: SemanticType;
   readonly name: string;
+  /**
+   * The glossary entry: what this number means, in the business's own words.
+   *
+   * Separate from the version body on purpose. "Engagement" is explained the
+   * same way whether it is currently computed one way or another, and a
+   * rewording is not a new business version (Master Spec §13).
+   */
+  readonly description: string | null;
   readonly currentVersionId: string | null;
 }
 
@@ -237,6 +245,53 @@ export interface BindingHealth {
   readonly detailKey?: string;
   /** What the site currently offers, for the person deciding what to do. */
   readonly availableSample?: readonly string[];
+  /** Present once somebody has looked at this binding. */
+  readonly review?: BindingReview;
+}
+
+/**
+ * The review state of a binding: who last looked, and whether that still holds.
+ *
+ * Detection says a mapping no longer resolves; it cannot say what to do about
+ * it. Someone deciding "the dimension really is gone and that is expected" is
+ * an answer, and the product has to remember it - otherwise the same warning
+ * is raised forever and stops being read.
+ *
+ * Recording a review touches no semantic version. Acknowledging a technical
+ * fact is not a change to what a number means (Gate F3).
+ */
+export interface BindingReview {
+  readonly reviewedAt: string;
+  readonly reviewedBy: string | null;
+  /**
+   * Whether the site still looks the way it did when it was reviewed.
+   *
+   * False makes the review stale: the situation changed after somebody signed
+   * off on it, so it needs looking at again rather than staying acknowledged.
+   */
+  readonly current: boolean;
+}
+
+/**
+ * Where a definition is actually used (Master Spec §13, D6).
+ *
+ * The question behind every change to a definition is "what will this break".
+ * Draft and published are counted separately because they answer different
+ * questions: a draft will pick up a new active version at its next publish, a
+ * published dashboard keeps the version it pinned.
+ */
+export interface SemanticUsage {
+  readonly definitionId: string;
+  /** Dashboards whose working copy references any version of this definition. */
+  readonly draftDashboards: number;
+  /** Dashboards whose published version pins one. */
+  readonly publishedDashboards: number;
+  /** Which versions published dashboards hold, newest version first. */
+  readonly pinnedVersions: readonly {
+    readonly versionId: string;
+    readonly version: number;
+    readonly dashboards: number;
+  }[];
 }
 
 /**

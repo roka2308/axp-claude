@@ -47,6 +47,7 @@ export const AUDIT_ACTIONS = [
   'semantic.version_activated',
   'semantic.version_deprecated',
   'source_binding.changed',
+  'source_binding.reviewed',
   // Dashboards (Phase 1)
   'dashboard.created',
   'dashboard.published',

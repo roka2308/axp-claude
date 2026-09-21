@@ -13,11 +13,11 @@ Read before changing anything substantial:
 4. `../analytics_experience_version_d_v1.0/acceptance/acceptance_checklist.md`
 5. `docs/adr/` — decisions already taken here
 
-Current milestone: **Phase 3 — Semantic Core**. Phases 0–2 are complete and
-their gates are demonstrated (`npm run gate:f0|f1|f2`, see `docs/gates/`).
-Phase 2 left widget _data_ configuration deliberately thin: choosing a metric,
-a dimension and filters per widget belongs with the semantic builders. Gate
-criteria are in the development plan.
+Current milestone: **Phase 4 — Viewer, Detail and State Model**. Phases 0–3 are
+complete and their gates are demonstrated (`npm run gate:f0|f1|f2|f3`, see
+`docs/gates/`). Phase 3 left the widget-level data configuration to here:
+the catalog can define a metric, and the Inspector has yet to let an editor
+pick one per widget. Gate criteria are in the development plan.
 
 ## Non-negotiable invariants
 

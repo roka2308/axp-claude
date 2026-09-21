@@ -7,10 +7,12 @@ import {
   type ComparisonMode,
   type FilterSpec,
   type AnalyticsQueryKind,
-  type SemanticDefinitionBody,
   type SemanticVersionRef,
+  type SourceBindingDescriptor,
   type TimeGranularity,
   type TimeRangePreset,
+  type ValueEnvelope,
+  valueEnvelope,
 } from '@axp/contracts';
 import { type Database, matomoSites } from '@axp/db';
 import type { Logger } from '@axp/observability';
@@ -194,11 +196,52 @@ export class AnalyticsQueryEngine {
      */
     const { leaves, derivations, names } = await this.expand(request.semanticVersionIds);
 
-    const sourceMetrics: ResolvedSourceMetric[] = leaves.map((version) => ({
-      semanticVersionId: version.id,
-      sourceMetric: sourceMetricFor(version.body),
-      decimals: 'decimals' in version.body ? version.body.decimals : 0,
-    }));
+    /*
+     * A custom metric is a business name for something this installation has
+     * to point at itself. Resolving it means reading the project's source
+     * mapping - and when there is none, saying so rather than failing the
+     * whole query: one unmapped input should not take a dashboard down with
+     * it (Master Spec §13).
+     */
+    const bindings = new Map(
+      (await this.deps.semantics.listSourceBindings(request.projectId)).map((binding) => [
+        binding.requirementKey,
+        binding.binding,
+      ]),
+    );
+
+    const sourceMetrics: ResolvedSourceMetric[] = [];
+    const placeholders = new Map<string, ValueEnvelope>();
+
+    for (const version of leaves) {
+      const decimals = 'decimals' in version.body ? version.body.decimals : 0;
+
+      if (version.body.kind === 'native') {
+        sourceMetrics.push({
+          semanticVersionId: version.id,
+          sourceMetric: version.body.sourceMetric,
+          decimals,
+        });
+        continue;
+      }
+
+      if (version.body.kind !== 'custom') {
+        throw notExecutable(version.body.kind);
+      }
+
+      const requirement = version.body.requirementKey;
+      const resolved = resolveRequirement(bindings.get(requirement), requirement);
+
+      if (typeof resolved === 'string') {
+        sourceMetrics.push({
+          semanticVersionId: version.id,
+          sourceMetric: resolved,
+          decimals,
+        });
+      } else {
+        placeholders.set(version.id, resolved);
+      }
+    }
 
     const query: ResolvedQuery = {
       kind: request.kind,
@@ -211,6 +254,7 @@ export class AnalyticsQueryEngine {
       semanticVersionIds: request.semanticVersionIds,
       sourceMetrics,
       derivedVersionIds: derivations.map((derivation) => derivation.semanticVersionId),
+      ...(placeholders.size > 0 ? { unresolvedDigest: digestOf(placeholders) } : {}),
       dimensions: request.dimensions ?? [],
       timeRange,
       granularity: request.granularity ?? granularityFor(timeRange),
@@ -225,7 +269,12 @@ export class AnalyticsQueryEngine {
 
     return {
       query,
-      derivation: { derivations, names, requested: request.semanticVersionIds },
+      derivation: {
+        derivations,
+        names,
+        requested: request.semanticVersionIds,
+        placeholders,
+      },
     };
   }
 
@@ -317,21 +366,68 @@ export class AnalyticsQueryEngine {
   }
 }
 
-/**
- * The normalised source metric a semantic definition reads from.
- *
- * Formulas and scores are computed above the connector and arrive in Phase 3;
- * reaching one here means a dashboard pinned something this milestone cannot
- * evaluate, which is a configuration error rather than a missing value.
- */
-function sourceMetricFor(body: SemanticDefinitionBody): string {
-  if (body.kind === 'native') return body.sourceMetric;
+/** A stable summary of which leaves were absent, and why. */
+function digestOf(placeholders: ReadonlyMap<string, ValueEnvelope>): string {
+  return [...placeholders]
+    .map(([id, value]) => `${id}:${value.state}:${'cause' in value ? value.cause.kind : ''}`)
+    .sort()
+    .join('|');
+}
 
-  throw new AppError('invalid_configuration', {
+/**
+ * What a custom metric's requirement resolves to on this site.
+ *
+ * Returns a source metric when the mapping points at something the connector
+ * can ask for, and an absence otherwise. Deliberately three different
+ * absences, because they call for three different actions: map it, accept
+ * that this site does not have it, or wait for the connector to learn the
+ * shape (Master Spec §13, D10).
+ */
+function resolveRequirement(
+  binding: SourceBindingDescriptor | undefined,
+  requirement: string,
+): string | ValueEnvelope {
+  if (!binding) {
+    // Nobody has said where this comes from. That is a setup question with a
+    // named subject, not a blank space.
+    return valueEnvelope.missing({ kind: 'no_mapping', requirement });
+  }
+
+  switch (binding.kind) {
+    case 'native_metric':
+      return binding.sourceMetric;
+
+    case 'not_available':
+      // Somebody looked and decided this site does not have it. A decision,
+      // not a gap.
+      return valueEnvelope.missing({ kind: 'source_field_absent', requirement });
+
+    default:
+      /*
+       * The mapping is recorded and legitimate; fetching it needs a Matomo
+       * call shape the connector does not have yet (DEVIATIONS.md, DEV-004).
+       * Reported as what it is rather than as a broken configuration.
+       */
+      return valueEnvelope.missing({
+        kind: 'other',
+        messageKey: 'analytics.binding_kind_not_executable',
+      });
+  }
+}
+
+/**
+ * A definition kind that cannot be executed as a leaf.
+ *
+ * Formulas and scores are derived above the connector, so reaching this means
+ * something pinned a body the engine does not know - a configuration error
+ * rather than a missing value.
+ */
+function notExecutable(kind: string): AppError {
+  return new AppError('invalid_configuration', {
     code: 'semantic_type_not_executable',
     messageKey: 'semantic.type_not_executable',
-    messageParams: { kind: body.kind },
-    internalMessage: `Semantic definitions of kind "${body.kind}" are evaluated from Phase 3 onwards.`,
+    messageParams: { kind },
+    internalMessage: `A semantic version of kind "${kind}" reached the engine as a leaf.`,
   });
 }
 

@@ -157,6 +157,30 @@ export async function setBindingAction(
   }
 }
 
+/**
+ * Records that somebody looked at a drifting mapping and accepted it.
+ *
+ * Separate from `setBindingAction` on purpose. Repointing a mapping and
+ * accepting that there is nothing to point at are different answers to the
+ * same warning, and neither one creates a semantic version (Gate F3).
+ */
+export async function reviewBindingAction(
+  projectId: string,
+  requirementKey: string,
+): Promise<CatalogOutcome> {
+  try {
+    await apiRequest(
+      `/projects/${encodeURIComponent(projectId)}/source-bindings/${encodeURIComponent(requirementKey)}/review`,
+      { method: 'POST', body: {}, authenticated: true },
+    );
+
+    revalidatePath(`/projects/${projectId}/semantics`);
+    return { status: 'saved' };
+  } catch (error) {
+    return failure(error);
+  }
+}
+
 async function failure(error: unknown): Promise<CatalogOutcome> {
   const resolved = await resolveError(error);
   return {

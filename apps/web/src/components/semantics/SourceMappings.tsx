@@ -4,7 +4,10 @@ import { useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import type { BindingHealth, SourceBindingDescriptor, SourceBindingRef } from '@axp/contracts';
 import { Button, Callout, Card, SelectField, TextField } from '@axp/ui';
-import { setBindingAction } from '@/app/projects/[projectId]/semantics/actions';
+import {
+  reviewBindingAction,
+  setBindingAction,
+} from '@/app/projects/[projectId]/semantics/actions';
 import styles from './SourceMappings.module.css';
 
 export interface SourceMappingsProps {
@@ -48,6 +51,14 @@ export function SourceMappings({
 
   const healthOf = new Map(health.map((entry) => [entry.requirementKey, entry]));
 
+  function review(requirementKey: string) {
+    setMessage(null);
+    startTransition(async () => {
+      const result = await reviewBindingAction(projectId, requirementKey);
+      setMessage(result.status === 'saved' ? t('reviewRecorded') : (result.message ?? null));
+    });
+  }
+
   function save() {
     const binding = describeBinding(kind, target);
     if (!requirementKey || !binding) return;
@@ -74,7 +85,8 @@ export function SourceMappings({
         ) : (
           <ul className={styles.list}>
             {bindings.map((binding) => {
-              const state = healthOf.get(binding.requirementKey)?.state ?? 'ok';
+              const health = healthOf.get(binding.requirementKey);
+              const state = health?.state ?? 'ok';
               return (
                 <li key={binding.id} className={styles.row} data-state={state}>
                   <span className={styles.requirement}>{binding.requirementKey}</span>
@@ -85,6 +97,26 @@ export function SourceMappings({
                     (D10).
                   */}
                   <span className={styles.state}>{t(`drift.${state}`)}</span>
+
+                  {/*
+                    Who last looked, and whether that still applies. A review
+                    that the site has since outgrown is stale rather than
+                    reassuring, and says so.
+                  */}
+                  {health?.review ? (
+                    <span className={styles.review}>
+                      {t(health.review.current ? 'reviewedOn' : 'reviewStale', {
+                        date: new Date(health.review.reviewedAt).toLocaleDateString(),
+                        who: health.review.reviewedBy ?? t('reviewedByUnknown'),
+                      })}
+                    </span>
+                  ) : null}
+
+                  {canManage && state === 'review_required' ? (
+                    <Button type="button" onClick={() => review(binding.requirementKey)}>
+                      {t('markReviewed')}
+                    </Button>
+                  ) : null}
                 </li>
               );
             })}

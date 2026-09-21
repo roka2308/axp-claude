@@ -3,6 +3,7 @@ import type {
   BindingHealth,
   SemanticDefinitionBody,
   SemanticDefinitionRef,
+  SemanticUsage,
   SemanticVersionRef,
   SourceBindingRef,
 } from '@axp/contracts';
@@ -58,6 +59,24 @@ export async function getBindingHealth(projectId: string): Promise<BindingHealth
     // The site may be unreachable. A drift check that cannot run is not a
     // broken page: it simply has nothing to report yet.
     return { health: [], available: { metrics: [], dimensions: [] } };
+  }
+}
+
+/**
+ * Where each definition is used, keyed by definition id.
+ *
+ * Tolerates failure the same way the drift check does: a usage summary that
+ * could not be produced is a missing summary, not a broken catalog.
+ */
+export async function describeUsage(projectId: string): Promise<Map<string, SemanticUsage>> {
+  try {
+    const { usage } = await apiRequest<{ usage: SemanticUsage[] }>(
+      `/projects/${encodeURIComponent(projectId)}/semantic-definitions/usage`,
+      { authenticated: true },
+    );
+    return new Map(usage.map((entry) => [entry.definitionId, entry]));
+  } catch {
+    return new Map();
   }
 }
 

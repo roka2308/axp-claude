@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
-import type { SemanticVersionRef } from '@axp/contracts';
+import type { SemanticUsage, SemanticVersionRef } from '@axp/contracts';
 import { Button, Callout } from '@axp/ui';
 import { AppShell } from '@/components/AppShell';
 import { SemanticLibrary } from '@/components/semantics/SemanticLibrary';
@@ -10,6 +10,7 @@ import { getProject } from '@/lib/analytics';
 import { getApiVersion, getCurrentUser } from '@/lib/platform';
 import {
   describeActiveVersions,
+  describeUsage,
   getBindingHealth,
   listBindings,
   listDefinitions,
@@ -54,8 +55,9 @@ export default async function SemanticsPage({ params }: SemanticsPageProps) {
   }
 
   const definitions = await listDefinitions(projectId);
-  const [active, bindings, health] = await Promise.all([
+  const [active, usage, bindings, health] = await Promise.all([
     describeActiveVersions(projectId, definitions),
+    describeUsage(projectId),
     listBindings(projectId),
     getBindingHealth(projectId),
   ]);
@@ -87,6 +89,7 @@ export default async function SemanticsPage({ params }: SemanticsPageProps) {
           projectId={projectId}
           definitions={definitions}
           active={Object.fromEntries(active) as Record<string, SemanticVersionRef>}
+          usage={Object.fromEntries(usage) as Record<string, SemanticUsage>}
           siteId={detail.sites[0]?.id ?? null}
           canManage={canManage}
         />

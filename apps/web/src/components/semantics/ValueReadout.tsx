@@ -40,6 +40,33 @@ export function ValueReadout({ value, large = false }: ValueReadoutProps) {
     );
   }
 
+  /*
+   * The two setup absences. Both name the requirement, because "no value" and
+   * "no value because nobody has said where engaged users come from" call for
+   * completely different next steps (D10).
+   */
+  if (value.state === 'missing' && value.cause.kind === 'no_mapping') {
+    return (
+      <span className={styles.state}>
+        {t('semantics.noMapping')}
+        <span className={styles.detail}>
+          {t('semantics.requirementNamed', { requirement: value.cause.requirement })}
+        </span>
+      </span>
+    );
+  }
+
+  if (value.state === 'missing' && value.cause.kind === 'source_field_absent') {
+    return (
+      <span className={styles.state}>
+        {t('semantics.sourceFieldAbsent')}
+        <span className={styles.detail}>
+          {t('semantics.requirementNamed', { requirement: value.cause.requirement })}
+        </span>
+      </span>
+    );
+  }
+
   if (value.state === 'missing' && 'messageKey' in value.cause) {
     return <span className={styles.state}>{translate(t, value.cause.messageKey)}</span>;
   }

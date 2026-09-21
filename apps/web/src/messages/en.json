@@ -342,7 +342,8 @@
     "custom_range_inverted": "The start date is after the end date.",
     "custom_comparison_incomplete": "A custom comparison needs both a start and an end.",
     "no_comparison_period": "No comparison period available.",
-    "unparsable_value": "The value could not be read."
+    "unparsable_value": "The value could not be read.",
+    "binding_kind_not_executable": "This kind of mapping cannot be fetched from Matomo yet. The mapping is kept."
   },
   "dashboard": {
     "not_found": "The dashboard was not found.",
@@ -394,7 +395,8 @@
       "empty_bands": "A component scored in bands needs at least one band.",
       "duplicate_band": "Two bands start at the same value. Bands have to differ.",
       "input_missing": "One component of this score is not available. The score is therefore not calculated – the missing number would otherwise be redistributed silently across the remaining components."
-    }
+    },
+    "binding_not_found": "There is no mapping for this requirement to review."
   },
   "tenant": {
     "not_found": "The tenant was not found.",
@@ -779,6 +781,23 @@
       "input_missing": "No value is available for this component."
     },
     "drift_detail": {},
-    "preview_no_inputs": "A preview needs at least one referenced metric."
+    "preview_no_inputs": "A preview needs at least one referenced metric.",
+    "columnUsage": "Used by",
+    "usageUnknown": "Cannot be determined",
+    "usageNone": "Not on any dashboard",
+    "usageSummary": "{published, plural, =0 {No published dashboard} =1 {1 published dashboard} other {# published dashboards}}, {drafts, plural, =0 {no draft} =1 {1 draft} other {# drafts}}",
+    "pinnedVersions": "Pinned versions",
+    "pinnedVersion": "Version {version} · {count, plural, =1 {held by 1 published dashboard} other {held by # published dashboards}}",
+    "glossary": "What it means",
+    "definitionDescription": "Explanation",
+    "definitionDescriptionHint": "In your own words: what this number means. Shown wherever somebody asks what it stands for.",
+    "markReviewed": "Mark as reviewed",
+    "reviewRecorded": "The review was recorded. The definition is unchanged.",
+    "reviewedOn": "Reviewed on {date} by {who}",
+    "reviewStale": "Reviewed on {date} by {who} - the source has changed since",
+    "reviewedByUnknown": "unknown",
+    "noMapping": "No source mapped",
+    "sourceFieldAbsent": "Not present on this site",
+    "requirementNamed": "Needs: {requirement}"
   }
 }

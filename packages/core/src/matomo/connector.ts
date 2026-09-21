@@ -81,6 +81,14 @@ export interface ResolvedQuery extends NormalizedAnalyticsQuery {
    * formulas are different questions.
    */
   readonly derivedVersionIds?: readonly string[];
+  /**
+   * The leaves that were resolved to an absence rather than a source metric.
+   *
+   * Carried on the query only so the cache key covers it: correcting a source
+   * mapping has to produce a different answer, and two of the absences differ
+   * in cause rather than in which metrics were fetched.
+   */
+  readonly unresolvedDigest?: string;
   /** Resolved comparison dates, when a comparison was requested. */
   readonly comparisonRange?: { readonly from: string; readonly to: string };
 }

@@ -92,3 +92,9 @@
     gap: var(--space-1);
   }
 }
+
+/* Who last looked at a drifting mapping, and when. */
+.review {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}

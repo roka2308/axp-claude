@@ -117,3 +117,14 @@
   border-bottom: none;
   font-weight: var(--font-weight-medium);
 }
+
+/*
+  Which published dashboards hold which version. A plain list: the interesting
+  part is the sentence, not the ornament.
+*/
+.pinned {
+  margin: 0;
+  padding-left: var(--space-5);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}

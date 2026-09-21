@@ -84,6 +84,9 @@ export function cacheKeyFor(query: ResolvedQuery): CacheKey {
     metrics: query.sourceMetrics.map((metric) => metric.sourceMetric).sort(),
     // Same leaves, different formula, different answer.
     derived: [...(query.derivedVersionIds ?? [])].sort(),
+    // And the same again for an input that resolved to an absence: a mapping
+    // correction must not be served the pre-correction answer.
+    unresolved: query.unresolvedDigest ?? null,
     dimensions: [...query.dimensions].sort(),
     range: [query.timeRange.from, query.timeRange.to],
     granularity: query.granularity ?? null,

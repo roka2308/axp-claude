@@ -104,6 +104,19 @@ test.describe('semantic catalog', () => {
     await expect(panel.getByRole('group', { name: /Bestandteil 2/ })).toBeVisible();
   });
 
+  test('says what a number means and where it is used', async ({ page }) => {
+    await openCatalog(page);
+    await page.getByRole('button', { name: 'Besuche', exact: true }).click();
+
+    // The glossary entry: the meaning in words, not the formula.
+    await expect(page.getByText(/zusammenhängende Folge von Aufrufen/)).toBeVisible();
+
+    // And where it is used, with published and draft named apart - a published
+    // dashboard holds the version it pinned, a draft does not (Gate F3).
+    await expect(page.getByRole('columnheader', { name: 'Verwendung' })).toBeVisible();
+    await expect(page.getByText(/veröffentlichte?s? Dashboard/).first()).toBeVisible();
+  });
+
   test('shows version history only when asked', async ({ page }) => {
     await openCatalog(page);
 

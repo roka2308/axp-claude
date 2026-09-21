@@ -108,3 +108,51 @@ scheduled work, not debt.
 
 Keep. Implement `JobQueue` in Phase 8 as specified. The scheduler stays for
 periodic maintenance that does not need durability.
+
+---
+
+## DEV-004 — Only `native_metric` source bindings are executable
+
+- Status: `track_specific`
+- Milestone: F3
+- Specification reference: Master Spec §13, Development Plan Phase 3
+
+### What differs
+
+A custom metric resolves its requirement through the project's source
+mappings. Of the six binding kinds the product can record, one is executed:
+`native_metric`. A mapping to a custom dimension, an event, a goal or site
+search is stored, shown and versioned exactly as specified — but asking Matomo
+for it is not implemented, so the value comes back as `missing` with the cause
+`analytics.binding_kind_not_executable` rather than as a number.
+
+`not_available` is executed in the sense that matters: it resolves to
+`missing` with `source_field_absent`, which is what it means.
+
+### Why
+
+Each remaining kind is a different Matomo API call with its own parameters and
+its own capability requirement — `CustomDimensions.getCustomDimension`,
+`Events.getCategory`, `Goals.get`, `Actions.getSiteSearchKeywords`. Phase 3's
+gate is about the semantic layer: that a definition is separate from its
+mapping, that a formula is an AST, that a score refuses to reweight around a
+missing input. Building four connector call shapes against a mock adapter, with
+no real Matomo to verify them, would produce four guesses rather than four
+features.
+
+### Risks / impact
+
+A tenant can record a mapping that does not yet produce a value. The product
+says so, in words, naming the requirement — it does not render zero and does
+not fail the surrounding query. Nothing about the stored mapping has to change
+when the calls land; this is a gap in the connector, not in the model.
+
+Gate F3 is unaffected: its criteria concern semantic versioning, cycles,
+pinning, mapping separation and score behaviour, none of which depend on which
+binding kinds execute.
+
+### Proposed action
+
+Keep. Implement the remaining call shapes against a real Matomo instance, with
+the capability probe deciding which are offered. The natural milestone is the
+first one with a live Matomo available.

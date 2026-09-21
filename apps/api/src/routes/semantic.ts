@@ -25,15 +25,15 @@ const definitionParams = z.object({ definitionId: z.string().min(1) });
 /** The formula AST, as a schema. Recursive, and closed: no other node exists. */
 const formulaNodeSchema: z.ZodType<FormulaNode> = z.lazy(() =>
   z.union([
-    z.object({ type: z.literal('constant'), value: z.number().finite() }),
-    z.object({ type: z.literal('reference'), semanticVersionId: z.string().min(1) }),
-    z.object({
+    z.strictObject({ type: z.literal('constant'), value: z.number().finite() }),
+    z.strictObject({ type: z.literal('reference'), semanticVersionId: z.string().min(1) }),
+    z.strictObject({
       type: z.literal('binary'),
       op: z.enum(['+', '-', '*', '/']),
       left: formulaNodeSchema,
       right: formulaNodeSchema,
     }),
-    z.object({
+    z.strictObject({
       type: z.literal('function'),
       name: z.enum(['MIN', 'MAX', 'AVG', 'ROUND', 'COALESCE']),
       // A bound the builder cannot exceed either: a formula nobody can read is
@@ -48,18 +48,30 @@ const scopeSchema = z.enum(['visit', 'action', 'event', 'site']);
 const directionSchema = z.enum(['higher_is_better', 'lower_is_better', 'neutral']);
 
 const normalisationSchema = z.union([
-  z.object({ kind: z.literal('linear'), worst: z.number().finite(), best: z.number().finite() }),
-  z.object({
+  z.strictObject({
+    kind: z.literal('linear'),
+    worst: z.number().finite(),
+    best: z.number().finite(),
+  }),
+  z.strictObject({
     kind: z.literal('bands'),
     bands: z
-      .array(z.object({ atLeast: z.number().finite(), points: z.number().min(0).max(100) }))
+      .array(z.strictObject({ atLeast: z.number().finite(), points: z.number().min(0).max(100) }))
       .min(1)
       .max(10),
   }),
 ]);
 
+/*
+ * Every object here is strict.
+ *
+ * Unknown keys are refused rather than stripped. A formula is stored as
+ * structure and executed by walking it, so a stray field would be dropped
+ * either way - but a schema whose job is to be closed should say so, instead
+ * of accepting a payload and silently keeping a different one (Gate F3).
+ */
 const bodySchema = z.union([
-  z.object({
+  z.strictObject({
     kind: z.literal('custom'),
     requirementKey: z.string().min(1).max(128),
     unit: unitSchema,
@@ -67,7 +79,7 @@ const bodySchema = z.union([
     direction: directionSchema,
     decimals: z.number().int().min(0).max(6),
   }),
-  z.object({
+  z.strictObject({
     kind: z.literal('formula'),
     ast: formulaNodeSchema,
     unit: unitSchema,
@@ -75,11 +87,11 @@ const bodySchema = z.union([
     direction: directionSchema,
     decimals: z.number().int().min(0).max(6),
   }),
-  z.object({
+  z.strictObject({
     kind: z.literal('score'),
     components: z
       .array(
-        z.object({
+        z.strictObject({
           semanticVersionId: z.string().min(1),
           weight: z.number().positive().max(1000),
           normalisation: normalisationSchema,
@@ -90,7 +102,7 @@ const bodySchema = z.union([
       .max(12),
     evaluation: z
       .array(
-        z.object({
+        z.strictObject({
           key: z.string().min(1).max(64),
           atLeast: z.number().min(0).max(100),
           band: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4), z.literal(5)]),
@@ -198,7 +210,10 @@ export function registerSemanticRoutes(app: FastifyInstance, container: Containe
       });
 
       void reply.status(201);
-      return version;
+      // Wrapped, like every other read on this resource. A route that
+      // sometimes returns a bare object and sometimes a named one is a trap
+      // for the next caller.
+      return { version };
     },
   );
 
@@ -370,6 +385,57 @@ export function registerSemanticRoutes(app: FastifyInstance, container: Containe
       const health = await container.semantics.checkBindingDrift(scope.projectId, available);
 
       return { health, available };
+    },
+  );
+
+  /**
+   * Records that somebody looked at a drifting mapping and accepted it.
+   *
+   * A write to the mapping's review state only. No semantic version is
+   * created, because acknowledging a technical fact is not a change to what a
+   * number means (Gate F3).
+   */
+  app.post(
+    '/projects/:projectId/source-bindings/:requirementKey/review',
+    { onRequest: [app.authenticate] },
+    async (request) => {
+      const auth = requireAuth(request);
+      const { projectId, requirementKey } = z
+        .object({ projectId: z.string().uuid(), requirementKey: z.string().min(1).max(128) })
+        .parse(request.params);
+      const { siteId } = z.object({ siteId: z.string().optional() }).parse(request.body ?? {});
+
+      const scope = await requireProjectScope(container, auth, projectId, 'semantic.manage');
+
+      const sites = await container.matomo.listProjectSites(scope.projectId);
+      const target = siteId ? sites.find((site) => site.id === siteId) : sites[0];
+      const available = target
+        ? await container.matomo.describeSiteMetadata(scope.tenantId, target.id)
+        : { metrics: [], dimensions: [] };
+
+      const health = await container.semantics.reviewSourceBinding({
+        tenantId: scope.tenantId,
+        projectId: scope.projectId,
+        requirementKey,
+        available,
+        actorUserId: auth.userId,
+      });
+
+      return { health };
+    },
+  );
+
+  /** Where each definition is used, which is the question before every change. */
+  app.get(
+    '/projects/:projectId/semantic-definitions/usage',
+    { onRequest: [app.authenticate] },
+    async (request) => {
+      const auth = requireAuth(request);
+      const { projectId } = projectParams.parse(request.params);
+      const scope = await requireProjectScope(container, auth, projectId, 'semantic.read');
+
+      const usage = await container.semantics.describeUsage(scope.projectId);
+      return { usage };
     },
   );
 }

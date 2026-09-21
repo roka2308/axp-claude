@@ -8,6 +8,7 @@ import {
   type ScoreDefinition,
   type SemanticVersionRef,
 } from '@axp/contracts';
+import { seedReferenceDashboard } from '@axp/fixtures';
 import {
   closeDatabase,
   createTestContext,
@@ -32,6 +33,7 @@ describe('semantic catalog', () => {
   let actorUserId: string;
 
   let visitsVersionId: string;
+  let visitsDefinitionId: string;
   let pageviewsVersionId: string;
 
   let app: FastifyInstance;
@@ -125,7 +127,11 @@ describe('semantic catalog', () => {
     viewerToken = await signIn('betrachter@example.invalid');
 
     await ctx.container.semantics.ensureCoreNativeMetrics();
+    const visits = await ctx.container.semantics.getActiveVersionByPortableId(
+      CORE_NATIVE_METRICS.visits,
+    );
     visitsVersionId = (await activeVersionOf(CORE_NATIVE_METRICS.visits)).id;
+    visitsDefinitionId = visits!.definition.id;
     pageviewsVersionId = (await activeVersionOf(CORE_NATIVE_METRICS.pageviews)).id;
   });
 
@@ -587,6 +593,118 @@ describe('semantic catalog', () => {
       expect(drifted[0]!.availableSample).toEqual(['dimension1', 'dimension2']);
     });
 
+    it('remembers that somebody reviewed the drift, without touching a version', async () => {
+      const { definition } = await ctx.container.semantics.createDefinition({
+        tenantId,
+        projectId,
+        portableId: 'demo.reviewed',
+        type: 'custom_metric',
+        name: 'Engagement',
+        body: {
+          kind: 'custom',
+          requirementKey: 'pulse.engaged_users',
+          unit: 'count',
+          scope: 'visit',
+          direction: 'higher_is_better',
+          decimals: 0,
+        },
+        actorUserId,
+      });
+      const before = await ctx.container.semantics.listVersions(tenantId, definition.id);
+
+      await ctx.container.semantics.setSourceBinding({
+        tenantId,
+        projectId,
+        siteId: null,
+        requirementKey: 'pulse.engaged_users',
+        binding: { kind: 'custom_dimension', index: 3 },
+        actorUserId,
+      });
+
+      const gone = { metrics: ['visits'], dimensions: ['dimension1'] };
+      expect((await ctx.container.semantics.checkBindingDrift(projectId, gone))[0]).toMatchObject({
+        state: 'review_required',
+      });
+
+      await ctx.container.semantics.reviewSourceBinding({
+        tenantId,
+        projectId,
+        requirementKey: 'pulse.engaged_users',
+        available: gone,
+        actorUserId,
+      });
+
+      // Reviewed: somebody looked at exactly this situation and accepted it.
+      // The mapping is not repaired - `unresolved` still says the number
+      // cannot be produced here.
+      const reviewed = await ctx.container.semantics.checkBindingDrift(projectId, gone);
+      expect(reviewed[0]).toMatchObject({ state: 'unresolved' });
+      expect(reviewed[0]!.review).toMatchObject({ current: true, reviewedBy: 'Sina Semantik' });
+
+      // And the business definition is untouched (Gate F3).
+      expect(await ctx.container.semantics.listVersions(tenantId, definition.id)).toEqual(before);
+    });
+
+    it('lets a review go stale when the site changes underneath it', async () => {
+      await ctx.container.semantics.setSourceBinding({
+        tenantId,
+        projectId,
+        siteId: null,
+        requirementKey: 'pulse.engaged_users',
+        binding: { kind: 'custom_dimension', index: 3 },
+        actorUserId,
+      });
+
+      await ctx.container.semantics.reviewSourceBinding({
+        tenantId,
+        projectId,
+        requirementKey: 'pulse.engaged_users',
+        available: { metrics: [], dimensions: ['dimension1'] },
+        actorUserId,
+      });
+
+      // dimension3 came back. The review was an answer to its absence, so it
+      // no longer applies and the warning returns rather than staying signed
+      // off.
+      const health = await ctx.container.semantics.checkBindingDrift(projectId, {
+        metrics: [],
+        dimensions: ['dimension1', 'dimension3'],
+      });
+      expect(health[0]).toMatchObject({ state: 'ok' });
+      expect(health[0]!.review).toMatchObject({ current: false });
+    });
+
+    it('drops the review when the mapping is pointed somewhere else', async () => {
+      const bind = (index: number) =>
+        ctx.container.semantics.setSourceBinding({
+          tenantId,
+          projectId,
+          siteId: null,
+          requirementKey: 'pulse.engaged_users',
+          binding: { kind: 'custom_dimension', index },
+          actorUserId,
+        });
+
+      await bind(3);
+      await ctx.container.semantics.reviewSourceBinding({
+        tenantId,
+        projectId,
+        requirementKey: 'pulse.engaged_users',
+        available: { metrics: [], dimensions: [] },
+        actorUserId,
+      });
+
+      // Repointing answers the question the review was about, so carrying the
+      // old sign-off forward would be a lie about what was looked at.
+      await bind(4);
+      const health = await ctx.container.semantics.checkBindingDrift(projectId, {
+        metrics: [],
+        dimensions: [],
+      });
+      expect(health[0]!.review).toBeUndefined();
+      expect(health[0]).toMatchObject({ state: 'review_required' });
+    });
+
     it('treats a recorded "not available" as a decision, not as drift', async () => {
       await ctx.container.semantics.setSourceBinding({
         tenantId,
@@ -603,6 +721,242 @@ describe('semantic catalog', () => {
       });
       // `unresolved`, not `review_required`: the review already happened.
       expect(health[0]).toMatchObject({ state: 'unresolved' });
+    });
+  });
+
+  // --- Gate F3: a custom metric needs a mapping to produce a number --------
+
+  describe('custom metrics resolve through their source mapping', () => {
+    let siteId: string;
+
+    beforeEach(async () => {
+      siteId = (await seedReferenceDashboard(ctx.container, { tenantId, projectId, actorUserId }))
+        .siteId;
+    });
+
+    /** A custom metric whose requirement is whatever the caller says. */
+    async function customMetric(portableId: string, requirementKey: string) {
+      const created = await ctx.container.semantics.createDefinition({
+        tenantId,
+        projectId,
+        portableId,
+        type: 'custom_metric',
+        name: portableId,
+        body: {
+          kind: 'custom',
+          requirementKey,
+          unit: 'count',
+          scope: 'visit',
+          direction: 'higher_is_better',
+          decimals: 0,
+        },
+        actorUserId,
+      });
+      await activate(created.definition.id, created.version.id);
+      return created.version.id;
+    }
+
+    function read(versionId: string) {
+      return ctx.container.analytics.execute({
+        kind: 'scalar',
+        tenantId,
+        projectId,
+        siteId,
+        semanticVersionIds: [versionId],
+        timeRangePreset: 'last_30_days',
+        comparisonMode: 'none',
+        permissionContextId: 'test',
+      });
+    }
+
+    it('reports an unmapped requirement as missing, naming what it needs', async () => {
+      const versionId = await customMetric('demo.unmapped', 'pulse.engaged_users');
+
+      // Not an error, and certainly not zero: one unmapped input must not take
+      // the surrounding query down with it (Master Spec §13).
+      const result = await read(versionId);
+      expect(result.kind).toBe('scalar');
+      const value = result.kind === 'scalar' ? result.metrics[0]!.value : null;
+      expect(value).toEqual({
+        state: 'missing',
+        cause: { kind: 'no_mapping', requirement: 'pulse.engaged_users' },
+      });
+    });
+
+    it('produces a number once the requirement is mapped to a native metric', async () => {
+      const versionId = await customMetric('demo.mapped', 'pulse.sessions');
+
+      await ctx.container.semantics.setSourceBinding({
+        tenantId,
+        projectId,
+        siteId: null,
+        requirementKey: 'pulse.sessions',
+        binding: { kind: 'native_metric', sourceMetric: 'visits' },
+        actorUserId,
+      });
+
+      const result = await read(versionId);
+      const value = result.kind === 'scalar' ? result.metrics[0]!.value : null;
+      expect(value?.state === 'ready' || value?.state === 'zero').toBe(true);
+    });
+
+    it('reports a recorded "not available" as absent from this site', async () => {
+      const versionId = await customMetric('demo.absent', 'pulse.downloads');
+
+      await ctx.container.semantics.setSourceBinding({
+        tenantId,
+        projectId,
+        siteId: null,
+        requirementKey: 'pulse.downloads',
+        binding: { kind: 'not_available' },
+        actorUserId,
+      });
+
+      const result = await read(versionId);
+      const value = result.kind === 'scalar' ? result.metrics[0]!.value : null;
+      // A decision somebody made, not a gap nobody noticed.
+      expect(value).toEqual({
+        state: 'missing',
+        cause: { kind: 'source_field_absent', requirement: 'pulse.downloads' },
+      });
+    });
+
+    it('says so when a mapping is recorded but not yet fetchable', async () => {
+      const versionId = await customMetric('demo.dimension', 'pulse.creators');
+
+      await ctx.container.semantics.setSourceBinding({
+        tenantId,
+        projectId,
+        siteId: null,
+        requirementKey: 'pulse.creators',
+        binding: { kind: 'custom_dimension', index: 3 },
+        actorUserId,
+      });
+
+      const result = await read(versionId);
+      const value = result.kind === 'scalar' ? result.metrics[0]!.value : null;
+      // DEVIATIONS.md DEV-004: the mapping is legitimate and stored; the
+      // connector call shape is not built yet, and the product says which.
+      expect(value).toMatchObject({
+        state: 'missing',
+        cause: { kind: 'other', messageKey: 'analytics.binding_kind_not_executable' },
+      });
+    });
+
+    it('does not hide a missing component by reweighting the score', async () => {
+      const missing = await customMetric('demo.score-missing', 'pulse.nothing_here');
+
+      const score: ScoreDefinition = {
+        kind: 'score',
+        unit: 'score',
+        scope: 'visit',
+        direction: 'higher_is_better',
+        decimals: 1,
+        components: [
+          {
+            semanticVersionId: visitsVersionId,
+            weight: 50,
+            label: 'Besuche',
+            normalisation: { kind: 'linear', worst: 0, best: 1000 },
+          },
+          {
+            semanticVersionId: missing,
+            weight: 50,
+            label: 'Nicht zugeordnet',
+            normalisation: { kind: 'linear', worst: 0, best: 100 },
+          },
+        ],
+        evaluation: [{ key: 'good', atLeast: 60, band: 4 }],
+      };
+
+      const created = await ctx.container.semantics.createDefinition({
+        tenantId,
+        projectId,
+        portableId: 'demo.half-score',
+        type: 'score',
+        name: 'Halber Score',
+        body: score,
+        actorUserId,
+      });
+      await activate(created.definition.id, created.version.id);
+
+      const result = await read(created.version.id);
+      const value = result.kind === 'scalar' ? result.metrics[0]!.value : null;
+
+      // Half the score was available. Renormalising to 100 % would have
+      // produced a plausible number, which is exactly the failure mode the
+      // rule exists to prevent (Gate F3).
+      expect(value).toMatchObject({
+        state: 'missing',
+        cause: { kind: 'not_calculable' },
+      });
+      expect(
+        value?.state === 'missing' && value.cause.kind === 'not_calculable'
+          ? value.cause.missingInputs
+          : [],
+      ).toContain('Nicht zugeordnet');
+    });
+  });
+
+  // --- Gate F3: usage ------------------------------------------------------
+
+  describe('where a definition is used', () => {
+    it('counts a published dashboard and names the version it pinned', async () => {
+      const seeded = await seedReferenceDashboard(ctx.container, {
+        tenantId,
+        projectId,
+        actorUserId,
+      });
+      expect(seeded.dashboardId).toBeTruthy();
+
+      const usage = await ctx.container.semantics.describeUsage(projectId);
+      const visits = usage.find((entry) => entry.definitionId === visitsDefinitionId);
+
+      expect(visits).toMatchObject({ publishedDashboards: 1 });
+      expect(visits!.pinnedVersions).toEqual([
+        { versionId: visitsVersionId, version: 1, dashboards: 1 },
+      ]);
+    });
+
+    it('keeps the published count on the old version when a newer one is activated', async () => {
+      await seedReferenceDashboard(ctx.container, { tenantId, projectId, actorUserId });
+
+      // The business changed its mind about what a visit means. The published
+      // dashboard keeps the version it pinned until it is published again,
+      // and the usage summary has to say so rather than quietly following the
+      // new active version (Gate F3).
+      const second = await ctx.container.semantics.addVersion({
+        tenantId,
+        definitionId: visitsDefinitionId,
+        body: {
+          kind: 'native',
+          sourceMetric: 'visits',
+          unit: 'count',
+          scope: 'visit',
+          direction: 'higher_is_better',
+          decimals: 1,
+        },
+        actorUserId,
+      });
+      await activate(visitsDefinitionId, second.id);
+
+      const usage = await ctx.container.semantics.describeUsage(projectId);
+      const visits = usage.find((entry) => entry.definitionId === visitsDefinitionId);
+
+      expect(visits!.pinnedVersions).toEqual([
+        { versionId: visitsVersionId, version: 1, dashboards: 1 },
+      ]);
+    });
+
+    it('reports a definition nothing uses as unused, not as unknown', async () => {
+      const { definition } = await createFormula();
+
+      const usage = await ctx.container.semantics.describeUsage(projectId);
+      expect(usage.find((entry) => entry.definitionId === definition.id)).toMatchObject({
+        draftDashboards: 0,
+        publishedDashboards: 0,
+        pinnedVersions: [],
+      });
     });
   });
 
@@ -726,6 +1080,29 @@ describe('semantic catalog', () => {
       expect(response.json().error.category).toBe('validation_failed');
     });
 
+    it('refuses a node carrying a field the schema does not know', async () => {
+      // A valid reference with an extra key. Zod would strip it by default,
+      // which stores something other than what was sent; a closed schema says
+      // so instead (Gate F3).
+      const response = await app.inject({
+        method: 'POST',
+        url: `/projects/${projectId}/semantic-definitions`,
+        headers: as(manager),
+        payload: {
+          portableId: 'demo.api-extra-field',
+          type: 'formula',
+          name: 'Zusatzfeld',
+          body: {
+            ...apiBody(),
+            ast: { type: 'reference', semanticVersionId: visitsVersionId, eval: '1+1' },
+          },
+        },
+      });
+
+      expect(response.statusCode).toBe(422);
+      expect(response.json().error.category).toBe('validation_failed');
+    });
+
     it('lists the version history', async () => {
       const { definition } = (await create(manager, 'demo.api-history')).json();
 
@@ -752,6 +1129,56 @@ describe('semantic catalog', () => {
 
       const after = (await versionsOf(definition.id, manager)).json().versions;
       expect(after).toEqual(before);
+    });
+
+    it('lets a manager record a review, and refuses one from a reader', async () => {
+      await app.inject({
+        method: 'PUT',
+        url: `/projects/${projectId}/source-bindings`,
+        headers: as(manager),
+        payload: {
+          requirementKey: 'pulse.engaged_users',
+          siteId: null,
+          binding: { kind: 'custom_dimension', index: 9 },
+        },
+      });
+
+      const denied = await app.inject({
+        method: 'POST',
+        url: `/projects/${projectId}/source-bindings/pulse.engaged_users/review`,
+        headers: as(reader),
+        payload: {},
+      });
+      expect(denied.statusCode).toBe(403);
+
+      const allowed = await app.inject({
+        method: 'POST',
+        url: `/projects/${projectId}/source-bindings/pulse.engaged_users/review`,
+        headers: as(manager),
+        payload: {},
+      });
+      expect(allowed.statusCode).toBe(200);
+      expect(allowed.json().health).toMatchObject({ requirementKey: 'pulse.engaged_users' });
+    });
+
+    it('reports where a definition is used, published apart from draft', async () => {
+      const usage = await app.inject({
+        method: 'GET',
+        url: `/projects/${projectId}/semantic-definitions/usage`,
+        headers: as(reader),
+      });
+
+      expect(usage.statusCode).toBe(200);
+      const visits = usage
+        .json()
+        .usage.find((entry: { definitionId: string }) => entry.definitionId);
+      // Nothing is on a dashboard in this fixture, and that is a stated answer
+      // rather than an absent one.
+      expect(visits).toMatchObject({
+        draftDashboards: 0,
+        publishedDashboards: 0,
+        pinnedVersions: [],
+      });
     });
 
     it('refuses a mapping change from someone who may only read', async () => {
