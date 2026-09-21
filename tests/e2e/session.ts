@@ -23,12 +23,17 @@ export const DEMO_ACCOUNTS = {
     email: process.env.E2E_TENANT_ADMIN_EMAIL ?? 'tenantadmin.demo@example.invalid',
     state: path.join(AUTH_DIR, 'tenant-admin.json'),
   },
+  semanticManager: {
+    email: process.env.E2E_SEMANTIC_EMAIL ?? 'semantic.demo@example.invalid',
+    state: path.join(AUTH_DIR, 'semantic.json'),
+  },
 } as const;
 
 /** Where `auth.setup.ts` stores the signed-in viewer session. */
 export const VIEWER_STATE = DEMO_ACCOUNTS.viewer.state;
 export const EDITOR_STATE = DEMO_ACCOUNTS.editor.state;
 export const TENANT_ADMIN_STATE = DEMO_ACCOUNTS.tenantAdmin.state;
+export const SEMANTIC_STATE = DEMO_ACCOUNTS.semanticManager.state;
 
 export const VIEWER_EMAIL = DEMO_ACCOUNTS.viewer.email;
 

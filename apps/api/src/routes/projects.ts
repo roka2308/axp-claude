@@ -56,7 +56,6 @@ export function registerProjectRoutes(app: FastifyInstance, container: Container
 
     return { project, setup, sites, capabilities };
   });
-
 }
 
 /**

@@ -85,3 +85,15 @@
 .skip-link:focus-visible {
   inset-block-start: var(--space-4);
 }
+
+/* Available to assistive technology, out of everyone else's way. */
+.sr-only {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

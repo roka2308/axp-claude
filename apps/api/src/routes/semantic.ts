@@ -7,12 +7,7 @@ import {
   type SemanticVersionRef,
   type ValueEnvelope,
 } from '@axp/contracts';
-import {
-  type Container,
-  evaluateFormula,
-  evaluateScore,
-  type TraceEntry,
-} from '@axp/core';
+import { type Container, evaluateFormula, evaluateScore, type TraceEntry } from '@axp/core';
 import { requireAuth } from '../plugins/authentication';
 import { requireProjectScope, requireProjectSite } from '../lib/project-scope';
 
@@ -131,10 +126,7 @@ export function registerSemanticRoutes(app: FastifyInstance, container: Containe
       const { projectId } = projectParams.parse(request.params);
       const scope = await requireProjectScope(container, auth, projectId, 'semantic.read');
 
-      const definitions = await container.semantics.listForProject(
-        scope.tenantId,
-        scope.projectId,
-      );
+      const definitions = await container.semantics.listForProject(scope.tenantId, scope.projectId);
       return { definitions };
     },
   );

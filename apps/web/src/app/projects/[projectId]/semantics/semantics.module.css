@@ -1,0 +1,10 @@
+.back {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.back:hover {
+  color: var(--text-primary);
+  text-decoration: underline;
+}

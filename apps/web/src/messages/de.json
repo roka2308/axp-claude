@@ -190,7 +190,8 @@
     "publish": "Veröffentlichen",
     "dashboardsNotYoursTitle": "Dashboards nicht sichtbar",
     "dashboardsNotYoursBody": "Ihre Rolle umfasst das Lesen von Dashboards in diesem Projekt nicht. Eine Rolle allein gewährt keinen Zugriff auf Analytics-Daten.",
-    "editDashboard": "Bearbeiten"
+    "editDashboard": "Bearbeiten",
+    "openSemantics": "Katalog öffnen"
   },
   "setupReadiness": {
     "ready": "Bereit",
@@ -362,7 +363,38 @@
   },
   "semantic": {
     "version_not_found": "Eine referenzierte Definitionsversion existiert nicht.",
-    "type_not_executable": "Definitionen vom Typ {kind} werden ab Phase 3 ausgewertet."
+    "type_not_executable": "Definitionen vom Typ {kind} werden ab Phase 3 ausgewertet.",
+    "definition_not_found": "Die Definition wurde nicht gefunden.",
+    "drift": {
+      "native_metric": "Diese Kennzahl wird von der Site nicht mehr gemeldet.",
+      "custom_dimension": "Diese Custom Dimension gibt es auf der Site nicht mehr.",
+      "event": "Ereignisse stehen auf dieser Site nicht zur Verfügung.",
+      "goal": "Dieses Ziel gibt es auf der Site nicht mehr.",
+      "site_search": "Die Site-Suche steht nicht zur Verfügung.",
+      "not_available": "Für diese Anforderung wurde festgehalten, dass sie hier nicht erfüllbar ist."
+    },
+    "preview": {
+      "no_inputs": "Für eine Vorschau wird mindestens eine referenzierte Kennzahl benötigt.",
+      "not_supported": "Für diesen Definitionstyp gibt es keine Vorschau."
+    },
+    "formula": {
+      "scope_mismatch": "Die beiden Kennzahlen beziehen sich auf Unterschiedliches – die eine {left, select, visit {je Besuch} action {je Aktion} event {je Ereignis} site {je Site} other {{left}}}, die andere {right, select, visit {je Besuch} action {je Aktion} event {je Ereignis} site {je Site} other {{right}}} – und lassen sich nicht direkt verrechnen. Teilen Sie sie durcheinander, wenn Sie eine Kennzahl „pro“ brauchen, oder wählen Sie zwei Kennzahlen mit demselben Bezug.",
+      "unit_mismatch": "Die beiden Werte haben verschiedene Einheiten – {left, select, count {Anzahl} percent {Prozent} ratio {Verhältnis} seconds {Sekunden} currency {Währung} score {Score} other {{left}}} und {right, select, count {Anzahl} percent {Prozent} ratio {Verhältnis} seconds {Sekunden} currency {Währung} score {Score} other {{right}}} – und lassen sich nicht addieren oder subtrahieren. Rechnen Sie mit derselben Einheit, oder multiplizieren beziehungsweise teilen Sie stattdessen.",
+      "unknown_reference": "Eine verwendete Kennzahl gibt es nicht mehr oder sie ist hier nicht sichtbar. Wählen Sie im Baustein eine andere Kennzahl aus.",
+      "cycle": "Diese Formel verweist im Kreis auf sich selbst. Eine Kennzahl kann nicht auf ihrem eigenen Ergebnis aufbauen – entfernen Sie den Verweis.",
+      "function_needs_arguments": "Die Funktion {name} braucht mindestens einen Wert. Fügen Sie dem Baustein ein Argument hinzu.",
+      "round_needs_constant_digits": "Die Nachkommastellen für ROUND müssen ein fester Wert sein, keine gerechnete Zahl.",
+      "division_by_zero": "Geteilt durch null – dafür gibt es kein Ergebnis. Der Wert wird als nicht berechenbar ausgewiesen, nicht als null."
+    },
+    "score": {
+      "no_components": "Ein Score braucht mindestens einen Bestandteil.",
+      "non_positive_weight": "Jeder Bestandteil braucht eine Gewichtung größer als null.",
+      "no_weight": "Die Gewichtungen ergeben zusammen null. Vergeben Sie mindestens einem Bestandteil ein Gewicht.",
+      "duplicate_component": "Dieselbe Kennzahl ist mehrfach als Bestandteil eingetragen. Entfernen Sie die Dopplung, oder erhöhen Sie stattdessen ihr Gewicht.",
+      "empty_bands": "Ein Bestandteil mit Bewertungsstufen braucht mindestens eine Stufe.",
+      "duplicate_band": "Zwei Bewertungsstufen beginnen beim selben Wert. Die Stufen müssen sich unterscheiden.",
+      "input_missing": "Ein Bestandteil dieses Scores liegt nicht vor. Der Score wird deshalb nicht berechnet – die fehlende Zahl würde sonst stillschweigend auf die übrigen Bestandteile umverteilt."
+    }
   },
   "tenant": {
     "not_found": "Der Kunde wurde nicht gefunden.",
@@ -570,5 +602,183 @@
       "ranking": "Top-Seiten als Balken",
       "share": "Anteile als Ring"
     }
+  },
+  "semantics": {
+    "title": "Semantik",
+    "subtitle": "Was die Zahlen bedeuten, und woher sie kommen.",
+    "notAllowedTitle": "Kein Zugriff auf den Kennzahlen-Katalog",
+    "notAllowedBody": "Der Katalog ist eine Bearbeitungsfläche. Ihre Rolle umfasst ihn nicht — die Definition hinter einer Zahl sehen Sie weiterhin im Dashboard.",
+    "libraryTitle": "Kennzahlen und Definitionen",
+    "libraryBody": "Jede Definition hat unveränderliche Versionen. Veröffentlichte Dashboards halten die Version fest, mit der sie veröffentlicht wurden.",
+    "empty": "Für dieses Projekt sind noch keine Definitionen vorhanden.",
+    "columnName": "Name",
+    "columnType": "Typ",
+    "columnStatus": "Status",
+    "columnMeaning": "Bedeutung",
+    "statusActive": "Aktiv in Version {version}",
+    "statusDraftOnly": "Nur Entwurf",
+    "noActiveVersion": "Noch keine aktive Version",
+    "portableId": "Portable Kennung",
+    "unit": "Einheit",
+    "scope": "Bezug",
+    "showHistory": "Versionsverlauf anzeigen",
+    "versionHistory": "Versionsverlauf",
+    "hideHistory": "Versionsverlauf ausblenden",
+    "versionNumber": "Version {version}",
+    "activate": "Aktivieren",
+    "loading": "Wird geladen …",
+    "newTitle": "Neue Definition",
+    "newBody": "Neue Definitionen beginnen als Entwurf. Erst das Aktivieren macht sie zur aktuellen Bedeutung.",
+    "noMetrics": "Es sind noch keine Kennzahlen vorhanden, auf die sich eine Definition beziehen könnte.",
+    "definitionName": "Name",
+    "definitionType": "Typ",
+    "saveDraft": "Als Entwurf speichern",
+    "saving": "Wird gespeichert …",
+    "savedAsDraft": "Als Entwurf gespeichert. Aktivieren Sie die Version, wenn sie gelten soll.",
+    "saveFailed": "Speichern nicht möglich.",
+    "statusChanged": "Der Status wurde geändert.",
+    "preview": "Vorschau berechnen",
+    "previewResult": "Vorschau",
+    "previewFailed": "Vorschau nicht möglich",
+    "notCalculable": "Nicht berechenbar",
+    "missingInputs": "Fehlende Eingaben: {inputs}",
+    "nodeKind": "Baustein",
+    "metric": "Kennzahl",
+    "value": "Wert",
+    "operator": "Rechenart",
+    "function": "Funktion",
+    "left": "Links",
+    "right": "Rechts",
+    "argument": "Argument {index}",
+    "addArgument": "Argument hinzufügen",
+    "removeArgument": "Argument entfernen",
+    "components": "Bestandteile",
+    "componentNumber": "Bestandteil {index} · {share} %",
+    "weight": "Gewicht",
+    "weightHint": "Entspricht {share} % des Scores.",
+    "normalisation": "Bewertungskurve",
+    "normalisationLinear": "Linear zwischen zwei Werten",
+    "normalisationBands": "Stufen",
+    "worst": "Wert für 0 Punkte",
+    "worstHint": "Darf über dem Bestwert liegen — so wird „kleiner ist besser“ ausgedrückt.",
+    "best": "Wert für 100 Punkte",
+    "bestHint": "Bessere Werte bringen keine zusätzlichen Punkte.",
+    "bandsHint": "Stufen werden in einer späteren Ausbaustufe im Detail bearbeitbar.",
+    "addComponent": "Bestandteil hinzufügen",
+    "removeComponent": "Bestandteil entfernen",
+    "allComponentsRequiredTitle": "Alle Bestandteile sind erforderlich",
+    "allComponentsRequiredBody": "Fehlt ein Wert, ist der Score nicht berechenbar und nennt den fehlenden Bestandteil. Die Gewichte werden nicht stillschweigend umverteilt — sonst sähe „72 von 100“ genauso aus wie „72 von dem, was wir messen konnten“.",
+    "evaluation": "Bewertung",
+    "evaluationHint": "Ab welchem Wert welche Einstufung gilt. Optional: ein Score ohne Einstufung ist eine Zahl ohne Urteil.",
+    "bandKey": "Bezeichnung",
+    "bandAtLeast": "Ab Wert",
+    "addBand": "Stufe hinzufügen",
+    "removeBand": "Entfernen",
+    "scoreOf": "Score aus {count} Bestandteilen",
+    "nativeOf": "Direkt aus Matomo: {metric}",
+    "customOf": "Über Zuordnung: {requirement}",
+    "mappingsTitle": "Quell-Zuordnungen",
+    "mappingsBody": "Womit dieses Matomo die fachlichen Anforderungen erfüllt. Eine Zuordnung zu korrigieren erzeugt keine neue Definitionsversion.",
+    "noMappings": "Für dieses Projekt sind noch keine Zuordnungen hinterlegt.",
+    "newMapping": "Zuordnung hinzufügen oder korrigieren",
+    "requirementKey": "Anforderung",
+    "requirementKeyHint": "Der fachliche Schlüssel, den eine Definition benötigt.",
+    "bindingKind": "Quelle",
+    "saveMapping": "Zuordnung speichern",
+    "mappingSaved": "Die Zuordnung wurde gespeichert.",
+    "availableTitle": "Was diese Site anbietet",
+    "availableBody": "Auszug aus den derzeit verfügbaren Dimensionen.",
+    "type": {
+      "native_metric": "Native Kennzahl",
+      "custom_metric": "Eigene Kennzahl",
+      "formula": "Formel",
+      "score": "Score"
+    },
+    "lifecycle": {
+      "draft": "Entwurf",
+      "active": "Aktiv",
+      "deprecated": "Abgelöst",
+      "archived": "Archiviert"
+    },
+    "kind": {
+      "reference": "Kennzahl",
+      "constant": "Fester Wert",
+      "binary": "Rechnung",
+      "function": "Funktion"
+    },
+    "op": {
+      "+": "plus",
+      "-": "minus",
+      "*": "mal",
+      "/": "geteilt durch"
+    },
+    "fn": {
+      "MIN": "kleinster Wert",
+      "MAX": "größter Wert",
+      "AVG": "Durchschnitt",
+      "ROUND": "runden",
+      "COALESCE": "erster vorhandener Wert"
+    },
+    "unitName": {
+      "count": "Anzahl",
+      "percent": "Prozent",
+      "ratio": "Verhältnis",
+      "seconds": "Sekunden",
+      "currency": "Währung",
+      "score": "Score"
+    },
+    "scopeName": {
+      "visit": "je Besuch",
+      "action": "je Aktion",
+      "event": "je Ereignis",
+      "site": "je Site"
+    },
+    "drift": {
+      "ok": "Zuordnung gültig",
+      "review_required": "Prüfung erforderlich",
+      "unresolved": "Hier nicht verfügbar"
+    },
+    "bindingKindName": {
+      "custom_dimension": "Custom Dimension",
+      "event": "Ereignis",
+      "goal": "Ziel",
+      "site_search": "Site-Suche",
+      "native_metric": "Native Kennzahl",
+      "not_available": "Hier nicht verfügbar"
+    },
+    "bindingTarget": {
+      "custom_dimension": "Index der Dimension",
+      "event": "Ereignis-Kategorie",
+      "goal": "Ziel-ID",
+      "native_metric": "Name der Kennzahl"
+    },
+    "bindingDescription": {
+      "native_metric": "Native Kennzahl {metric}",
+      "event": "Ereignis {category} / {action}",
+      "custom_dimension": "Custom Dimension {index}",
+      "goal": "Ziel {goalId}",
+      "site_search": "Site-Suche",
+      "not_available": "In dieser Instanz nicht verfügbar"
+    },
+    "formula": {
+      "unit_mismatch": "Diese Einheiten lassen sich nicht verrechnen ({left} und {right}).",
+      "scope_mismatch": "Diese Bezüge lassen sich nicht addieren ({left} und {right}).",
+      "cycle": "Die Definition würde sich selbst voraussetzen.",
+      "unknown_reference": "Eine referenzierte Kennzahl existiert nicht.",
+      "round_needs_constant_digits": "Die Nachkommastellen von ROUND müssen ein fester Wert sein.",
+      "function_needs_arguments": "{name} benötigt mindestens ein Argument.",
+      "division_by_zero": "Division durch null — der Wert existiert nicht."
+    },
+    "score": {
+      "no_components": "Ein Score braucht mindestens einen Bestandteil.",
+      "non_positive_weight": "Jedes Gewicht muss größer als null sein.",
+      "no_weight": "Die Gewichte ergeben in Summe null.",
+      "duplicate_component": "Eine Kennzahl kommt mehrfach vor.",
+      "duplicate_band": "Zwei Stufen beginnen beim selben Wert.",
+      "empty_bands": "Eine Stufenkurve braucht mindestens eine Stufe.",
+      "input_missing": "Für diesen Bestandteil liegt kein Wert vor."
+    },
+    "drift_detail": {},
+    "preview_no_inputs": "Für eine Vorschau wird mindestens eine referenzierte Kennzahl benötigt."
   }
 }

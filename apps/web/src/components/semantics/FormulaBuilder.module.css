@@ -1,0 +1,57 @@
+.builder {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.node {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.kind {
+  max-inline-size: 16rem;
+}
+
+.operator {
+  max-inline-size: 12rem;
+}
+
+.children {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/*
+ * A branch is a fieldset so its legend names the slot for a screen reader
+ * too - "left", "argument 2" - rather than the nesting being visual only.
+ */
+.branch {
+  margin: 0;
+  padding: var(--space-3);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* Depth is a tint rather than an indent, so deep trees stay readable at 320px. */
+.node[data-depth='1'] > .children > .branch {
+  background: var(--surface-sunken);
+}
+
+.node[data-depth='2'] > .children > .branch {
+  background: var(--surface-card);
+}
+
+.legend {
+  padding-inline: var(--space-2);
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  color: var(--text-muted);
+}

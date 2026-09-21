@@ -190,7 +190,8 @@
     "publish": "Publish",
     "dashboardsNotYoursTitle": "Dashboards not visible",
     "dashboardsNotYoursBody": "Your role does not include reading dashboards in this project. A role alone never grants access to analytics data.",
-    "editDashboard": "Edit"
+    "editDashboard": "Edit",
+    "openSemantics": "Open the catalog"
   },
   "setupReadiness": {
     "ready": "Ready",
@@ -362,7 +363,38 @@
   },
   "semantic": {
     "version_not_found": "A referenced definition version does not exist.",
-    "type_not_executable": "Definitions of type {kind} are evaluated from Phase 3 onwards."
+    "type_not_executable": "Definitions of type {kind} are evaluated from Phase 3 onwards.",
+    "definition_not_found": "The definition was not found.",
+    "drift": {
+      "native_metric": "The site no longer reports this metric.",
+      "custom_dimension": "This custom dimension no longer exists on the site.",
+      "event": "Events are not available on this site.",
+      "goal": "This goal no longer exists on the site.",
+      "site_search": "Site search is not available.",
+      "not_available": "This requirement was recorded as unsatisfiable here."
+    },
+    "preview": {
+      "no_inputs": "A preview needs at least one referenced metric.",
+      "not_supported": "There is no preview for this kind of definition."
+    },
+    "formula": {
+      "scope_mismatch": "These two metrics count different things – one {left, select, visit {per visit} action {per action} event {per event} site {per site} other {{left}}}, the other {right, select, visit {per visit} action {per action} event {per event} site {per site} other {{right}}} – so they cannot be combined directly. Divide one by the other if you want a “per” metric, or pick two metrics with the same basis.",
+      "unit_mismatch": "These two values are in different units – {left, select, count {a count} percent {a percentage} ratio {a ratio} seconds {seconds} currency {an amount of money} score {a score} other {{left}}} and {right, select, count {a count} percent {a percentage} ratio {a ratio} seconds {seconds} currency {an amount of money} score {a score} other {{right}}} – so they cannot be added or subtracted. Use the same unit on both sides, or multiply or divide instead.",
+      "unknown_reference": "A metric used here no longer exists, or is not visible to you. Pick a different metric in that building block.",
+      "cycle": "This formula refers back to itself. A metric cannot be built on its own result – remove the reference.",
+      "function_needs_arguments": "{name} needs at least one value. Add an argument to that building block.",
+      "round_needs_constant_digits": "The number of decimal places for ROUND has to be a fixed value, not a calculated one.",
+      "division_by_zero": "Divided by zero – there is no result. The value is reported as not calculable, not as zero."
+    },
+    "score": {
+      "no_components": "A score needs at least one component.",
+      "non_positive_weight": "Every component needs a weight greater than zero.",
+      "no_weight": "The weights add up to zero. Give at least one component a weight.",
+      "duplicate_component": "The same metric is listed as a component more than once. Remove the duplicate, or raise its weight instead.",
+      "empty_bands": "A component scored in bands needs at least one band.",
+      "duplicate_band": "Two bands start at the same value. Bands have to differ.",
+      "input_missing": "One component of this score is not available. The score is therefore not calculated – the missing number would otherwise be redistributed silently across the remaining components."
+    }
   },
   "tenant": {
     "not_found": "The tenant was not found.",
@@ -570,5 +602,183 @@
       "ranking": "Top pages as bars",
       "share": "Shares as a ring"
     }
+  },
+  "semantics": {
+    "title": "Semantics",
+    "subtitle": "What the numbers mean, and where they come from.",
+    "notAllowedTitle": "No access to the metric catalog",
+    "notAllowedBody": "The catalog is an authoring surface. Your role does not cover it — you still see the definition behind a number on a dashboard.",
+    "libraryTitle": "Metrics and definitions",
+    "libraryBody": "Every definition has immutable versions. Published dashboards pin the version they were published with.",
+    "empty": "No definitions exist for this project yet.",
+    "columnName": "Name",
+    "columnType": "Type",
+    "columnStatus": "Status",
+    "columnMeaning": "Meaning",
+    "statusActive": "Active in version {version}",
+    "statusDraftOnly": "Draft only",
+    "noActiveVersion": "No active version yet",
+    "portableId": "Portable id",
+    "unit": "Unit",
+    "scope": "Scope",
+    "showHistory": "Show version history",
+    "versionHistory": "Version history",
+    "hideHistory": "Hide version history",
+    "versionNumber": "Version {version}",
+    "activate": "Activate",
+    "loading": "Loading …",
+    "newTitle": "New definition",
+    "newBody": "New definitions start as a draft. Activating one makes it the current meaning.",
+    "noMetrics": "There are no metrics yet for a definition to refer to.",
+    "definitionName": "Name",
+    "definitionType": "Type",
+    "saveDraft": "Save as draft",
+    "saving": "Saving …",
+    "savedAsDraft": "Saved as a draft. Activate the version when it should take effect.",
+    "saveFailed": "Could not save.",
+    "statusChanged": "The status was changed.",
+    "preview": "Calculate preview",
+    "previewResult": "Preview",
+    "previewFailed": "Preview not possible",
+    "notCalculable": "Not calculable",
+    "missingInputs": "Missing inputs: {inputs}",
+    "nodeKind": "Building block",
+    "metric": "Metric",
+    "value": "Value",
+    "operator": "Operation",
+    "function": "Function",
+    "left": "Left",
+    "right": "Right",
+    "argument": "Argument {index}",
+    "addArgument": "Add argument",
+    "removeArgument": "Remove argument",
+    "components": "Components",
+    "componentNumber": "Component {index} · {share} %",
+    "weight": "Weight",
+    "weightHint": "Worth {share} % of the score.",
+    "normalisation": "Scoring curve",
+    "normalisationLinear": "Linear between two values",
+    "normalisationBands": "Steps",
+    "worst": "Value scoring 0",
+    "worstHint": "May be above the best value — that is how “lower is better” is expressed.",
+    "best": "Value scoring 100",
+    "bestHint": "Better values earn no extra points.",
+    "bandsHint": "Steps become editable in detail in a later stage.",
+    "addComponent": "Add component",
+    "removeComponent": "Remove component",
+    "allComponentsRequiredTitle": "Every component is required",
+    "allComponentsRequiredBody": "If one value is missing the score is not calculable and names the missing component. The weights are not quietly redistributed — otherwise “72 out of 100” would look exactly like “72 out of what we could measure”.",
+    "evaluation": "Evaluation",
+    "evaluationHint": "Which rating applies from which value. Optional: a score without one is a number without a verdict.",
+    "bandKey": "Label",
+    "bandAtLeast": "From value",
+    "addBand": "Add band",
+    "removeBand": "Remove",
+    "scoreOf": "Score from {count} components",
+    "nativeOf": "Straight from Matomo: {metric}",
+    "customOf": "Through a mapping: {requirement}",
+    "mappingsTitle": "Source mappings",
+    "mappingsBody": "How this Matomo satisfies the business requirements. Correcting a mapping does not create a new definition version.",
+    "noMappings": "No mappings are recorded for this project yet.",
+    "newMapping": "Add or correct a mapping",
+    "requirementKey": "Requirement",
+    "requirementKeyHint": "The business key a definition needs.",
+    "bindingKind": "Source",
+    "saveMapping": "Save mapping",
+    "mappingSaved": "The mapping was saved.",
+    "availableTitle": "What this site offers",
+    "availableBody": "An excerpt of the dimensions currently available.",
+    "type": {
+      "native_metric": "Native metric",
+      "custom_metric": "Custom metric",
+      "formula": "Formula",
+      "score": "Score"
+    },
+    "lifecycle": {
+      "draft": "Draft",
+      "active": "Active",
+      "deprecated": "Superseded",
+      "archived": "Archived"
+    },
+    "kind": {
+      "reference": "Metric",
+      "constant": "Fixed value",
+      "binary": "Calculation",
+      "function": "Function"
+    },
+    "op": {
+      "+": "plus",
+      "-": "minus",
+      "*": "times",
+      "/": "divided by"
+    },
+    "fn": {
+      "MIN": "smallest value",
+      "MAX": "largest value",
+      "AVG": "average",
+      "ROUND": "round",
+      "COALESCE": "first value present"
+    },
+    "unitName": {
+      "count": "Count",
+      "percent": "Percent",
+      "ratio": "Ratio",
+      "seconds": "Seconds",
+      "currency": "Currency",
+      "score": "Score"
+    },
+    "scopeName": {
+      "visit": "per visit",
+      "action": "per action",
+      "event": "per event",
+      "site": "per site"
+    },
+    "drift": {
+      "ok": "Mapping valid",
+      "review_required": "Needs review",
+      "unresolved": "Not available here"
+    },
+    "bindingKindName": {
+      "custom_dimension": "Custom dimension",
+      "event": "Event",
+      "goal": "Goal",
+      "site_search": "Site search",
+      "native_metric": "Native metric",
+      "not_available": "Not available here"
+    },
+    "bindingTarget": {
+      "custom_dimension": "Dimension index",
+      "event": "Event category",
+      "goal": "Goal id",
+      "native_metric": "Metric name"
+    },
+    "bindingDescription": {
+      "native_metric": "Native metric {metric}",
+      "event": "Event {category} / {action}",
+      "custom_dimension": "Custom dimension {index}",
+      "goal": "Goal {goalId}",
+      "site_search": "Site search",
+      "not_available": "Not available in this installation"
+    },
+    "formula": {
+      "unit_mismatch": "These units cannot be combined ({left} and {right}).",
+      "scope_mismatch": "These scopes cannot be added ({left} and {right}).",
+      "cycle": "The definition would depend on itself.",
+      "unknown_reference": "A referenced metric does not exist.",
+      "round_needs_constant_digits": "The decimal places of ROUND must be a fixed value.",
+      "function_needs_arguments": "{name} needs at least one argument.",
+      "division_by_zero": "Division by zero — the value does not exist."
+    },
+    "score": {
+      "no_components": "A score needs at least one component.",
+      "non_positive_weight": "Every weight must be greater than zero.",
+      "no_weight": "The weights add up to zero.",
+      "duplicate_component": "A metric appears more than once.",
+      "duplicate_band": "Two bands start at the same value.",
+      "empty_bands": "A step curve needs at least one step.",
+      "input_missing": "No value is available for this component."
+    },
+    "drift_detail": {},
+    "preview_no_inputs": "A preview needs at least one referenced metric."
   }
 }

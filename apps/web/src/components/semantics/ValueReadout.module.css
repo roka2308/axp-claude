@@ -1,0 +1,27 @@
+.value {
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.large {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+}
+
+/*
+ * An absent value is words, not a dash. "Not calculable because Creation Rate
+ * is missing" is actionable; "–" is not.
+ */
+.state {
+  display: inline-flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.detail {
+  color: var(--text-muted);
+  font-size: var(--font-size-xs);
+}
