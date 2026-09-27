@@ -1,17 +1,7 @@
+import type { AuditEntry } from '@axp/contracts';
 import { and, desc, eq, inArray, lt } from 'drizzle-orm';
-import type { AuditAction, AuditOutcome } from '@axp/contracts';
+import type { AuditAction } from '@axp/contracts';
 import { auditEvents, type Database, users } from '@axp/db';
-
-export interface AuditEntry {
-  readonly id: string;
-  readonly action: AuditAction;
-  readonly outcome: AuditOutcome;
-  readonly occurredAt: string;
-  readonly actor: { readonly id: string; readonly name: string } | null;
-  readonly targetType: string | null;
-  readonly targetId: string | null;
-  readonly metadata: Readonly<Record<string, unknown>>;
-}
 
 /**
  * Reading the audit trail of one tenant (D5: "Audit für privilegierte
@@ -69,3 +59,5 @@ export class AuditQueryService {
     }));
   }
 }
+
+export type { AuditEntry };

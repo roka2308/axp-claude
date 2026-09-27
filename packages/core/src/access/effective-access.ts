@@ -1,3 +1,10 @@
+import type {
+  ScopeAccess,
+  DashboardAccess,
+  DataAccessView,
+  EffectiveAccess,
+  AccessDiff,
+} from '@axp/contracts';
 import {
   CAPABILITIES_BY_ROLE,
   type AccessReason,
@@ -68,38 +75,6 @@ export interface AccessModel {
   readonly grants: readonly AccessModelGrant[];
 }
 
-export interface ScopeAccess {
-  readonly scope: { readonly type: ScopeType; readonly id: string; readonly label: string };
-  readonly capabilities: readonly {
-    readonly capability: Capability;
-    readonly reasons: readonly AccessReason[];
-  }[];
-}
-
-export interface DashboardAccess {
-  readonly id: string;
-  readonly name: string;
-  readonly projectId: string;
-  readonly projectName: string;
-  readonly published: boolean;
-  readonly view: DataAccessView;
-  readonly edit: DataAccessView;
-}
-
-export interface DataAccessView {
-  readonly granted: boolean;
-  readonly missing?: 'role' | 'grant' | 'role_and_grant';
-  readonly roleReasons: readonly AccessReason[];
-  readonly grantReasons: readonly AccessReason[];
-}
-
-export interface EffectiveAccess {
-  readonly userId: string;
-  readonly active: boolean;
-  readonly scopes: readonly ScopeAccess[];
-  readonly dashboards: readonly DashboardAccess[];
-}
-
 /** The capabilities that open or change a dashboard's data, by level. */
 const DATA_CAPABILITY: Readonly<Record<ObjectAccess, Capability>> = {
   view: 'dashboard.read_published',
@@ -168,22 +143,6 @@ export function computeEffectiveAccess(model: AccessModel): EffectiveAccess {
   }));
 
   return { userId: model.user.id, active: true, scopes, dashboards };
-}
-
-/**
- * What changes between two answers, for the impact preview (D5).
- *
- * Listed as capabilities gained and lost per scope, and dashboards whose data
- * becomes visible or invisible, editable or not. A change that alters nothing
- * says so - which is itself worth knowing before confirming it.
- */
-export interface AccessDiff {
-  readonly userId: string;
-  readonly capabilitiesGained: readonly { scope: string; capability: Capability }[];
-  readonly capabilitiesLost: readonly { scope: string; capability: Capability }[];
-  readonly dashboardsGained: readonly { id: string; name: string; access: ObjectAccess }[];
-  readonly dashboardsLost: readonly { id: string; name: string; access: ObjectAccess }[];
-  readonly unchanged: boolean;
 }
 
 export function diffEffectiveAccess(before: EffectiveAccess, after: EffectiveAccess): AccessDiff {
@@ -403,3 +362,5 @@ function scopeLabel(model: AccessModel, type: ScopeType, id: string): string {
   if (type === 'tenant') return id === model.tenant.id ? model.tenant.name : '—';
   return projectName(model, id);
 }
+
+export type { ScopeAccess, DashboardAccess, DataAccessView, EffectiveAccess, AccessDiff };

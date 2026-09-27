@@ -1,0 +1,54 @@
+.heading {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+}
+
+/* Tables scroll on their own, so the page never scrolls sideways (D10). */
+.scroller {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+
+.table th,
+.table td {
+  padding: var(--space-3);
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.table thead th {
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-secondary);
+}
+
+.capabilities {
+  margin: 0;
+  padding-left: var(--space-4);
+}
+
+.context {
+  display: block;
+  font-weight: var(--font-weight-regular);
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.verdict {
+  white-space: nowrap;
+}
+
+.verdict[data-granted='false'] {
+  color: var(--text-secondary);
+}
+
+.why summary {
+  cursor: pointer;
+  color: var(--text-link);
+}

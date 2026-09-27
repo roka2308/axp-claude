@@ -128,8 +128,12 @@ test.describe('viewer and detail view', () => {
     expect(overflow).toBeLessThanOrEqual(1);
 
     // The close control is a real touch target (D10).
-    const close = (await page.getByRole('button', { name: 'Schließen' }).boundingBox())!;
-    expect(close.height).toBeGreaterThanOrEqual(44);
+    // Polled: on a cold server the dialog's stylesheet can arrive a moment
+    // after the dialog itself.
+    const close = page.getByRole('button', { name: 'Schließen' });
+    await expect
+      .poll(async () => (await close.boundingBox())?.height ?? 0)
+      .toBeGreaterThanOrEqual(44);
   });
 
   test('has no cross-filter: the only analytics controls are time and comparison', async ({

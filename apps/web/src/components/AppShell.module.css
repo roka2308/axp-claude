@@ -1,7 +1,9 @@
 .shell {
   display: grid;
   grid-template-rows: var(--layout-topbar-height) 1fr;
-  grid-template-columns: var(--layout-sidebar-width) 1fr;
+  /* minmax(0, …): a wide table scrolls inside its own container instead of
+     widening the whole page (D10: no horizontal page scroll). */
+  grid-template-columns: var(--layout-sidebar-width) minmax(0, 1fr);
   grid-template-areas:
     'topbar topbar'
     'sidebar content';
@@ -99,6 +101,7 @@
 
 .content {
   grid-area: content;
+  min-width: 0;
   padding: var(--space-6);
   max-width: var(--layout-content-max-width);
 }
@@ -117,7 +120,7 @@
 /* Viewer surfaces are fully responsive (D10). */
 @media (max-width: 1279px) {
   .shell {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     grid-template-areas:
       'topbar'
       'sidebar'
@@ -149,7 +152,7 @@
 
 .searchInput {
   width: 100%;
-  min-height: var(--touch-target-min, 44px);
+  min-height: var(--target-size-min);
   padding: 0 var(--space-3);
   color: var(--text-primary);
   background: var(--surface-card);
@@ -167,5 +170,37 @@
 @media (max-width: 767px) {
   .search {
     flex-basis: 10rem;
+  }
+}
+
+.profileLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-size-min);
+  padding: 0 var(--space-2);
+  color: var(--text-secondary);
+}
+
+.profileLink:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* On a phone the search gets a row of its own rather than being squeezed
+   between the brand and the account links. */
+@media (max-width: 40rem) {
+  .shell {
+    grid-template-rows: auto auto 1fr;
+  }
+
+  .topbar {
+    flex-wrap: wrap;
+    padding-block: var(--space-2);
+    row-gap: var(--space-2);
+  }
+
+  .search {
+    order: 3;
+    flex: 1 1 100%;
   }
 }

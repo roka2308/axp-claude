@@ -1,3 +1,4 @@
+import type { RoleAssignmentView } from '@axp/contracts';
 import { and, eq, inArray, or } from 'drizzle-orm';
 import {
   AppError,
@@ -17,24 +18,13 @@ import {
   roleAssignments,
   tenantMemberships,
   tenants,
+  users,
 } from '@axp/db';
 import type { AuditService } from '../audit/audit-service';
 
 export interface RoleAssignmentServiceDeps {
   readonly db: Database;
   readonly audit: AuditService;
-}
-
-export interface RoleAssignmentView {
-  readonly id: string;
-  readonly subjectType: SubjectType;
-  readonly subjectId: string;
-  readonly role: SystemRole;
-  readonly scopeType: ScopeType;
-  readonly scopeId: string;
-  readonly scopeLabel: string;
-  /** Set when the assignment reaches a user through a group. */
-  readonly viaGroup?: { readonly id: string; readonly name: string };
 }
 
 /**
@@ -391,10 +381,32 @@ export class RoleAssignmentService {
         : [],
     );
 
+    const userIds = rows.filter((row) => row.subjectType === 'user').map((row) => row.subjectId);
+    const groupIds = rows.filter((row) => row.subjectType === 'group').map((row) => row.subjectId);
+    const subjectNames = new Map<string, string>([
+      ...(userIds.length > 0
+        ? (
+            await this.deps.db
+              .select({ id: users.id, first: users.firstName, last: users.lastName })
+              .from(users)
+              .where(inArray(users.id, userIds))
+          ).map((row) => [row.id, `${row.first} ${row.last}`.trim()] as [string, string])
+        : []),
+      ...(groupIds.length > 0
+        ? (
+            await this.deps.db
+              .select({ id: groups.id, name: groups.name })
+              .from(groups)
+              .where(inArray(groups.id, groupIds))
+          ).map((row) => [row.id, row.name] as [string, string])
+        : []),
+    ]);
+
     return rows.map((row) => ({
       id: row.id,
       subjectType: row.subjectType,
       subjectId: row.subjectId,
+      subjectLabel: subjectNames.get(row.subjectId) ?? '—',
       role: row.role,
       scopeType: row.scopeType,
       scopeId: row.scopeId,
@@ -412,3 +424,5 @@ export class RoleAssignmentService {
     }));
   }
 }
+
+export type { RoleAssignmentView };

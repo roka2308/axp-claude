@@ -1,0 +1,39 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--surface-sunken);
+  border-radius: var(--radius-md);
+}
+
+.title {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+}
+
+.lead {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.people {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.changes {
+  margin: var(--space-1) 0 0;
+  padding-left: var(--space-5);
+  font-size: var(--font-size-sm);
+}
+
+/* Gain and loss are stated in the words ("erhält", "verliert"), not by colour. */
+.changes li[data-change='loss'] {
+  color: var(--text-primary);
+  font-weight: var(--font-weight-medium);
+}

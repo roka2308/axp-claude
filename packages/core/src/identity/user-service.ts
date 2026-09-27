@@ -277,7 +277,11 @@ export class UserService {
     return verifyPassword(identity.passwordHash, candidate);
   }
 
-  async deactivate(userId: string, actorUserId?: string): Promise<void> {
+  /**
+   * `tenantId` names the tenant the change was made from, so the event shows
+   * up in that tenant's audit trail - the status itself is global.
+   */
+  async deactivate(userId: string, actorUserId?: string, tenantId?: string): Promise<void> {
     const now = this.deps.clock.now();
     await this.deps.db
       .update(users)
@@ -285,18 +289,20 @@ export class UserService {
       .where(eq(users.id, userId));
     await this.deps.audit.success('user.deactivated', {
       actorUserId: actorUserId ?? null,
+      ...(tenantId ? { tenantId } : {}),
       targetType: 'user',
       targetId: userId,
     });
   }
 
-  async activate(userId: string, actorUserId?: string): Promise<void> {
+  async activate(userId: string, actorUserId?: string, tenantId?: string): Promise<void> {
     await this.deps.db
       .update(users)
       .set({ status: 'active', deactivatedAt: null })
       .where(eq(users.id, userId));
     await this.deps.audit.success('user.activated', {
       actorUserId: actorUserId ?? null,
+      ...(tenantId ? { tenantId } : {}),
       targetType: 'user',
       targetId: userId,
     });

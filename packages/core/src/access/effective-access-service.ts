@@ -1,12 +1,6 @@
+import type { AccessChange, ImpactPreview, ObjectAccessEntry } from '@axp/contracts';
 import { and, eq, inArray, ne, or } from 'drizzle-orm';
-import {
-  AppError,
-  type ObjectAccess,
-  type ObjectType,
-  type ScopeType,
-  type SubjectType,
-  type SystemRole,
-} from '@axp/contracts';
+import { AppError, type ObjectType } from '@axp/contracts';
 import {
   type Database,
   dashboards,
@@ -29,47 +23,6 @@ import {
 
 export interface EffectiveAccessServiceDeps {
   readonly db: Database;
-}
-
-/** A change an administrator is about to make, described before it is made. */
-export type AccessChange =
-  | {
-      readonly kind: 'assign_role';
-      readonly subjectType: SubjectType;
-      readonly subjectId: string;
-      readonly role: SystemRole;
-      readonly scopeType: ScopeType;
-      readonly scopeId: string;
-    }
-  | { readonly kind: 'remove_role'; readonly assignmentId: string }
-  | { readonly kind: 'add_member'; readonly groupId: string; readonly userId: string }
-  | { readonly kind: 'remove_member'; readonly groupId: string; readonly userId: string }
-  | {
-      readonly kind: 'grant';
-      readonly subjectType: SubjectType;
-      readonly subjectId: string;
-      readonly objectType: ObjectType;
-      readonly objectId: string;
-      readonly access: ObjectAccess;
-    }
-  | { readonly kind: 'revoke'; readonly grantId: string }
-  | { readonly kind: 'delete_group'; readonly groupId: string }
-  | { readonly kind: 'deactivate_user'; readonly userId: string };
-
-export interface ImpactPreview {
-  readonly change: AccessChange;
-  /** One entry per person the change reaches, with what they gain and lose. */
-  readonly affected: readonly (AccessDiff & { readonly name: string })[];
-  /** True when nobody's access changes - worth knowing before confirming. */
-  readonly noEffect: boolean;
-}
-
-/** Who can open one object, and why - the "Objekte" view (D5). */
-export interface ObjectAccessEntry {
-  readonly userId: string;
-  readonly name: string;
-  readonly view: EffectiveAccess['dashboards'][number]['view'];
-  readonly edit: EffectiveAccess['dashboards'][number]['edit'];
 }
 
 interface ModelAdjustment {
@@ -397,3 +350,5 @@ function applyRowChange(model: AccessModel, change: AccessChange, userId: string
       return model;
   }
 }
+
+export type { AccessChange, ImpactPreview, ObjectAccessEntry };

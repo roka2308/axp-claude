@@ -128,7 +128,10 @@
     },
     "technicalDetails": "Technical details",
     "required": "This field is required.",
-    "actionFailed": "Action failed"
+    "actionFailed": "Action failed",
+    "rate_limited": {
+      "too_many_requests": "Too many requests in a short time. Please try again in {retryAfterSeconds} seconds."
+    }
   },
   "roles": {
     "viewer": {
@@ -965,5 +968,559 @@
     "user_in_other_tenants": "This person also belongs to another tenant. Deactivating them would lock them out there too.",
     "user_not_found": "This person does not exist in this tenant.",
     "user_not_invited": "This person has already accepted their invitation."
+  },
+  "administration": {
+    "title": "Administration",
+    "sections": "Administration sections",
+    "tenant": "Customer",
+    "switchTenant": "Switch",
+    "noAccessTitle": "No administration rights",
+    "noAccessBody": "You have no role in any customer that allows administration. Ask a Tenant Admin if you should manage people or permissions.",
+    "section": {
+      "users": "Users",
+      "groups": "Groups",
+      "access": "Roles & permissions",
+      "audit": "Audit",
+      "tenants": "Customers"
+    },
+    "status": {
+      "invited": "Invited",
+      "active": "Active",
+      "deactivated": "Deactivated"
+    },
+    "provider": {
+      "local": "Local account",
+      "oidc": "Signs in through identity provider (SSO)"
+    },
+    "subject": {
+      "user": "Person",
+      "group": "Group"
+    },
+    "scopeLabel": {
+      "platform": "Platform",
+      "tenant": "Customer {name}",
+      "project": "Project {name}"
+    },
+    "users": {
+      "search": "Search people",
+      "searchPlaceholder": "Name or email",
+      "searchSubmit": "Search",
+      "invite": "Invite person",
+      "empty": "No people found.",
+      "columnName": "Name",
+      "columnStatus": "Status",
+      "columnGroups": "Groups",
+      "columnRoles": "Roles",
+      "back": "← All users",
+      "profile": "Profile",
+      "account": "Account & sessions",
+      "groups": "Groups",
+      "groupsBody": "A group's roles and grants apply to all its members.",
+      "noGroups": "In no group.",
+      "leaveGroup": "Remove from group",
+      "roles": "Roles",
+      "rolesBody": "A role allows activities within a scope. It opens no data - that also takes a grant.",
+      "noRoles": "No role.",
+      "removeRole": "Remove role",
+      "grants": "Grants",
+      "grantsBody": "A grant opens a dashboard, or all of a project's dashboards - to view or to edit.",
+      "noGrants": "No grant.",
+      "revokeGrant": "Revoke grant",
+      "direct": "assigned directly",
+      "viaGroup": "via group {name}"
+    },
+    "profile": {
+      "firstName": "First name",
+      "lastName": "Last name",
+      "email": "Email address",
+      "emailNotEditable": "The email address cannot be changed yet: the confirmation email needs a mail transport, which arrives with phase 8.",
+      "locale": "Language",
+      "managedByProvider": "Managed by the identity provider and not changed here.",
+      "save": "Save",
+      "saving": "Saving …",
+      "saved": "Saved."
+    },
+    "account": {
+      "status": {
+        "invited": "Invited - the person has not accepted the invitation yet.",
+        "active": "Active - the person can sign in.",
+        "deactivated": "Deactivated - the person cannot sign in; their permissions are kept."
+      },
+      "deactivate": "Deactivate account",
+      "reactivate": "Reactivate account",
+      "reactivated": "The account is active again.",
+      "sessions": "{count, plural, =0 {No active session.} one {One active session.} other {# active sessions.}}",
+      "revokeSessions": "End all sessions",
+      "sessionsRevoked": "All sessions have been ended.",
+      "invitationPending": "The invitation is still valid.",
+      "invitationExpired": "The invitation has expired or was already used.",
+      "reissueInvitation": "Create a new invitation link",
+      "failed": "That did not work."
+    },
+    "invite": {
+      "title": "Invite person",
+      "body": "The person receives a link with which they set their own password.",
+      "notAllowed": "You may not invite anyone to this customer.",
+      "email": "Email address",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "locale": "Language",
+      "explain": "An invitation grants no rights yet. Assign roles, groups and grants afterwards on the person's page.",
+      "submit": "Invite",
+      "sending": "Inviting …",
+      "doneTitle": "Invited",
+      "doneNew": "Pass the link below on to the person. It is valid for 72 hours, works once and is shown only now.",
+      "doneExisting": "This person already has an account and now also belongs to this customer. They sign in as usual.",
+      "openPerson": "Open person",
+      "linkLabel": "Invitation link",
+      "linkHint": "There is no mail transport yet (DEV-005). Pass the link on through a trusted channel."
+    },
+    "groups": {
+      "principle": "Groups bundle roles and grants. Members receive everything the group has - in addition to their own rights. Nothing is taken away by it.",
+      "empty": "No groups yet.",
+      "members": "Members",
+      "memberCount": "{count, plural, one {# member} other {# members}}",
+      "newTitle": "New group",
+      "name": "Name",
+      "description": "Description (optional)",
+      "create": "Create group",
+      "created": "The group has been created.",
+      "back": "← All groups",
+      "membersTitle": "Members",
+      "noMembers": "No members yet.",
+      "removeMember": "Remove from group",
+      "rolesBody": "These roles apply to every member.",
+      "grantsBody": "These grants apply to every member.",
+      "deleteTitle": "Delete group",
+      "deleteBody": "All members lose what they had only through this group. The preview shows who is affected.",
+      "delete": "Delete group"
+    },
+    "access": {
+      "views": "Views",
+      "view": {
+        "roles": "By role",
+        "users": "By person",
+        "objects": "By dashboard"
+      },
+      "rolesPrinciple": "There are exactly five roles. They add up, none contains another, and none opens data by itself.",
+      "capabilities": "Allows",
+      "scopes": "Assignable for",
+      "automaticData": "Data access",
+      "automaticDataNo": "No - only together with a grant.",
+      "holders": "Assigned to",
+      "holder": "{name} ({kind}, {scope})",
+      "noHolders": "Nobody.",
+      "usersLead": "Choose a person to see what they can do, where, and why.",
+      "whatCan": "What can {name} do?",
+      "objectsLead": "Choose a dashboard to see who can open or edit it, and why.",
+      "whoCan": "Who has access to {name}?",
+      "nobody": "Nobody in this customer has access.",
+      "published": "published",
+      "unpublished": "not published yet",
+      "grantsOnObject": "Grants for this dashboard"
+    },
+    "effective": {
+      "title": "Effective access",
+      "body": "What this person can do, where, and why - computed from roles, groups and grants.",
+      "inactiveTitle": "Account not active",
+      "inactiveBody": "{name} cannot sign in at the moment. The rights below apply again once the account is active.",
+      "doTitle": "What {name} can do",
+      "doNothing": "No role - this person cannot manage or create anything.",
+      "columnScope": "Scope",
+      "columnCapabilities": "Activities",
+      "columnWhy": "Why",
+      "scope": {
+        "platform": "Platform",
+        "tenant": "Customer {name}",
+        "project": "Project {name}"
+      },
+      "dataTitle": "Which data {name} can see",
+      "principle": "Data takes both: a role that allows viewing or editing, and a grant for the dashboard or its project.",
+      "noDashboards": "No dashboards in this customer.",
+      "columnDashboard": "Dashboard",
+      "columnView": "View",
+      "columnEdit": "Edit",
+      "yes": "Yes",
+      "missing": {
+        "role": "No - role missing",
+        "grant": "No - grant missing",
+        "role_and_grant": "No - role and grant missing"
+      },
+      "noReason": "No reason - neither role nor grant.",
+      "showReasons": "{count, plural, one {Show one reason} other {Show # reasons}}"
+    },
+    "chain": {
+      "group": "Group {name}",
+      "role": "Role {role}",
+      "scope": {
+        "platform": "on the platform",
+        "tenant": "in customer {name}",
+        "project": "in project {name}"
+      },
+      "grant": {
+        "dashboard": "Grant for dashboard {name} ({access})",
+        "project": "Grant for project {name} ({access})"
+      },
+      "access": {
+        "view": "View",
+        "edit": "Edit"
+      }
+    },
+    "forms": {
+      "scope": "Scope",
+      "scopeOption": {
+        "platform": "Platform",
+        "tenant": "Customer: {name}",
+        "project": "Project: {name}"
+      },
+      "role": "Role",
+      "assignRole": "Assign role",
+      "nothingAssignable": "You cannot assign a role here.",
+      "object": "Dashboard or project",
+      "objectOption": {
+        "dashboard": "Dashboard: {name}",
+        "project": "Project: {name}"
+      },
+      "noObjects": "There are no projects or dashboards yet.",
+      "subject": "Person or group",
+      "subjectOption": {
+        "user": "Person: {name}",
+        "group": "Group: {name}"
+      },
+      "grant": "Grant access",
+      "access": "Access",
+      "accessView": "View",
+      "accessEdit": "Edit",
+      "person": "Person",
+      "addMember": "Add member",
+      "everyoneIsMember": "Everyone is already a member.",
+      "group": "Group",
+      "addToGroup": "Add to group",
+      "noMoreGroups": "This person is already in every group."
+    },
+    "change": {
+      "checkImpact": "{action}: check impact",
+      "checking": "Checking …",
+      "confirm": "{action}: confirm",
+      "applying": "Applying …",
+      "cancel": "Cancel",
+      "applied": "The change is in effect.",
+      "reauthExplain": "This change is sensitive. Please confirm it with your password.",
+      "password": "Your password",
+      "confirmWithPassword": "Confirm with password",
+      "reauthFailed": "The password could not be confirmed."
+    },
+    "impact": {
+      "title": "Impact",
+      "lead": "{count, plural, one {This change affects one person.} other {This change affects # people.}}",
+      "unchanged": "nothing changes for this person",
+      "gainsCapability": "may now: {capability} ({scope})",
+      "losesCapability": "may no longer: {capability} ({scope})",
+      "gainsDashboard": {
+        "view": "can now view {name}",
+        "edit": "can now edit {name}"
+      },
+      "losesDashboard": {
+        "view": "can no longer view {name}",
+        "edit": "can no longer edit {name}"
+      },
+      "noEffectTitle": "No effect",
+      "noEffectBody": "This change alters nothing for anyone - the rights already exist by another route."
+    },
+    "audit": {
+      "when": "When",
+      "who": "Who",
+      "what": "What",
+      "outcome": "Outcome",
+      "outcomeValue": {
+        "success": "Succeeded",
+        "failure": "Failed",
+        "denied": "Denied"
+      },
+      "system": "System",
+      "empty": "No entries yet.",
+      "older": "Older entries",
+      "notAllowed": "You may not view this customer's audit log."
+    },
+    "tenants": {
+      "notAllowed": "Only Platform Admins manage customers.",
+      "lead": "{count, plural, one {One customer} other {# customers}}",
+      "create": "Create tenant",
+      "empty": "No customers yet.",
+      "columnName": "Customer",
+      "columnState": "State",
+      "columnProjects": "Projects",
+      "columnUsers": "People",
+      "back": "← All customers",
+      "stateLine": "State: {state}",
+      "tabs": "Customer sections",
+      "tab": {
+        "overview": "Overview",
+        "projects": "Projects",
+        "people": "Users & groups",
+        "theme": "Theme",
+        "entitlements": "Entitlements",
+        "connections": "Connections",
+        "diagnostics": "Diagnostics",
+        "lifecycle": "Lifecycle"
+      },
+      "later": "This section arrives with phase {phase} of the development plan.",
+      "slug": "Slug",
+      "portableId": "Portable ID",
+      "defaultLocale": "Default language",
+      "dashboards": "Dashboards",
+      "groups": "Groups",
+      "noDataAccess": "As Platform Admin you manage this customer but see none of its data - that would take a grant.",
+      "noProjects": "No projects yet.",
+      "peopleSummary": "{users, plural, one {One person} other {# people}} in {groups, plural, =0 {no group} one {one group} other {# groups}}.",
+      "openPeople": "Manage users and groups",
+      "peopleNeedRole": "To manage this customer's people you need the Tenant Admin role there.",
+      "connectionsSummary": "{count, plural, =0 {No Matomo connection.} one {One Matomo connection.} other {# Matomo connections.}}",
+      "connectionsLater": "Connections are set up in project setup (phase 6).",
+      "state": {
+        "provisioning": "Provisioning",
+        "active": "Active",
+        "suspended": "Suspended",
+        "offboarding": "Offboarding",
+        "deleted": "Deleted"
+      },
+      "wizard": {
+        "title": "Create tenant",
+        "body": "In four steps: customer, first administrator, first project, review. Nothing is created before the last step.",
+        "progress": "Progress",
+        "step": {
+          "customer": "Customer",
+          "admin": "First administrator",
+          "project": "First project",
+          "review": "Review & create"
+        },
+        "name": "Customer name",
+        "slug": "Slug",
+        "slugHint": "Lower-case letters, digits and hyphens. Unique on the platform.",
+        "locale": "Default language",
+        "adminExplain": "This person becomes Tenant Admin of the new customer. They receive an invitation link and set their own password.",
+        "adminEmail": "Email address",
+        "adminFirstName": "First name",
+        "adminLastName": "Last name",
+        "withProject": "Create a first project right away",
+        "withoutProject": "The customer starts without a project; the Tenant Admin can create one later.",
+        "projectName": "Project name",
+        "projectSlug": "Project slug",
+        "reviewAdmin": "Tenant Admin",
+        "reviewProject": "First project",
+        "reviewAccess": "Access",
+        "reviewAccessBody": "The Tenant Admin manages people and permissions but sees data only with a grant. You yourself receive no data access.",
+        "none": "none",
+        "back": "Back",
+        "next": "Next",
+        "create": "Create customer",
+        "creating": "Creating …",
+        "doneTitle": "Customer created",
+        "doneWithInvitation": "Pass the link below on to the Tenant Admin. It is valid for 72 hours, works once and is shown only now.",
+        "doneExistingAdmin": "The person already had an account and is now Tenant Admin of the new customer.",
+        "doneProvisioning": "The customer is in the state “Provisioning”. Activate it under “Lifecycle” once it should be used - until then nobody can sign in there.",
+        "openTenant": "Open customer"
+      },
+      "lifecycle": {
+        "options": "Possible transitions",
+        "moveTo": "Move to: {state}",
+        "explain": {
+          "provisioning": "The customer is being set up and cannot be used yet.",
+          "active": "People can sign in; queries, shares and reports run.",
+          "suspended": "Sign-in, queries, shares and reports stop at once. Configuration is kept; the customer can be reactivated.",
+          "offboarding": "The customer is being wound down. Processing stops; only deletion follows.",
+          "deleted": "Final. There is no way back."
+        },
+        "final": "There is no further transition from here.",
+        "impactTitle": "Impact",
+        "halts": "Sign-in, queries, external shares and scheduled reports stop at once.",
+        "resumes": "Sign-in, queries, shares and reports run again.",
+        "affected": "Affected: {users, plural, =0 {nobody} one {one person} other {# people}} and {dashboards, plural, =0 {no dashboards} one {one dashboard} other {# dashboards}}.",
+        "signedOut": "{users, plural, =0 {Nobody is signed out} one {One person is signed out at once} other {# people are signed out at once}} ({sessions, plural, one {one live session} other {# live sessions}}). People who also belong to other customers stay signed in.",
+        "irreversibleTitle": "Irreversible",
+        "irreversibleBody": "This step cannot be undone.",
+        "typeName": "Type the name to confirm: {phrase}",
+        "apply": "Change state: {state}",
+        "applying": "Changing …",
+        "changed": "The state is now: {state}.",
+        "reauthExplain": "This change is sensitive. Please confirm it with your password.",
+        "password": "Your password",
+        "reauthFailed": "The password could not be confirmed."
+      }
+    },
+    "self": {
+      "title": "My profile",
+      "profileTitle": "Profile",
+      "localBody": "You can change your name and language yourself.",
+      "managedBody": "You sign in through your identity provider. Fields it manages are changed there.",
+      "accessTitle": "My permissions",
+      "noTenants": "You belong to no customer.",
+      "password": {
+        "title": "Change password",
+        "explain": "After the change all your sessions end - this one too. You then sign in again.",
+        "current": "Current password",
+        "new": "New password",
+        "hint": "At least 12 characters. Must not contain your name or the local part of your email address.",
+        "repeat": "Repeat new password",
+        "mismatch": "The two passwords do not match.",
+        "submit": "Change password",
+        "saving": "Changing …"
+      },
+      "invitation": {
+        "title": "Welcome, {name}",
+        "body": "Set your password to activate your account.",
+        "email": "Email address",
+        "password": "Password",
+        "hint": "At least 12 characters. Must not contain your name or the local part of your email address.",
+        "repeat": "Repeat password",
+        "mismatch": "The two passwords do not match.",
+        "submit": "Activate account",
+        "saving": "Activating …",
+        "doneTitle": "Account activated",
+        "doneBody": "You can now sign in with your email address and password.",
+        "signIn": "Go to sign-in",
+        "invalidTitle": "This invitation link is not valid",
+        "invalidBody": "It has expired, was already used or is incomplete. Ask the person who invited you for a new link."
+      }
+    }
+  },
+  "capability": {
+    "platform": {
+      "tenant": {
+        "create": "Create customers",
+        "read": "View customers",
+        "lifecycle": {
+          "change": "Change customer lifecycle"
+        }
+      },
+      "diagnostics": {
+        "read": "View platform diagnostics"
+      }
+    },
+    "tenant": {
+      "read": "Open customer administration",
+      "settings": {
+        "update": "Change customer settings"
+      },
+      "user": {
+        "invite": "Invite people and edit profiles",
+        "deactivate": "Deactivate accounts and end sessions"
+      },
+      "role_assignment": {
+        "manage": "Assign roles and grants"
+      },
+      "group": {
+        "manage": "Manage groups"
+      },
+      "audit": {
+        "read": "View audit log"
+      }
+    },
+    "project": {
+      "read": "Open projects",
+      "create": "Create projects",
+      "settings": {
+        "update": "Change project settings"
+      }
+    },
+    "dashboard": {
+      "read_published": "View published dashboards",
+      "create": "Create dashboards",
+      "edit_draft": "Edit dashboard drafts",
+      "publish": "Publish dashboards"
+    },
+    "semantic": {
+      "read": "Read semantic catalog",
+      "manage": "Maintain semantic catalog"
+    }
+  },
+  "auditAction": {
+    "platform": {
+      "bootstrap": {
+        "started": "Initial setup started",
+        "completed": "Initial setup completed",
+        "rejected": "Initial setup rejected"
+      },
+      "recovery": {
+        "started": "Recovery started",
+        "completed": "Recovery completed"
+      }
+    },
+    "auth": {
+      "login": {
+        "succeeded": "Sign-in",
+        "failed": "Sign-in failed"
+      },
+      "logout": "Sign-out",
+      "session": {
+        "revoked": "Session ended"
+      },
+      "password": {
+        "changed": "Password changed"
+      },
+      "reauthenticated": "Password confirmed again"
+    },
+    "tenant": {
+      "created": "Customer created",
+      "lifecycle": {
+        "changed": "Lifecycle changed"
+      },
+      "purged": "Customer data purged"
+    },
+    "project": {
+      "created": "Project created",
+      "updated": "Project changed",
+      "site_assigned": "Matomo site assigned"
+    },
+    "user": {
+      "invited": "Person invited",
+      "invitation": {
+        "accepted": "Invitation accepted"
+      },
+      "activated": "Account activated",
+      "deactivated": "Account deactivated",
+      "updated": "Profile changed"
+    },
+    "role_assignment": {
+      "created": "Role assigned",
+      "removed": "Role removed"
+    },
+    "group": {
+      "created": "Group created",
+      "updated": "Group changed",
+      "deleted": "Group deleted",
+      "membership": {
+        "changed": "Group membership changed"
+      }
+    },
+    "object_grant": {
+      "changed": "Grant changed"
+    },
+    "matomo_connection": {
+      "created": "Matomo connection created",
+      "credential_replaced": "Matomo credentials replaced",
+      "capabilities_refreshed": "Matomo capabilities refreshed",
+      "removed": "Matomo connection removed"
+    },
+    "matomo_site": {
+      "imported": "Matomo site imported"
+    },
+    "semantic": {
+      "version_activated": "Definition version activated",
+      "version_deprecated": "Definition version deprecated"
+    },
+    "source_binding": {
+      "changed": "Source mapping changed",
+      "reviewed": "Source mapping reviewed"
+    },
+    "dashboard": {
+      "created": "Dashboard created",
+      "published": "Dashboard published",
+      "rolled_back": "Dashboard rolled back",
+      "archived": "Dashboard archived",
+      "trashed": "Dashboard moved to trash",
+      "restored": "Dashboard restored",
+      "editor_takeover": "Editing taken over"
+    }
   }
 }

@@ -1,3 +1,4 @@
+import type { TenantSummary, TenantOverview, LifecycleImpact } from '@axp/contracts';
 import { and, count, eq, gt, inArray, isNull, ne } from 'drizzle-orm';
 import {
   AppError,
@@ -29,51 +30,6 @@ export interface TenantAdminServiceDeps {
   readonly userAdmin: UserAdminService;
   readonly roles: RoleAssignmentService;
   readonly revokeAllSessions: (userId: string, reason: string) => Promise<number>;
-}
-
-export interface TenantSummary {
-  readonly id: string;
-  readonly name: string;
-  readonly slug: string;
-  readonly lifecycle: TenantLifecycle;
-  readonly projects: number;
-  readonly users: number;
-  readonly lifecycleChangedAt: string | null;
-}
-
-export interface TenantOverview extends TenantSummary {
-  readonly portableId: string;
-  readonly defaultLocale: string;
-  readonly groups: number;
-  readonly dashboards: number;
-  readonly connections: number;
-  readonly projectList: readonly { readonly id: string; readonly name: string }[];
-  /** Where this tenant may go next, and nothing else. */
-  readonly allowedTransitions: readonly TenantLifecycle[];
-}
-
-/**
- * What a lifecycle change would do, before it is done (D5).
- *
- * "Gefährliche Lifecycle-Aktionen sind klar getrennt, besitzen Impact Preview,
- * Re-Authentication, explizite Bestätigung und Audit."
- */
-export interface LifecycleImpact {
-  readonly from: TenantLifecycle;
-  readonly to: TenantLifecycle;
-  readonly allowed: boolean;
-  /** Customer processing (sign-in, queries, shares, reports) stops or resumes. */
-  readonly haltsProcessing: boolean;
-  readonly resumesProcessing: boolean;
-  /** Members who would be signed out now, because this is their only tenant. */
-  readonly usersSignedOut: number;
-  readonly liveSessions: number;
-  readonly affectedUsers: number;
-  readonly dashboards: number;
-  /** Irreversible: nothing leads back from here. */
-  readonly irreversible: boolean;
-  /** The text the administrator has to type to confirm. */
-  readonly confirmationPhrase: string;
 }
 
 /**
@@ -361,3 +317,5 @@ export class TenantAdminService {
     return new Map(rows.map((row) => [row.tenantId, Number(row.n)]));
   }
 }
+
+export type { TenantSummary, TenantOverview, LifecycleImpact };

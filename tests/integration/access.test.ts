@@ -502,14 +502,26 @@ describe('administration and effective access', () => {
     it('records privileged changes in the audit trail', async () => {
       await post(`/admin/tenants/${tenantId}/groups`, tokens.admin!, { name: 'Protokolliert' });
       await post(`/admin/tenants/${tenantId}/grants`, tokens.admin!, grantTo('user', ids.viewer!));
+      // The account status is global, but the change was made from this
+      // tenant, so this tenant's trail is where it has to show up.
+      await post(`/admin/tenants/${tenantId}/users/${ids.viewer}/deactivate`, tokens.admin!, {});
+      await post(`/admin/tenants/${tenantId}/users/${ids.viewer}/reactivate`, tokens.admin!, {});
 
       const events = (await get(`/admin/tenants/${tenantId}/audit`, tokens.admin!)).json().events;
       const actions = events.map((event: { action: string }) => event.action);
-      expect(actions).toEqual(expect.arrayContaining(['group.created', 'object_grant.changed']));
+      expect(actions).toEqual(
+        expect.arrayContaining([
+          'group.created',
+          'object_grant.changed',
+          'user.deactivated',
+          'user.activated',
+        ]),
+      );
       expect(events[0].actor.name).toBeTruthy();
 
-      // A viewer may not read it.
-      expect((await get(`/admin/tenants/${tenantId}/audit`, tokens.viewer!)).statusCode).toBe(403);
+      // A viewer may not read it. (Deactivation above ended the old session.)
+      const viewer = await signIn('viewer@example.invalid');
+      expect((await get(`/admin/tenants/${tenantId}/audit`, viewer)).statusCode).toBe(403);
     });
   });
 

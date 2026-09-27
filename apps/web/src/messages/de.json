@@ -128,7 +128,10 @@
     },
     "technicalDetails": "Technische Details",
     "required": "Dieses Feld wird benötigt.",
-    "actionFailed": "Aktion nicht möglich"
+    "actionFailed": "Aktion nicht möglich",
+    "rate_limited": {
+      "too_many_requests": "Zu viele Anfragen in kurzer Zeit. Bitte versuchen Sie es in {retryAfterSeconds} Sekunden erneut."
+    }
   },
   "roles": {
     "viewer": {
@@ -965,5 +968,559 @@
     "user_in_other_tenants": "Diese Person gehört auch zu einem anderen Mandanten. Eine Deaktivierung würde sie dort ebenfalls aussperren.",
     "user_not_found": "Diese Person gibt es in diesem Mandanten nicht.",
     "user_not_invited": "Diese Person hat ihre Einladung bereits angenommen."
+  },
+  "administration": {
+    "title": "Administration",
+    "sections": "Bereiche der Administration",
+    "tenant": "Kunde",
+    "switchTenant": "Wechseln",
+    "noAccessTitle": "Keine Administrationsrechte",
+    "noAccessBody": "Sie haben in keinem Kunden eine Rolle, die Administration erlaubt. Wenden Sie sich an einen Tenant Admin, wenn Sie Personen oder Rechte verwalten sollen.",
+    "section": {
+      "users": "Benutzer",
+      "groups": "Gruppen",
+      "access": "Rollen & Rechte",
+      "audit": "Audit",
+      "tenants": "Kunden"
+    },
+    "status": {
+      "invited": "Eingeladen",
+      "active": "Aktiv",
+      "deactivated": "Deaktiviert"
+    },
+    "provider": {
+      "local": "Lokales Konto",
+      "oidc": "Anmeldung über Identity Provider (SSO)"
+    },
+    "subject": {
+      "user": "Person",
+      "group": "Gruppe"
+    },
+    "scopeLabel": {
+      "platform": "Plattform",
+      "tenant": "Kunde {name}",
+      "project": "Projekt {name}"
+    },
+    "users": {
+      "search": "Personen suchen",
+      "searchPlaceholder": "Name oder E-Mail",
+      "searchSubmit": "Suchen",
+      "invite": "Person einladen",
+      "empty": "Keine Personen gefunden.",
+      "columnName": "Name",
+      "columnStatus": "Status",
+      "columnGroups": "Gruppen",
+      "columnRoles": "Rollen",
+      "back": "← Alle Benutzer",
+      "profile": "Profil",
+      "account": "Konto & Sitzungen",
+      "groups": "Gruppen",
+      "groupsBody": "Rollen und Freigaben einer Gruppe gelten für alle ihre Mitglieder.",
+      "noGroups": "In keiner Gruppe.",
+      "leaveGroup": "Aus Gruppe entfernen",
+      "roles": "Rollen",
+      "rolesBody": "Eine Rolle erlaubt Tätigkeiten in einem Bereich. Sie öffnet keine Daten - dafür braucht es zusätzlich eine Freigabe.",
+      "noRoles": "Keine Rolle.",
+      "removeRole": "Rolle entziehen",
+      "grants": "Freigaben",
+      "grantsBody": "Eine Freigabe öffnet ein Dashboard oder alle Dashboards eines Projekts - zum Ansehen oder zum Bearbeiten.",
+      "noGrants": "Keine Freigabe.",
+      "revokeGrant": "Freigabe entziehen",
+      "direct": "direkt zugewiesen",
+      "viaGroup": "über Gruppe {name}"
+    },
+    "profile": {
+      "firstName": "Vorname",
+      "lastName": "Nachname",
+      "email": "E-Mail-Adresse",
+      "emailNotEditable": "Die E-Mail-Adresse lässt sich noch nicht ändern, weil die Bestätigungsmail einen Mailversand braucht, den es erst mit Phase 8 gibt.",
+      "locale": "Sprache",
+      "managedByProvider": "Wird vom Identity Provider verwaltet und hier nicht geändert.",
+      "save": "Speichern",
+      "saving": "Wird gespeichert …",
+      "saved": "Gespeichert."
+    },
+    "account": {
+      "status": {
+        "invited": "Eingeladen - die Person hat die Einladung noch nicht angenommen.",
+        "active": "Aktiv - die Person kann sich anmelden.",
+        "deactivated": "Deaktiviert - die Person kann sich nicht anmelden; ihre Rechte bleiben erhalten."
+      },
+      "deactivate": "Konto deaktivieren",
+      "reactivate": "Konto wieder aktivieren",
+      "reactivated": "Das Konto ist wieder aktiv.",
+      "sessions": "{count, plural, =0 {Keine aktive Sitzung.} one {Eine aktive Sitzung.} other {# aktive Sitzungen.}}",
+      "revokeSessions": "Alle Sitzungen beenden",
+      "sessionsRevoked": "Alle Sitzungen wurden beendet.",
+      "invitationPending": "Die Einladung ist noch gültig.",
+      "invitationExpired": "Die Einladung ist abgelaufen oder wurde schon benutzt.",
+      "reissueInvitation": "Neuen Einladungslink erzeugen",
+      "failed": "Das hat nicht geklappt."
+    },
+    "invite": {
+      "title": "Person einladen",
+      "body": "Die Person erhält einen Link, mit dem sie ihr Passwort selbst festlegt.",
+      "notAllowed": "Sie dürfen in diesem Kunden niemanden einladen.",
+      "email": "E-Mail-Adresse",
+      "firstName": "Vorname",
+      "lastName": "Nachname",
+      "locale": "Sprache",
+      "explain": "Eine Einladung gibt noch keine Rechte. Rollen, Gruppen und Freigaben vergeben Sie danach auf der Seite der Person.",
+      "submit": "Einladen",
+      "sending": "Wird eingeladen …",
+      "doneTitle": "Eingeladen",
+      "doneNew": "Geben Sie den Link unten an die Person weiter. Er ist 72 Stunden gültig, nur einmal verwendbar und wird nur jetzt angezeigt.",
+      "doneExisting": "Diese Person hat bereits ein Konto und gehört jetzt auch zu diesem Kunden. Sie meldet sich wie gewohnt an.",
+      "openPerson": "Zur Person",
+      "linkLabel": "Einladungslink",
+      "linkHint": "Es gibt noch keinen Mailversand (DEV-005). Geben Sie den Link auf einem vertrauenswürdigen Weg weiter."
+    },
+    "groups": {
+      "principle": "Gruppen bündeln Rollen und Freigaben. Wer Mitglied ist, erhält alles, was die Gruppe hat - zusätzlich zu den eigenen Rechten. Nichts wird dadurch entzogen.",
+      "empty": "Noch keine Gruppen.",
+      "members": "Mitglieder",
+      "memberCount": "{count, plural, one {# Mitglied} other {# Mitglieder}}",
+      "newTitle": "Neue Gruppe",
+      "name": "Name",
+      "description": "Beschreibung (optional)",
+      "create": "Gruppe anlegen",
+      "created": "Die Gruppe wurde angelegt.",
+      "back": "← Alle Gruppen",
+      "membersTitle": "Mitglieder",
+      "noMembers": "Noch keine Mitglieder.",
+      "removeMember": "Aus Gruppe entfernen",
+      "rolesBody": "Diese Rollen gelten für jedes Mitglied.",
+      "grantsBody": "Diese Freigaben gelten für jedes Mitglied.",
+      "deleteTitle": "Gruppe löschen",
+      "deleteBody": "Alle Mitglieder verlieren, was sie nur über diese Gruppe hatten. Die Vorschau zeigt, wen das betrifft.",
+      "delete": "Gruppe löschen"
+    },
+    "access": {
+      "views": "Sichten",
+      "view": {
+        "roles": "Nach Rolle",
+        "users": "Nach Person",
+        "objects": "Nach Dashboard"
+      },
+      "rolesPrinciple": "Es gibt genau fünf Rollen. Sie ergänzen sich, keine enthält eine andere, und keine öffnet von selbst Daten.",
+      "capabilities": "Erlaubt",
+      "scopes": "Zuweisbar für",
+      "automaticData": "Datenzugriff",
+      "automaticDataNo": "Nein - nur zusammen mit einer Freigabe.",
+      "holders": "Vergeben an",
+      "holder": "{name} ({kind}, {scope})",
+      "noHolders": "Niemanden.",
+      "usersLead": "Wählen Sie eine Person, um zu sehen, was sie wo darf und warum.",
+      "whatCan": "Was darf {name}?",
+      "objectsLead": "Wählen Sie ein Dashboard, um zu sehen, wer es öffnen oder bearbeiten kann und warum.",
+      "whoCan": "Wer hat Zugriff auf {name}?",
+      "nobody": "Niemand in diesem Kunden hat Zugriff.",
+      "published": "veröffentlicht",
+      "unpublished": "noch nicht veröffentlicht",
+      "grantsOnObject": "Freigaben für dieses Dashboard"
+    },
+    "effective": {
+      "title": "Effective Access",
+      "body": "Was diese Person wo darf und warum - berechnet aus Rollen, Gruppen und Freigaben.",
+      "inactiveTitle": "Konto nicht aktiv",
+      "inactiveBody": "{name} kann sich derzeit nicht anmelden. Die Rechte unten gelten erst wieder, wenn das Konto aktiv ist.",
+      "doTitle": "Was {name} tun darf",
+      "doNothing": "Keine Rolle - diese Person darf nichts verwalten oder anlegen.",
+      "columnScope": "Bereich",
+      "columnCapabilities": "Tätigkeiten",
+      "columnWhy": "Warum",
+      "scope": {
+        "platform": "Plattform",
+        "tenant": "Kunde {name}",
+        "project": "Projekt {name}"
+      },
+      "dataTitle": "Welche Daten {name} sehen darf",
+      "principle": "Für Daten braucht es beides: eine Rolle, die das Ansehen oder Bearbeiten erlaubt, und eine Freigabe für das Dashboard oder sein Projekt.",
+      "noDashboards": "Keine Dashboards in diesem Kunden.",
+      "columnDashboard": "Dashboard",
+      "columnView": "Ansehen",
+      "columnEdit": "Bearbeiten",
+      "yes": "Ja",
+      "missing": {
+        "role": "Nein - Rolle fehlt",
+        "grant": "Nein - Freigabe fehlt",
+        "role_and_grant": "Nein - Rolle und Freigabe fehlen"
+      },
+      "noReason": "Kein Grund - weder Rolle noch Freigabe.",
+      "showReasons": "{count, plural, one {Einen Grund anzeigen} other {# Gründe anzeigen}}"
+    },
+    "chain": {
+      "group": "Gruppe {name}",
+      "role": "Rolle {role}",
+      "scope": {
+        "platform": "auf der Plattform",
+        "tenant": "im Kunden {name}",
+        "project": "im Projekt {name}"
+      },
+      "grant": {
+        "dashboard": "Freigabe für Dashboard {name} ({access})",
+        "project": "Freigabe für Projekt {name} ({access})"
+      },
+      "access": {
+        "view": "Ansehen",
+        "edit": "Bearbeiten"
+      }
+    },
+    "forms": {
+      "scope": "Bereich",
+      "scopeOption": {
+        "platform": "Plattform",
+        "tenant": "Kunde: {name}",
+        "project": "Projekt: {name}"
+      },
+      "role": "Rolle",
+      "assignRole": "Rolle zuweisen",
+      "nothingAssignable": "Sie können hier keine Rolle zuweisen.",
+      "object": "Dashboard oder Projekt",
+      "objectOption": {
+        "dashboard": "Dashboard: {name}",
+        "project": "Projekt: {name}"
+      },
+      "noObjects": "Es gibt noch keine Projekte oder Dashboards.",
+      "subject": "Person oder Gruppe",
+      "subjectOption": {
+        "user": "Person: {name}",
+        "group": "Gruppe: {name}"
+      },
+      "grant": "Freigabe erteilen",
+      "access": "Zugriff",
+      "accessView": "Ansehen",
+      "accessEdit": "Bearbeiten",
+      "person": "Person",
+      "addMember": "Mitglied hinzufügen",
+      "everyoneIsMember": "Alle Personen sind bereits Mitglied.",
+      "group": "Gruppe",
+      "addToGroup": "Zur Gruppe hinzufügen",
+      "noMoreGroups": "Diese Person ist bereits in allen Gruppen."
+    },
+    "change": {
+      "checkImpact": "{action}: Auswirkung prüfen",
+      "checking": "Wird geprüft …",
+      "confirm": "{action}: bestätigen",
+      "applying": "Wird ausgeführt …",
+      "cancel": "Abbrechen",
+      "applied": "Die Änderung ist wirksam.",
+      "reauthExplain": "Diese Änderung ist sensibel. Bitte bestätigen Sie sie mit Ihrem Passwort.",
+      "password": "Ihr Passwort",
+      "confirmWithPassword": "Mit Passwort bestätigen",
+      "reauthFailed": "Das Passwort konnte nicht bestätigt werden."
+    },
+    "impact": {
+      "title": "Auswirkung",
+      "lead": "{count, plural, one {Diese Änderung betrifft eine Person.} other {Diese Änderung betrifft # Personen.}}",
+      "unchanged": "für diese Person ändert sich nichts",
+      "gainsCapability": "darf neu: {capability} ({scope})",
+      "losesCapability": "darf nicht mehr: {capability} ({scope})",
+      "gainsDashboard": {
+        "view": "kann neu {name} ansehen",
+        "edit": "kann neu {name} bearbeiten"
+      },
+      "losesDashboard": {
+        "view": "kann {name} nicht mehr ansehen",
+        "edit": "kann {name} nicht mehr bearbeiten"
+      },
+      "noEffectTitle": "Keine Auswirkung",
+      "noEffectBody": "Diese Änderung ändert für niemanden etwas - die Rechte bestehen bereits auf anderem Weg."
+    },
+    "audit": {
+      "when": "Wann",
+      "who": "Wer",
+      "what": "Was",
+      "outcome": "Ergebnis",
+      "outcomeValue": {
+        "success": "Erfolgreich",
+        "failure": "Fehlgeschlagen",
+        "denied": "Verweigert"
+      },
+      "system": "System",
+      "empty": "Noch keine Einträge.",
+      "older": "Ältere Einträge",
+      "notAllowed": "Sie dürfen das Audit-Log dieses Kunden nicht einsehen."
+    },
+    "tenants": {
+      "notAllowed": "Kunden verwalten nur Platform Admins.",
+      "lead": "{count, plural, one {Ein Kunde} other {# Kunden}}",
+      "create": "Tenant anlegen",
+      "empty": "Noch keine Kunden.",
+      "columnName": "Kunde",
+      "columnState": "Zustand",
+      "columnProjects": "Projekte",
+      "columnUsers": "Personen",
+      "back": "← Alle Kunden",
+      "stateLine": "Zustand: {state}",
+      "tabs": "Bereiche des Kunden",
+      "tab": {
+        "overview": "Übersicht",
+        "projects": "Projekte",
+        "people": "Benutzer & Gruppen",
+        "theme": "Theme",
+        "entitlements": "Entitlements",
+        "connections": "Verbindungen",
+        "diagnostics": "Diagnose",
+        "lifecycle": "Lebenszyklus"
+      },
+      "later": "Dieser Bereich folgt mit Phase {phase} des Entwicklungsplans.",
+      "slug": "Kürzel",
+      "portableId": "Portable ID",
+      "defaultLocale": "Standardsprache",
+      "dashboards": "Dashboards",
+      "groups": "Gruppen",
+      "noDataAccess": "Als Platform Admin verwalten Sie diesen Kunden, sehen aber keine seiner Daten - dafür bräuchten Sie eine Freigabe.",
+      "noProjects": "Noch keine Projekte.",
+      "peopleSummary": "{users, plural, one {Eine Person} other {# Personen}} in {groups, plural, =0 {keiner Gruppe} one {einer Gruppe} other {# Gruppen}}.",
+      "openPeople": "Benutzer und Gruppen verwalten",
+      "peopleNeedRole": "Um Personen dieses Kunden zu verwalten, brauchen Sie dort die Rolle Tenant Admin.",
+      "connectionsSummary": "{count, plural, =0 {Keine Matomo-Verbindung.} one {Eine Matomo-Verbindung.} other {# Matomo-Verbindungen.}}",
+      "connectionsLater": "Verbindungen werden im Projekt-Setup eingerichtet (Phase 6).",
+      "state": {
+        "provisioning": "Wird eingerichtet",
+        "active": "Aktiv",
+        "suspended": "Gesperrt",
+        "offboarding": "Wird beendet",
+        "deleted": "Gelöscht"
+      },
+      "wizard": {
+        "title": "Tenant anlegen",
+        "body": "In vier Schritten: Kunde, erster Administrator, erstes Projekt, Prüfen. Angelegt wird erst im letzten Schritt.",
+        "progress": "Fortschritt",
+        "step": {
+          "customer": "Kunde",
+          "admin": "Erster Administrator",
+          "project": "Erstes Projekt",
+          "review": "Prüfen & anlegen"
+        },
+        "name": "Name des Kunden",
+        "slug": "Kürzel",
+        "slugHint": "Kleinbuchstaben, Ziffern und Bindestriche. Eindeutig auf der Plattform.",
+        "locale": "Standardsprache",
+        "adminExplain": "Diese Person wird Tenant Admin des neuen Kunden. Sie erhält einen Einladungslink und legt ihr Passwort selbst fest.",
+        "adminEmail": "E-Mail-Adresse",
+        "adminFirstName": "Vorname",
+        "adminLastName": "Nachname",
+        "withProject": "Gleich ein erstes Projekt anlegen",
+        "withoutProject": "Der Kunde startet ohne Projekt; der Tenant Admin kann es später anlegen.",
+        "projectName": "Name des Projekts",
+        "projectSlug": "Kürzel des Projekts",
+        "reviewAdmin": "Tenant Admin",
+        "reviewProject": "Erstes Projekt",
+        "reviewAccess": "Zugriff",
+        "reviewAccessBody": "Der Tenant Admin verwaltet Personen und Rechte, sieht aber Daten erst mit einer Freigabe. Sie selbst erhalten keinen Datenzugriff.",
+        "none": "keines",
+        "back": "Zurück",
+        "next": "Weiter",
+        "create": "Kunden anlegen",
+        "creating": "Wird angelegt …",
+        "doneTitle": "Kunde angelegt",
+        "doneWithInvitation": "Geben Sie den Link unten an den Tenant Admin weiter. Er ist 72 Stunden gültig, nur einmal verwendbar und wird nur jetzt angezeigt.",
+        "doneExistingAdmin": "Die Person hatte bereits ein Konto und ist jetzt Tenant Admin des neuen Kunden.",
+        "doneProvisioning": "Der Kunde steht im Zustand „Wird eingerichtet“. Aktivieren Sie ihn unter „Lebenszyklus“, sobald er genutzt werden soll - vorher kann sich dort niemand anmelden.",
+        "openTenant": "Zum Kunden"
+      },
+      "lifecycle": {
+        "options": "Mögliche Übergänge",
+        "moveTo": "Wechseln zu: {state}",
+        "explain": {
+          "provisioning": "Der Kunde wird eingerichtet und ist noch nicht nutzbar.",
+          "active": "Personen können sich anmelden; Abfragen, Freigaben und Berichte laufen.",
+          "suspended": "Anmeldung, Abfragen, Freigaben und Berichte stoppen sofort. Die Konfiguration bleibt erhalten; der Kunde kann wieder aktiviert werden.",
+          "offboarding": "Der Kunde wird beendet. Die Verarbeitung stoppt; es folgt nur noch die Löschung.",
+          "deleted": "Endgültig. Es gibt keinen Weg zurück."
+        },
+        "final": "Von hier aus gibt es keinen weiteren Übergang.",
+        "impactTitle": "Auswirkung",
+        "halts": "Anmeldung, Abfragen, externe Freigaben und geplante Berichte stoppen sofort.",
+        "resumes": "Anmeldung, Abfragen, Freigaben und Berichte laufen wieder.",
+        "affected": "Betroffen: {users, plural, =0 {keine Person} one {eine Person} other {# Personen}} und {dashboards, plural, =0 {keine Dashboards} one {ein Dashboard} other {# Dashboards}}.",
+        "signedOut": "{users, plural, =0 {Niemand wird abgemeldet} one {Eine Person wird sofort abgemeldet} other {# Personen werden sofort abgemeldet}} ({sessions, plural, one {eine laufende Sitzung} other {# laufende Sitzungen}}). Wer auch zu anderen Kunden gehört, bleibt angemeldet.",
+        "irreversibleTitle": "Nicht umkehrbar",
+        "irreversibleBody": "Dieser Schritt lässt sich nicht rückgängig machen.",
+        "typeName": "Zur Bestätigung den Namen eintippen: {phrase}",
+        "apply": "Zustand ändern: {state}",
+        "applying": "Wird geändert …",
+        "changed": "Der Zustand ist jetzt: {state}.",
+        "reauthExplain": "Diese Änderung ist sensibel. Bitte bestätigen Sie sie mit Ihrem Passwort.",
+        "password": "Ihr Passwort",
+        "reauthFailed": "Das Passwort konnte nicht bestätigt werden."
+      }
+    },
+    "self": {
+      "title": "Mein Profil",
+      "profileTitle": "Profil",
+      "localBody": "Name und Sprache können Sie selbst ändern.",
+      "managedBody": "Sie melden sich über Ihren Identity Provider an. Felder, die er verwaltet, ändern Sie dort.",
+      "accessTitle": "Meine Rechte",
+      "noTenants": "Sie gehören zu keinem Kunden.",
+      "password": {
+        "title": "Passwort ändern",
+        "explain": "Nach der Änderung werden alle Ihre Sitzungen beendet - auch diese. Sie melden sich danach neu an.",
+        "current": "Aktuelles Passwort",
+        "new": "Neues Passwort",
+        "hint": "Mindestens 12 Zeichen. Darf weder Ihren Namen noch den lokalen Teil Ihrer E-Mail-Adresse enthalten.",
+        "repeat": "Neues Passwort wiederholen",
+        "mismatch": "Die beiden Passwörter stimmen nicht überein.",
+        "submit": "Passwort ändern",
+        "saving": "Wird geändert …"
+      },
+      "invitation": {
+        "title": "Willkommen, {name}",
+        "body": "Legen Sie Ihr Passwort fest, um Ihr Konto zu aktivieren.",
+        "email": "E-Mail-Adresse",
+        "password": "Passwort",
+        "hint": "Mindestens 12 Zeichen. Darf weder Ihren Namen noch den lokalen Teil Ihrer E-Mail-Adresse enthalten.",
+        "repeat": "Passwort wiederholen",
+        "mismatch": "Die beiden Passwörter stimmen nicht überein.",
+        "submit": "Konto aktivieren",
+        "saving": "Wird aktiviert …",
+        "doneTitle": "Konto aktiviert",
+        "doneBody": "Sie können sich jetzt mit Ihrer E-Mail-Adresse und Ihrem Passwort anmelden.",
+        "signIn": "Zur Anmeldung",
+        "invalidTitle": "Dieser Einladungslink gilt nicht",
+        "invalidBody": "Er ist abgelaufen, wurde schon benutzt oder ist unvollständig. Bitten Sie die Person, die Sie eingeladen hat, um einen neuen Link."
+      }
+    }
+  },
+  "capability": {
+    "platform": {
+      "tenant": {
+        "create": "Kunden anlegen",
+        "read": "Kunden einsehen",
+        "lifecycle": {
+          "change": "Lebenszyklus von Kunden ändern"
+        }
+      },
+      "diagnostics": {
+        "read": "Plattform-Diagnose einsehen"
+      }
+    },
+    "tenant": {
+      "read": "Kunden-Administration öffnen",
+      "settings": {
+        "update": "Kunden-Einstellungen ändern"
+      },
+      "user": {
+        "invite": "Personen einladen und Profile bearbeiten",
+        "deactivate": "Konten deaktivieren und Sitzungen beenden"
+      },
+      "role_assignment": {
+        "manage": "Rollen und Freigaben vergeben"
+      },
+      "group": {
+        "manage": "Gruppen verwalten"
+      },
+      "audit": {
+        "read": "Audit-Log einsehen"
+      }
+    },
+    "project": {
+      "read": "Projekte öffnen",
+      "create": "Projekte anlegen",
+      "settings": {
+        "update": "Projekt-Einstellungen ändern"
+      }
+    },
+    "dashboard": {
+      "read_published": "Veröffentlichte Dashboards ansehen",
+      "create": "Dashboards anlegen",
+      "edit_draft": "Dashboard-Entwürfe bearbeiten",
+      "publish": "Dashboards veröffentlichen"
+    },
+    "semantic": {
+      "read": "Semantischen Katalog lesen",
+      "manage": "Semantischen Katalog pflegen"
+    }
+  },
+  "auditAction": {
+    "platform": {
+      "bootstrap": {
+        "started": "Ersteinrichtung begonnen",
+        "completed": "Ersteinrichtung abgeschlossen",
+        "rejected": "Ersteinrichtung abgelehnt"
+      },
+      "recovery": {
+        "started": "Wiederherstellung begonnen",
+        "completed": "Wiederherstellung abgeschlossen"
+      }
+    },
+    "auth": {
+      "login": {
+        "succeeded": "Anmeldung",
+        "failed": "Anmeldung fehlgeschlagen"
+      },
+      "logout": "Abmeldung",
+      "session": {
+        "revoked": "Sitzung beendet"
+      },
+      "password": {
+        "changed": "Passwort geändert"
+      },
+      "reauthenticated": "Passwort erneut bestätigt"
+    },
+    "tenant": {
+      "created": "Kunde angelegt",
+      "lifecycle": {
+        "changed": "Lebenszyklus geändert"
+      },
+      "purged": "Kundendaten gelöscht"
+    },
+    "project": {
+      "created": "Projekt angelegt",
+      "updated": "Projekt geändert",
+      "site_assigned": "Matomo-Site zugeordnet"
+    },
+    "user": {
+      "invited": "Person eingeladen",
+      "invitation": {
+        "accepted": "Einladung angenommen"
+      },
+      "activated": "Konto aktiviert",
+      "deactivated": "Konto deaktiviert",
+      "updated": "Profil geändert"
+    },
+    "role_assignment": {
+      "created": "Rolle zugewiesen",
+      "removed": "Rolle entzogen"
+    },
+    "group": {
+      "created": "Gruppe angelegt",
+      "updated": "Gruppe geändert",
+      "deleted": "Gruppe gelöscht",
+      "membership": {
+        "changed": "Gruppenmitgliedschaft geändert"
+      }
+    },
+    "object_grant": {
+      "changed": "Freigabe geändert"
+    },
+    "matomo_connection": {
+      "created": "Matomo-Verbindung angelegt",
+      "credential_replaced": "Matomo-Zugangsdaten ersetzt",
+      "capabilities_refreshed": "Matomo-Fähigkeiten neu ermittelt",
+      "removed": "Matomo-Verbindung entfernt"
+    },
+    "matomo_site": {
+      "imported": "Matomo-Site importiert"
+    },
+    "semantic": {
+      "version_activated": "Definitionsversion aktiviert",
+      "version_deprecated": "Definitionsversion abgekündigt"
+    },
+    "source_binding": {
+      "changed": "Quellzuordnung geändert",
+      "reviewed": "Quellzuordnung geprüft"
+    },
+    "dashboard": {
+      "created": "Dashboard angelegt",
+      "published": "Dashboard veröffentlicht",
+      "rolled_back": "Dashboard zurückgesetzt",
+      "archived": "Dashboard archiviert",
+      "trashed": "Dashboard in den Papierkorb gelegt",
+      "restored": "Dashboard wiederhergestellt",
+      "editor_takeover": "Bearbeitung übernommen"
+    }
   }
 }

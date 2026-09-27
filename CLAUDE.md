@@ -13,9 +13,10 @@ Read before changing anything substantial:
 4. `../analytics_experience_version_d_v1.0/acceptance/acceptance_checklist.md`
 5. `docs/adr/` — decisions already taken here
 
-Current milestone: **Phase 5 — Administration, Tenant and Effective Access**.
-Phases 0–4 are complete and their gates are demonstrated
-(`npm run gate:f0|f1|f2|f3|f4`, see `docs/gates/`). Still open from earlier
+Current milestone: **Phase 6 — Project Setup and Solution Packages**.
+Phases 0–5 are complete and their gates are demonstrated
+(`npm run gate:f0|f1|f2|f3|f4|f5`, see `docs/gates/`). Data access needs a role
+capability and an object grant (ADR 0006) — a new data path must check both. Still open from earlier
 phases: the Inspector cannot yet pick a catalog definition per widget, and
 annotations have no store. Gate criteria are in the development plan.
 

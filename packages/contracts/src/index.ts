@@ -21,3 +21,4 @@ export * from './dashboard';
 export * from './layout';
 export * from './presentation';
 export * from './search';
+export * from './admin';

@@ -1,3 +1,4 @@
+import type { ObjectGrantView } from '@axp/contracts';
 import { and, eq, inArray, or } from 'drizzle-orm';
 import {
   AppError,
@@ -6,7 +7,6 @@ import {
   type DataAccessDecision,
   type GroupId,
   type ObjectAccess,
-  type ObjectGrant,
   type ObjectType,
   type SubjectType,
   type UserId,
@@ -19,12 +19,6 @@ export interface AccessServiceDeps {
   readonly db: Database;
   readonly audit: AuditService;
   readonly authorization: AuthorizationService;
-}
-
-/** An object grant with the names a person needs to read it. */
-export interface ObjectGrantView extends ObjectGrant {
-  readonly subjectLabel: string;
-  readonly objectLabel: string;
 }
 
 /**
@@ -550,3 +544,5 @@ export class AccessService {
     return labels;
   }
 }
+
+export type { ObjectGrantView };

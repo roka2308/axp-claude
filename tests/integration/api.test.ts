@@ -255,5 +255,22 @@ describe('API', () => {
       expect(body.error.category).toBe('validation_failed');
       expect(body.error.fieldErrors).toBeTruthy();
     });
+
+    it('answers a rate-limit refusal with what happened and when to retry', async () => {
+      // Sign-in allows 20 attempts a minute per client; the 21st is refused.
+      let response;
+      for (let attempt = 0; attempt < 21; attempt += 1) {
+        response = await app.inject({
+          method: 'POST',
+          url: '/auth/login',
+          payload: { email: 'niemand@example.invalid', password: 'falsch-aber-lang-genug' },
+        });
+      }
+      expect(response!.statusCode).toBe(429);
+      const body = response!.json();
+      expect(body.error.category).toBe('rate_limited');
+      expect(body.error.messageKey).toBe('errors.rate_limited.too_many_requests');
+      expect(body.error.messageParams.retryAfterSeconds).toBeGreaterThan(0);
+    });
   });
 });

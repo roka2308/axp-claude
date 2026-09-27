@@ -1,3 +1,4 @@
+import type { GroupSummary, GroupMember } from '@axp/contracts';
 import { and, count, eq, inArray } from 'drizzle-orm';
 import { AppError } from '@axp/contracts';
 import {
@@ -15,20 +16,6 @@ import type { AuditService } from '../audit/audit-service';
 export interface GroupServiceDeps {
   readonly db: Database;
   readonly audit: AuditService;
-}
-
-export interface GroupSummary {
-  readonly id: string;
-  readonly name: string;
-  readonly description: string | null;
-  readonly memberCount: number;
-}
-
-export interface GroupMember {
-  readonly userId: string;
-  readonly name: string;
-  readonly email: string;
-  readonly status: string;
 }
 
 /**
@@ -293,3 +280,5 @@ export class GroupService {
     }
   }
 }
+
+export type { GroupSummary, GroupMember };

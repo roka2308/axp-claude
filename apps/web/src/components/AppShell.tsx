@@ -30,11 +30,11 @@ const NAV_ENTRIES: readonly NavEntry[] = [
   // The cross-project library: every dashboard the caller may open.
   { key: 'dashboards', href: '/dashboards' },
   { key: 'templates', pendingPhase: 'Phase 6' },
-  { key: 'administration', pendingPhase: 'Phase 5' },
+  { key: 'administration', href: '/admin' },
 ];
 
 export interface AppShellProps {
-  readonly activeKey: NavEntry['key'] | 'search';
+  readonly activeKey: NavEntry['key'] | 'search' | 'profile';
   readonly version: VersionResponse | null;
   readonly headerEnd?: React.ReactNode;
   readonly children: React.ReactNode;
@@ -77,7 +77,16 @@ export async function AppShell({ activeKey, version, headerEnd, children }: AppS
             autoComplete="off"
           />
         </form>
-        <div className={styles.topbarEnd}>{headerEnd}</div>
+        <div className={styles.topbarEnd}>
+          <Link
+            href="/profile"
+            className={styles.profileLink}
+            aria-current={activeKey === 'profile' ? 'page' : undefined}
+          >
+            {t('profile')}
+          </Link>
+          {headerEnd}
+        </div>
       </header>
 
       <nav className={styles.sidebar} aria-label={t('primary')}>

@@ -2,6 +2,10 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
+  /* A select is as wide as its longest option by default; inside a row that
+     would push the page sideways on a phone. It takes the room it is given. */
+  min-width: 0;
+  max-width: 100%;
 }
 
 .label {
@@ -16,6 +20,7 @@
 }
 
 .select {
+  max-width: 100%;
   min-height: var(--density-control-height);
   padding: 0 var(--space-2);
   background: var(--surface-card);

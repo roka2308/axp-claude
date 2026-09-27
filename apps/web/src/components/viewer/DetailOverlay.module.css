@@ -41,8 +41,8 @@
   position: absolute;
   top: var(--space-4);
   right: var(--space-4);
-  min-height: var(--touch-target-min, 44px);
-  min-width: var(--touch-target-min, 44px);
+  min-height: var(--target-size-min);
+  min-width: var(--target-size-min);
   padding: 0 var(--space-3);
   color: var(--text-secondary);
   background: var(--surface-card);

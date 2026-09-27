@@ -2,6 +2,7 @@ import Fastify, { type FastifyBaseLogger, type FastifyInstance } from 'fastify';
 import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
 import type { AppConfig } from '@axp/config';
+import { errors } from '@axp/contracts';
 import type { Container } from '@axp/core';
 import type { Logger } from '@axp/observability';
 import { registerRequestContext } from './plugins/request-context';
@@ -55,6 +56,14 @@ export async function buildServer(options: BuildServerOptions): Promise<FastifyI
     global: false,
     max: 300,
     timeWindow: '1 minute',
+    // A refusal says what happened and when to try again, like any other
+    // product error - not "the request could not be processed".
+    errorResponseBuilder: (_request, context) =>
+      errors.rateLimited('too_many_requests', {
+        messageKey: 'errors.rate_limited.too_many_requests',
+        messageParams: { retryAfterSeconds: Math.ceil(context.ttl / 1000) },
+        internalMessage: `Rate limit of ${context.max} per ${context.after} reached.`,
+      }),
   });
 
   registerRequestContext(app);

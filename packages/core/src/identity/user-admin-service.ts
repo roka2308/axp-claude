@@ -1,11 +1,7 @@
+import type { ProfileField, UserListEntry, UserDetail } from '@axp/contracts';
+import { PROFILE_FIELDS } from '@axp/contracts';
 import { and, desc, eq, gt, inArray, isNull, ne } from 'drizzle-orm';
-import {
-  AppError,
-  type AuthContext,
-  type AuthProviderType,
-  type Locale,
-  type UserStatus,
-} from '@axp/contracts';
+import { AppError, type AuthContext, type Locale } from '@axp/contracts';
 import {
   authIdentities,
   type Database,
@@ -31,41 +27,6 @@ export interface UserAdminServiceDeps {
   readonly revokeAllSessions: (userId: string, reason: string) => Promise<number>;
   /** How long an invitation link stays usable. */
   readonly invitationTtlHours: number;
-}
-
-/** Profile fields a person or an administrator may edit. */
-export const PROFILE_FIELDS = ['firstName', 'lastName', 'email', 'locale'] as const;
-export type ProfileField = (typeof PROFILE_FIELDS)[number];
-
-export interface UserListEntry {
-  readonly id: string;
-  readonly name: string;
-  readonly email: string;
-  readonly status: UserStatus;
-  readonly provider: AuthProviderType;
-  readonly lastLoginAt: string | null;
-  readonly groups: readonly string[];
-  readonly roles: readonly string[];
-}
-
-export interface UserDetail {
-  readonly id: string;
-  readonly firstName: string;
-  readonly lastName: string;
-  readonly email: string;
-  readonly locale: Locale;
-  readonly status: UserStatus;
-  readonly provider: AuthProviderType;
-  /**
-   * Fields the identity provider owns. Shown as "Durch Identity Provider
-   * verwaltet" and never editable here (Master Spec §12).
-   */
-  readonly managedAttributes: readonly ProfileField[];
-  readonly lastLoginAt: string | null;
-  readonly deactivatedAt: string | null;
-  readonly activeSessions: number;
-  readonly pendingInvitation: { readonly expiresAt: string } | null;
-  readonly groups: readonly { readonly id: string; readonly name: string }[];
 }
 
 /**
@@ -425,7 +386,7 @@ export class UserAdminService {
     await this.requireMember(input.tenantId, input.userId);
     await this.assertMayChangeStatus(input.tenantId, input.userId, input.actor);
 
-    await this.deps.users.deactivate(input.userId, input.actor.userId);
+    await this.deps.users.deactivate(input.userId, input.actor.userId, input.tenantId);
     const revokedSessions = await this.deps.revokeAllSessions(input.userId, 'deactivated');
     return { revokedSessions };
   }
@@ -433,7 +394,7 @@ export class UserAdminService {
   async reactivate(input: { tenantId: string; userId: string; actor: AuthContext }): Promise<void> {
     await this.requireMember(input.tenantId, input.userId);
     await this.assertMayChangeStatus(input.tenantId, input.userId, input.actor);
-    await this.deps.users.activate(input.userId, input.actor.userId);
+    await this.deps.users.activate(input.userId, input.actor.userId, input.tenantId);
   }
 
   async revokeSessions(input: {
@@ -578,3 +539,6 @@ function normalise(text: string): string {
     .normalize('NFKD')
     .replace(/\p{Diacritic}/gu, '');
 }
+
+export type { ProfileField, UserListEntry, UserDetail };
+export { PROFILE_FIELDS };
