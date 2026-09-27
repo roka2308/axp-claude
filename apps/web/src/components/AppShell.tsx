@@ -27,15 +27,14 @@ interface NavEntry {
 const NAV_ENTRIES: readonly NavEntry[] = [
   { key: 'home', href: '/' },
   { key: 'projects', href: '/projects' },
-  // Dashboards are reached through their project until the cross-project
-  // library lands with the viewer work in Phase 4.
-  { key: 'dashboards', href: '/projects' },
+  // The cross-project library: every dashboard the caller may open.
+  { key: 'dashboards', href: '/dashboards' },
   { key: 'templates', pendingPhase: 'Phase 6' },
   { key: 'administration', pendingPhase: 'Phase 5' },
 ];
 
 export interface AppShellProps {
-  readonly activeKey: NavEntry['key'];
+  readonly activeKey: NavEntry['key'] | 'search';
   readonly version: VersionResponse | null;
   readonly headerEnd?: React.ReactNode;
   readonly children: React.ReactNode;
@@ -45,6 +44,7 @@ export async function AppShell({ activeKey, version, headerEnd, children }: AppS
   const t = await getTranslations('nav');
   const tProduct = await getTranslations('product');
   const tSystem = await getTranslations('system');
+  const tSearch = await getTranslations('search');
 
   return (
     <div className={styles.shell}>
@@ -57,6 +57,26 @@ export async function AppShell({ activeKey, version, headerEnd, children }: AppS
           */}
           <span className={styles.contextSwitcher}>{t('tenantSwitcher')}</span>
         </div>
+        {/*
+          Product search (D1). A plain GET form, so it works without
+          JavaScript and the results page is a URL like any other. It finds
+          projects, dashboards and definitions - never data.
+        */}
+        <form action="/search" method="get" role="search" className={styles.search}>
+          <label htmlFor="product-search" className="sr-only">
+            {tSearch('label')}
+          </label>
+          <input
+            id="product-search"
+            name="q"
+            type="search"
+            className={styles.searchInput}
+            placeholder={tSearch('placeholder')}
+            minLength={2}
+            maxLength={100}
+            autoComplete="off"
+          />
+        </form>
         <div className={styles.topbarEnd}>{headerEnd}</div>
       </header>
 

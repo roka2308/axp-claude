@@ -1,10 +1,21 @@
 import type { CSSProperties, ReactNode } from 'react';
-import type { WidgetPresentation } from '@axp/contracts';
+import type { ResponsivePlacement } from '@axp/contracts';
 import styles from './DashboardGrid.module.css';
 
-export interface DashboardGridProps {
-  readonly widgets: readonly WidgetPresentation[];
-  readonly renderWidget: (widget: WidgetPresentation) => ReactNode;
+/**
+ * The grid needs a placement and an id, and nothing else.
+ *
+ * Typed that narrowly on purpose: it lets the grid be drawn from the layout
+ * alone, before any widget has its values (Master Spec §11).
+ */
+export interface GridItem {
+  readonly widgetId: string;
+  readonly placement: ResponsivePlacement;
+}
+
+export interface DashboardGridProps<T extends GridItem> {
+  readonly widgets: readonly T[];
+  readonly renderWidget: (widget: T) => ReactNode;
 }
 
 /**
@@ -17,7 +28,10 @@ export interface DashboardGridProps {
  * Widgets are emitted in reading order - top to bottom, then left to right -
  * so the derived layouts and the tab order both follow what a reader expects.
  */
-export function DashboardGrid({ widgets, renderWidget }: DashboardGridProps) {
+export function DashboardGrid<T extends GridItem>({
+  widgets,
+  renderWidget,
+}: DashboardGridProps<T>) {
   const ordered = [...widgets].sort((a, b) => {
     const rowDelta = a.placement.desktop.y - b.placement.desktop.y;
     return rowDelta !== 0 ? rowDelta : a.placement.desktop.x - b.placement.desktop.x;

@@ -1,4 +1,6 @@
+import { Suspense } from 'react';
 import Link from 'next/link';
+import type { Route } from 'next';
 import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import {
@@ -11,12 +13,12 @@ import { Button, Callout } from '@axp/ui';
 import { AppShell } from '@/components/AppShell';
 import { DashboardGrid } from '@/components/DashboardGrid';
 import { ViewerControls } from '@/components/ViewerControls';
-import { WidgetFrame } from '@/components/widgets/WidgetFrame';
-import { WidgetContent } from '@/components/widgets/WidgetContent';
+import { CauseSurface } from '@/components/viewer/CauseSurface';
+import { DetailOverlay } from '@/components/viewer/DetailOverlay';
+import { WidgetDetail } from '@/components/viewer/WidgetDetail';
+import { WidgetTile, WidgetTileSkeleton } from '@/components/viewer/WidgetTile';
 import { getApiVersion, getCurrentUser } from '@/lib/platform';
-import { getPresentation } from '@/lib/analytics';
-import { ApiError, ApiUnreachableError } from '@/lib/api-client';
-import { resolveError } from '@/lib/error-messages';
+import { getDashboardLayout, getWidgetDetail } from '@/lib/analytics';
 import { logoutAction } from '@/app/login/actions';
 import styles from './dashboard.module.css';
 
@@ -26,6 +28,8 @@ interface DashboardPageProps {
     readonly timeRange?: string;
     readonly comparison?: string;
     readonly source?: string;
+    /** The widget whose detail view is open, if any. */
+    readonly widget?: string;
   }>;
 }
 
@@ -39,25 +43,57 @@ interface DashboardPageProps {
 export default async function DashboardPage({ params, searchParams }: DashboardPageProps) {
   const t = await getTranslations();
   const { dashboardId } = await params;
-  const query = await searchParams;
+  const search = await searchParams;
 
   const [user, version] = await Promise.all([getCurrentUser(), getApiVersion()]);
   if (!user) redirect('/login');
 
-  const timeRange = asPreset(query.timeRange);
-  const comparison = asComparison(query.comparison);
-  const source = query.source === 'draft' ? 'draft' : 'published';
+  const timeRange = asPreset(search.timeRange);
+  const comparison = asComparison(search.comparison);
+  const source = search.source === 'draft' ? 'draft' : 'published';
+
+  /*
+   * The layout first, and only the layout: it comes from the stored snapshot
+   * and asks Matomo nothing, so the grid is on screen while the widgets are
+   * still being fetched. Each tile then streams in on its own (Master Spec §11).
+   */
+  const query = { timeRange, comparison, source } as const;
 
   let presentation;
   try {
-    presentation = await getPresentation(dashboardId, { timeRange, comparison, source });
+    presentation = await getDashboardLayout(dashboardId, query);
   } catch (error) {
     return (
       <AppShell activeKey="dashboards" version={version}>
-        <DashboardError error={error} />
+        <CauseSurface error={error} />
       </AppShell>
     );
   }
+
+  /*
+   * The detail view is a URL, not a client-side state: `?widget=<id>` renders
+   * it server-side inside a focus-managed dialog. That makes it shareable, it
+   * survives a reload, and the content is in the document before any
+   * JavaScript runs (D4).
+   *
+   * Fetched separately and tolerantly: a detail view that fails must not take
+   * the dashboard behind it down with it.
+   */
+  const openWidgetId = search.widget;
+  const detail = openWidgetId
+    ? await getWidgetDetail(dashboardId, openWidgetId, { timeRange, comparison, source }).catch(
+        () => null,
+      )
+    : null;
+
+  const viewHref = (params: Record<string, string | undefined>): Route => {
+    const search = new URLSearchParams();
+    for (const [key, value] of Object.entries({ timeRange, comparison, ...params })) {
+      if (value) search.set(key, value);
+    }
+    if (source === 'draft') search.set('source', 'draft');
+    return `/dashboards/${dashboardId}?${search.toString()}` as Route;
+  };
 
   return (
     <AppShell
@@ -123,10 +159,18 @@ export default async function DashboardPage({ params, searchParams }: DashboardP
         ) : (
           <DashboardGrid
             widgets={presentation.widgets}
-            renderWidget={(widget) => (
-              <WidgetFrame widget={widget}>
-                <WidgetContent widget={widget} />
-              </WidgetFrame>
+            renderWidget={(shell) => (
+              // One boundary per widget. React streams each tile in as its own
+              // query resolves, which is what makes `loading` a state a viewer
+              // actually sees rather than a case in a type union (D10).
+              <Suspense fallback={<WidgetTileSkeleton shell={shell} />}>
+                <WidgetTile
+                  dashboardId={dashboardId}
+                  shell={shell}
+                  query={query}
+                  detailHref={viewHref({ widget: shell.widgetId })}
+                />
+              </Suspense>
             )}
           />
         )}
@@ -135,41 +179,22 @@ export default async function DashboardPage({ params, searchParams }: DashboardP
           {t('projects.backToList')}
         </Link>
       </div>
+
+      {openWidgetId ? (
+        <DetailOverlay
+          closeHref={viewHref({ widget: undefined })}
+          title={detail?.widget.title ?? t('detail.title')}
+        >
+          {detail ? (
+            <WidgetDetail detail={detail} />
+          ) : (
+            <Callout tone="critical" title={t('detail.loadFailedTitle')}>
+              {t('detail.loadFailedBody')}
+            </Callout>
+          )}
+        </DetailOverlay>
+      ) : null}
     </AppShell>
-  );
-}
-
-/**
- * Renders a dashboard-level failure with its actual cause.
- *
- * A dashboard that was never published, one the caller may not see and an
- * unreachable API are three different situations, and D10 requires them to
- * look different.
- */
-async function DashboardError({ error }: { readonly error: unknown }) {
-  const t = await getTranslations();
-  const resolved = await resolveError(error);
-
-  const tone =
-    error instanceof ApiError && error.body.category === 'setup_required' ? 'warning' : 'critical';
-
-  const title =
-    error instanceof ApiUnreachableError
-      ? t('errors.unreachable')
-      : error instanceof ApiError && error.body.category === 'permission_denied'
-        ? t('viewer.permissionDeniedTitle')
-        : t('viewer.loadFailedTitle');
-
-  return (
-    <div className="stack">
-      <Callout tone={tone} title={title}>
-        <div className="stack stack--tight">
-          <span>{resolved.message}</span>
-          {resolved.action ? <span className="text-muted">{resolved.action}</span> : null}
-        </div>
-      </Callout>
-      <Link href="/projects">{t('projects.backToList')}</Link>
-    </div>
   );
 }
 

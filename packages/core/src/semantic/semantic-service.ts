@@ -892,14 +892,26 @@ export class SemanticService {
   }
 
   /** Names for display, keyed by version id. Used by the presentation layer. */
-  async describeVersions(
-    versionIds: readonly string[],
-  ): Promise<Map<string, { name: string; body: SemanticDefinitionBody; version: number }>> {
+  async describeVersions(versionIds: readonly string[]): Promise<
+    Map<
+      string,
+      {
+        name: string;
+        description: string | null;
+        body: SemanticDefinitionBody;
+        version: number;
+      }
+    >
+  > {
     const versions = await this.resolveVersions(versionIds);
     if (versions.length === 0) return new Map();
 
     const definitions = await this.deps.db
-      .select({ id: semanticDefinitions.id, name: semanticDefinitions.name })
+      .select({
+        id: semanticDefinitions.id,
+        name: semanticDefinitions.name,
+        description: semanticDefinitions.description,
+      })
       .from(semanticDefinitions)
       .where(
         inArray(
@@ -909,12 +921,16 @@ export class SemanticService {
       );
 
     const namesByDefinition = new Map(definitions.map((row) => [row.id, row.name]));
+    const descriptionsByDefinition = new Map(
+      definitions.map((row) => [row.id, row.description ?? null]),
+    );
 
     return new Map(
       versions.map((version) => [
         version.id,
         {
           name: namesByDefinition.get(version.definitionId) ?? 'Unbenannt',
+          description: descriptionsByDefinition.get(version.definitionId) ?? null,
           body: version.body,
           version: version.version,
         },

@@ -4,6 +4,7 @@ import { users } from '@axp/db';
 import { type Container, generateSecretToken } from '@axp/core';
 import { DEMO_USER_NAMES, type DemoSeed, loadDemoSeed } from './demo-seed';
 import { seedReferenceDashboard, type SeedDashboardResult } from './seed-dashboard';
+import { seedStateModelDashboard, type SeedStateModelResult } from './seed-state-model';
 
 export interface SeedOptions {
   /**
@@ -28,6 +29,8 @@ export interface SeedResult {
   readonly projectId: string;
   readonly accounts: readonly SeededAccount[];
   readonly dashboard?: SeedDashboardResult;
+  /** One widget per D10 value state, for Gate F4. */
+  readonly stateModel?: SeedStateModelResult;
 }
 
 /**
@@ -190,9 +193,25 @@ export async function seedDemoData(
     ? await seedReferenceDashboard(container, { tenantId, projectId, actorUserId: editorUserId })
     : undefined;
 
+  const stateModel =
+    editorUserId && dashboard
+      ? await seedStateModelDashboard(container, {
+          tenantId,
+          projectId,
+          siteId: dashboard.siteId,
+          actorUserId: editorUserId,
+        })
+      : undefined;
+
   await container.projects.refreshSetupState(tenantId, projectId);
 
-  return { tenantId, projectId, accounts, ...(dashboard ? { dashboard } : {}) };
+  return {
+    tenantId,
+    projectId,
+    accounts,
+    ...(dashboard ? { dashboard } : {}),
+    ...(stateModel ? { stateModel } : {}),
+  };
 }
 
 async function findUserId(container: Container, email: string): Promise<string | null> {

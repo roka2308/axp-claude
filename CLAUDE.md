@@ -13,11 +13,11 @@ Read before changing anything substantial:
 4. `../analytics_experience_version_d_v1.0/acceptance/acceptance_checklist.md`
 5. `docs/adr/` — decisions already taken here
 
-Current milestone: **Phase 4 — Viewer, Detail and State Model**. Phases 0–3 are
-complete and their gates are demonstrated (`npm run gate:f0|f1|f2|f3`, see
-`docs/gates/`). Phase 3 left the widget-level data configuration to here:
-the catalog can define a metric, and the Inspector has yet to let an editor
-pick one per widget. Gate criteria are in the development plan.
+Current milestone: **Phase 5 — Administration, Tenant and Effective Access**.
+Phases 0–4 are complete and their gates are demonstrated
+(`npm run gate:f0|f1|f2|f3|f4`, see `docs/gates/`). Still open from earlier
+phases: the Inspector cannot yet pick a catalog definition per widget, and
+annotations have no store. Gate criteria are in the development plan.
 
 ## Non-negotiable invariants
 

@@ -10,10 +10,14 @@ import type { BuildInfo } from '@axp/contracts';
 export const PRODUCT_VERSION = '0.1.0';
 
 /**
- * Database schema version. Bumped when a migration changes the contract
- * between product version and stored data, not on every migration.
+ * Database schema version: the number of committed migrations.
+ *
+ * Counted rather than chosen. It stood at '1' through three further migrations
+ * because bumping it was a judgement call nobody made, while every gate record
+ * was already quoting the migration count. A test compares it with the
+ * migration journal, so the footer and the database cannot disagree again.
  */
-export const SCHEMA_VERSION = '1';
+export const SCHEMA_VERSION = '4';
 
 export function getBuildInfo(service: string): BuildInfo {
   return {

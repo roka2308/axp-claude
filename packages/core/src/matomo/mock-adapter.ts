@@ -62,6 +62,30 @@ const MOCK_SCENARIOS: readonly MockScenario[] = [
   'unavailable',
 ];
 
+/**
+ * Source metrics that always produce one particular value state.
+ *
+ * The state model has ten states, and a fixture has to be able to show all of
+ * them side by side (Gate F4). A scenario cannot do that on its own, because a
+ * dashboard reads one site and therefore one connection: the states have to
+ * vary per widget, which means per metric.
+ *
+ * Each one stands for a situation a real Matomo produces - a report the site
+ * does not compute, a value that came back uninterpretable, a period that is
+ * only partly processed, a report that answered 503. Named for the mock so
+ * nobody mistakes them for product vocabulary; a fixture reaches them through
+ * an ordinary `native_metric` source binding.
+ */
+export const MOCK_STATE_METRICS = {
+  zero: 'mock_state_zero',
+  empty: 'mock_state_empty',
+  unknown: 'mock_state_unknown',
+  notTracked: 'mock_state_not_tracked',
+  notApplicable: 'mock_state_not_applicable',
+  warning: 'mock_state_warning',
+  unavailable: 'mock_state_unavailable',
+} as const;
+
 export const MOCK_CONNECTION_PREFIX = 'mock://';
 export const MOCK_MATOMO_VERSION = '5.3.2';
 
@@ -158,6 +182,22 @@ export class MockMatomoAdapter implements MatomoConnector {
   async execute(connection: ResolvedConnection, query: ResolvedQuery): Promise<AnalyticsResult> {
     this.assertReachable(connection);
     const scenario = scenarioFromUrl(connection.baseUrl);
+
+    /*
+     * One report answering 503 while the rest of the installation is fine. The
+     * whole query fails, which is correct: the widget that asked for it is the
+     * one that reports `unavailable`, and its neighbours are unaffected because
+     * each widget queries on its own (Master Spec §11).
+     */
+    if (
+      query.sourceMetrics.some((metric) => metric.sourceMetric === MOCK_STATE_METRICS.unavailable)
+    ) {
+      throw new AppError('source_unavailable', {
+        code: 'mock_report_unavailable',
+        messageKey: 'matomo.source_unavailable',
+        internalMessage: `Mock report "${MOCK_STATE_METRICS.unavailable}" is deliberately unreachable.`,
+      });
+    }
 
     const freshness = {
       fetchedAt: this.clock.now().toISOString(),
@@ -317,6 +357,15 @@ export class MockMatomoAdapter implements MatomoConnector {
     to: CalendarDate,
     scenario: MockScenario,
   ) {
+    const reserved = stateMetricValue(sourceMetric, () => {
+      let total = 0;
+      for (let date = from; compareDates(date, to) <= 0; date = addDays(date, 1)) {
+        total += this.dailyValue(query.siteId, sourceMetric, date);
+      }
+      return total;
+    });
+    if (reserved) return reserved;
+
     if (scenario === 'empty') return valueEnvelope.empty();
     if (scenario === 'zero') return valueEnvelope.measured(0);
 
@@ -334,10 +383,20 @@ export class MockMatomoAdapter implements MatomoConnector {
     granularity: 'day' | 'week' | 'month',
     scenario: MockScenario,
   ) {
+    const days = granularity === 'day' ? 1 : granularity === 'week' ? 7 : 30;
+
+    const reserved = stateMetricValue(sourceMetric, () => {
+      let total = 0;
+      for (let offset = 0; offset < days; offset += 1) {
+        total += this.dailyValue(query.siteId, sourceMetric, addDays(periodStart, offset));
+      }
+      return total;
+    });
+    if (reserved) return reserved;
+
     if (scenario === 'empty') return valueEnvelope.empty();
     if (scenario === 'zero') return valueEnvelope.measured(0);
 
-    const days = granularity === 'day' ? 1 : granularity === 'week' ? 7 : 30;
     let total = 0;
     for (let offset = 0; offset < days; offset += 1) {
       total += this.dailyValue(query.siteId, sourceMetric, addDays(periodStart, offset));
@@ -421,6 +480,39 @@ const BASE_DAILY_VALUES: Readonly<Record<string, number>> = {
 
 export function isMockConnection(baseUrl: string): boolean {
   return baseUrl.startsWith(MOCK_CONNECTION_PREFIX);
+}
+
+/**
+ * The value a reserved state metric produces, or nothing for a normal one.
+ *
+ * `measure` is only called for the states that carry a number, so a state that
+ * carries none costs nothing to produce.
+ */
+function stateMetricValue(sourceMetric: string, measure: () => number): ValueEnvelope | null {
+  switch (sourceMetric) {
+    case MOCK_STATE_METRICS.zero:
+      // A measured zero. A value, and never a stand-in for an absence (D10).
+      return valueEnvelope.measured(0);
+    case MOCK_STATE_METRICS.empty:
+      return valueEnvelope.empty();
+    case MOCK_STATE_METRICS.unknown:
+      return valueEnvelope.unknown('matomo.value_unreadable');
+    case MOCK_STATE_METRICS.notTracked:
+      return valueEnvelope.notTracked('matomo.not_tracked_here');
+    case MOCK_STATE_METRICS.notApplicable:
+      return valueEnvelope.notApplicable('matomo.not_applicable_here');
+    case MOCK_STATE_METRICS.warning:
+      // A number worth showing, with a caveat worth reading alongside it: the
+      // last day of the period has not finished processing (Master Spec §18).
+      return valueEnvelope.warning(measure(), [
+        {
+          severity: 'warning',
+          messageKey: 'quality.period_partially_processed',
+        },
+      ]);
+    default:
+      return null;
+  }
 }
 
 export function scenarioFromUrl(baseUrl: string): MockScenario {

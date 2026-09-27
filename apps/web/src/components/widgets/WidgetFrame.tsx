@@ -1,3 +1,5 @@
+import Link from 'next/link';
+import type { Route } from 'next';
 import { getTranslations } from 'next-intl/server';
 import type { WidgetPresentation } from '@axp/contracts';
 import styles from './WidgetFrame.module.css';
@@ -13,9 +15,18 @@ import styles from './WidgetFrame.module.css';
 export async function WidgetFrame({
   widget,
   children,
+  detailHref,
 }: {
   readonly widget: WidgetPresentation;
   readonly children?: React.ReactNode;
+  /**
+   * Where the detail view lives, when one is reachable from here.
+   *
+   * A link rather than a click handler on the tile: the detail view is a URL,
+   * so it can be shared, opened in a new tab and reached by keyboard without
+   * anything extra (D4, D10).
+   */
+  readonly detailHref?: Route;
 }) {
   const t = await getTranslations();
 
@@ -25,7 +36,16 @@ export async function WidgetFrame({
   return (
     <section className={styles.widget} aria-label={widget.title}>
       <header className={styles.header}>
-        <h3 className={styles.title}>{widget.title}</h3>
+        <h3 className={styles.title}>
+          {detailHref ? (
+            <Link href={detailHref} className={styles.titleLink} scroll={false}>
+              {widget.title}
+              <span className={styles.detailHint}>{t('detail.open')}</span>
+            </Link>
+          ) : (
+            widget.title
+          )}
+        </h3>
         {widget.freshness ? (
           <span className={styles.freshness}>
             {/*
@@ -86,9 +106,17 @@ async function WidgetStateMessage({ widget }: { readonly widget: WidgetPresentat
     ? tryTranslate(t, widget.unavailable.actionKey)
     : null;
 
+  // The reason the source gave, beneath the state word: "Nicht erfasst", and
+  // then why (D10). Omitted rather than guessed when there is none.
+  const reason =
+    widget.stateMessage && t.has(widget.stateMessage.messageKey)
+      ? t(widget.stateMessage.messageKey, widget.stateMessage.messageParams as never)
+      : null;
+
   return (
     <div className={styles.state} data-state={widget.state}>
       <span className={styles.stateLabel}>{message}</span>
+      {reason ? <span className={styles.stateReason}>{reason}</span> : null}
       {action ? <span className={styles.stateAction}>{action}</span> : null}
     </div>
   );

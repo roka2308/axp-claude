@@ -47,7 +47,9 @@
     "gate:f2": "node scripts/verify-gate-f2.mjs",
     "gate:f2:local": "node scripts/verify-gate-f2.mjs --local-mysql",
     "gate:f3": "node scripts/verify-gate-f3.mjs",
-    "gate:f3:local": "node scripts/verify-gate-f3.mjs --local-mysql"
+    "gate:f3:local": "node scripts/verify-gate-f3.mjs --local-mysql",
+    "gate:f4": "node scripts/verify-gate-f4.mjs",
+    "gate:f4:local": "node scripts/verify-gate-f4.mjs --local-mysql"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

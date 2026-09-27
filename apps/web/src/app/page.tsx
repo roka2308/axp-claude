@@ -1,17 +1,19 @@
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { Button, Callout, Card } from '@axp/ui';
 import { AppShell } from '@/components/AppShell';
 import { getApiVersion, getCurrentUser, getPlatformStatus } from '@/lib/platform';
+import { listLibraryDashboards } from '@/lib/analytics';
 import { logoutAction } from '@/app/login/actions';
 
 /**
  * Home.
  *
  * Role-adaptive by design (Master Spec §16) - one Home for everyone, not
- * separate role portals. Phase 0 shows identity, effective roles and build
- * metadata; dashboards, projects and attention items arrive with their
- * milestones.
+ * separate role portals. The first thing on it is what most people came for:
+ * the dashboards they may open, most recently changed first. Roles follow,
+ * with the reminder that a role alone opens no data.
  */
 export default async function HomePage() {
   const t = await getTranslations();
@@ -24,6 +26,13 @@ export default async function HomePage() {
   if (!user) redirect('/login');
 
   const fullName = `${user.user.firstName} ${user.user.lastName}`.trim();
+
+  // Tolerant: a Home that fails because the library could not be read would
+  // hide the roles and the sign-out along with it.
+  const recent = (await listLibraryDashboards().catch(() => []))
+    .filter((dashboard) => dashboard.publishedVersion !== null)
+    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
+    .slice(0, 6);
 
   return (
     <AppShell
@@ -43,6 +52,24 @@ export default async function HomePage() {
           <h1>{t('home.title')}</h1>
           <p className="text-secondary">{t('home.subtitle')}</p>
         </div>
+
+        <Card title={t('home.recentTitle')}>
+          {recent.length === 0 ? (
+            <p className="text-muted">{t('home.recentEmpty')}</p>
+          ) : (
+            <ul className="stack stack--tight">
+              {recent.map((dashboard) => (
+                <li key={dashboard.id}>
+                  <Link href={`/dashboards/${dashboard.id}`}>{dashboard.name}</Link>{' '}
+                  <span className="text-muted">· {dashboard.projectName}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+          <p>
+            <Link href="/dashboards">{t('home.allDashboards')}</Link>
+          </p>
+        </Card>
 
         <Card title={t('home.rolesTitle')}>
           <div className="stack">
@@ -68,10 +95,6 @@ export default async function HomePage() {
             */}
             <Callout tone="info">{t('home.noAutomaticDataAccess')}</Callout>
           </div>
-        </Card>
-
-        <Card title={t('home.nextMilestone')}>
-          <p className="text-secondary">{t('home.nextMilestoneBody')}</p>
         </Card>
       </div>
     </AppShell>

@@ -2,10 +2,14 @@ import 'server-only';
 import type {
   Capability,
   ComparisonMode,
+  DashboardLayoutPresentation,
   DashboardPresentation,
   DashboardRef,
+  ProductSearchResult,
   SetupReadiness,
   TimeRangePreset,
+  WidgetDetailPresentation,
+  WidgetPresentation,
 } from '@axp/contracts';
 import { apiRequest } from './api-client';
 
@@ -89,6 +93,68 @@ export interface PresentationQuery {
   readonly source?: 'published' | 'draft';
 }
 
+function viewSearch(query: PresentationQuery): string {
+  return new URLSearchParams({
+    timeRange: query.timeRange,
+    comparison: query.comparison,
+    breakpoint: query.breakpoint ?? 'desktop',
+    source: query.source ?? 'published',
+  }).toString();
+}
+
+/**
+ * The dashboard without its numbers.
+ *
+ * Returns before any Matomo call has been made, so the grid is on screen while
+ * the widgets are still being fetched (Master Spec §11).
+ */
+export async function getDashboardLayout(
+  dashboardId: string,
+  query: PresentationQuery,
+): Promise<DashboardLayoutPresentation> {
+  return apiRequest<DashboardLayoutPresentation>(
+    `/dashboards/${encodeURIComponent(dashboardId)}/layout?${viewSearch(query)}`,
+    { authenticated: true },
+  );
+}
+
+/** One widget's values, fetched on its own so a slow metric delays only itself. */
+export async function getWidgetTile(
+  dashboardId: string,
+  widgetId: string,
+  query: PresentationQuery,
+): Promise<WidgetPresentation> {
+  return apiRequest<WidgetPresentation>(
+    `/dashboards/${encodeURIComponent(dashboardId)}/widgets/${encodeURIComponent(widgetId)}?${viewSearch(query)}`,
+    { authenticated: true },
+  );
+}
+
+/**
+ * One widget, in depth.
+ *
+ * Its own request, so that opening a detail view does not re-fetch the whole
+ * dashboard and a detail view that fails leaves the grid behind it intact
+ * (Master Spec §11).
+ */
+export async function getWidgetDetail(
+  dashboardId: string,
+  widgetId: string,
+  query: PresentationQuery,
+): Promise<WidgetDetailPresentation> {
+  const search = new URLSearchParams({
+    timeRange: query.timeRange,
+    comparison: query.comparison,
+    breakpoint: query.breakpoint ?? 'desktop',
+    source: query.source ?? 'published',
+  });
+
+  return apiRequest<WidgetDetailPresentation>(
+    `/dashboards/${encodeURIComponent(dashboardId)}/widgets/${encodeURIComponent(widgetId)}/detail?${search.toString()}`,
+    { authenticated: true },
+  );
+}
+
 export async function getPresentation(
   dashboardId: string,
   query: PresentationQuery,
@@ -104,4 +170,25 @@ export async function getPresentation(
     `/dashboards/${encodeURIComponent(dashboardId)}/presentation?${search.toString()}`,
     { authenticated: true },
   );
+}
+
+/** A dashboard in the library, with the project it belongs to. */
+export interface LibraryDashboard extends DashboardRef {
+  readonly projectName: string;
+  readonly tenantName: string;
+}
+
+/** Every dashboard the caller may open, across projects (D1). */
+export async function listLibraryDashboards(): Promise<LibraryDashboard[]> {
+  const { dashboards } = await apiRequest<{ dashboards: LibraryDashboard[] }>('/dashboards', {
+    authenticated: true,
+  });
+  return dashboards;
+}
+
+/** Product search: projects, dashboards and definitions by name - never data. */
+export async function searchProductObjects(query: string): Promise<ProductSearchResult> {
+  return apiRequest<ProductSearchResult>(`/search?${new URLSearchParams({ q: query })}`, {
+    authenticated: true,
+  });
 }

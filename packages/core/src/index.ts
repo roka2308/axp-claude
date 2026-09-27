@@ -36,3 +36,4 @@ export * from './semantic/score';
 
 export * from './dashboard/dashboard-service';
 export * from './dashboard/presentation-builder';
+export * from './search/product-search';

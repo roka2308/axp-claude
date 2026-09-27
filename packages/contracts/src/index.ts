@@ -20,3 +20,4 @@ export * from './semantic';
 export * from './dashboard';
 export * from './layout';
 export * from './presentation';
+export * from './search';

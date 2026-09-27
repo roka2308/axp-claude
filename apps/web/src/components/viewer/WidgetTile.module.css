@@ -1,0 +1,56 @@
+/*
+ * A tile whose query is still running. Same frame as a finished one, so nothing
+ * jumps when the values arrive.
+ */
+.skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  height: 100%;
+  padding: var(--density-card-padding);
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.title {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+}
+
+.state {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+}
+
+.bar,
+.barShort {
+  display: block;
+  height: 0.75rem;
+  border-radius: var(--radius-full);
+  background: var(--surface-sunken);
+}
+
+.barShort {
+  width: 60%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .bar,
+  .barShort {
+    animation: pulse 1.4s ease-in-out infinite;
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.45;
+  }
+}

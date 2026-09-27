@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { eq } from 'drizzle-orm';
 import {
   AppError,
+  type AuthContext,
   type Breakpoint,
   comparisonModeSchema,
   type DashboardSnapshot,
@@ -348,6 +349,174 @@ export function registerDashboardRoutes(app: FastifyInstance, container: Contain
       });
     },
   );
+
+  /**
+   * The dashboard without its numbers (Master Spec §11).
+   *
+   * Answered from the stored snapshot alone, so it returns before any Matomo
+   * call has been made. The viewer draws the grid from this and then asks for
+   * each widget separately, which is what makes the widgets independent rather
+   * than merely described as such.
+   */
+  app.get('/dashboards/:dashboardId/layout', { onRequest: [app.authenticate] }, async (request) => {
+    const auth = requireAuth(request);
+    const { dashboardId } = z.object({ dashboardId: z.string() }).parse(request.params);
+    const query = viewQuerySchema.parse(request.query);
+    const resolved = await resolveView(container, auth, dashboardId, query);
+
+    return container.presentation.buildLayout(resolved.input);
+  });
+
+  /**
+   * One widget's values.
+   *
+   * Its own request so a slow metric delays only its own tile. Authorized
+   * identically to the dashboard: asking for one widget is not a way past the
+   * capability that guards the whole.
+   */
+  app.get(
+    '/dashboards/:dashboardId/widgets/:widgetId',
+    { onRequest: [app.authenticate] },
+    async (request) => {
+      const auth = requireAuth(request);
+      const { dashboardId, widgetId } = z
+        .object({ dashboardId: z.string(), widgetId: z.string().min(1) })
+        .parse(request.params);
+      const query = viewQuerySchema.parse(request.query);
+      const resolved = await resolveView(container, auth, dashboardId, query);
+
+      return container.presentation.buildTile({ ...resolved.input, widgetId });
+    },
+  );
+
+  /**
+   * One widget, in depth (D4, Master Spec §11).
+   *
+   * Reads the same snapshot through the same builder as the grid, with the same
+   * time range and comparison, so the detail view cannot contradict the tile it
+   * was opened from. Authorized identically: opening a widget is not a way past
+   * the capability that guards the dashboard.
+   */
+  app.get(
+    '/dashboards/:dashboardId/widgets/:widgetId/detail',
+    { onRequest: [app.authenticate] },
+    async (request) => {
+      const auth = requireAuth(request);
+      const { dashboardId, widgetId } = z
+        .object({ dashboardId: z.string(), widgetId: z.string().min(1) })
+        .parse(request.params);
+      const query = viewQuerySchema.parse(request.query);
+
+      const capability =
+        query.source === 'draft' ? 'dashboard.edit_draft' : 'dashboard.read_published';
+      const scope = await scopeForDashboard(container, auth, dashboardId, capability);
+
+      const state =
+        query.source === 'draft'
+          ? await container.dashboards.getDraft(scope.tenantId, dashboardId, auth.userId)
+          : await container.dashboards.getPublished(scope.tenantId, dashboardId);
+
+      if (!state) {
+        throw new AppError('setup_required', {
+          code: 'dashboard_not_published',
+          messageKey: 'dashboard.not_published',
+          internalMessage: `Dashboard ${dashboardId} has no published version yet.`,
+        });
+      }
+
+      const site = await requireProjectSite(container, scope, state.snapshot.siteId);
+
+      // Only the capabilities the detail view's actions depend on, rather than
+      // the whole project surface: this runs on every widget a viewer opens.
+      const canReadCatalog = await container.authorization.can(auth, 'semantic.read', {
+        type: 'project',
+        projectId: scope.projectId,
+      });
+
+      return container.presentation.buildDetail({
+        widgetId,
+        capabilities: canReadCatalog ? ['semantic.read'] : [],
+        snapshot: state.snapshot,
+        meta: {
+          dashboardId,
+          name: state.snapshot.name,
+          ...(state.snapshot.description ? { description: state.snapshot.description } : {}),
+          publishedVersion: 'version' in state ? state.version : null,
+          isDraftPreview: query.source === 'draft',
+          projectName: scope.projectName,
+          tenantName: scope.tenantName,
+        },
+        tenantId: scope.tenantId,
+        projectId: scope.projectId,
+        site,
+        timeRangePreset: query.timeRange,
+        ...(query.from ? { from: query.from } : {}),
+        ...(query.to ? { to: query.to } : {}),
+        comparisonMode: query.comparison,
+        breakpoint: query.breakpoint as Breakpoint,
+        locale: auth.locale,
+        permissionContextId: scope.permissionContextId,
+      });
+    },
+  );
+}
+
+/**
+ * Everything the presentation builder needs, resolved and authorized once.
+ *
+ * Three routes read the same snapshot with the same capability and the same
+ * time range. Sharing the resolution is what keeps the layout, a tile and a
+ * detail view from ever disagreeing about which snapshot they are describing.
+ */
+async function resolveView(
+  container: Container,
+  auth: AuthContext,
+  dashboardId: string,
+  query: z.infer<typeof viewQuerySchema>,
+) {
+  const capability = query.source === 'draft' ? 'dashboard.edit_draft' : 'dashboard.read_published';
+  const scope = await scopeForDashboard(container, auth, dashboardId, capability);
+
+  const state =
+    query.source === 'draft'
+      ? await container.dashboards.getDraft(scope.tenantId, dashboardId, auth.userId)
+      : await container.dashboards.getPublished(scope.tenantId, dashboardId);
+
+  if (!state) {
+    throw new AppError('setup_required', {
+      code: 'dashboard_not_published',
+      messageKey: 'dashboard.not_published',
+      internalMessage: `Dashboard ${dashboardId} has no published version yet.`,
+    });
+  }
+
+  const site = await requireProjectSite(container, scope, state.snapshot.siteId);
+
+  return {
+    scope,
+    input: {
+      snapshot: state.snapshot,
+      meta: {
+        dashboardId,
+        name: state.snapshot.name,
+        ...(state.snapshot.description ? { description: state.snapshot.description } : {}),
+        publishedVersion: 'version' in state ? state.version : null,
+        isDraftPreview: query.source === 'draft',
+        projectName: scope.projectName,
+        tenantName: scope.tenantName,
+      },
+      tenantId: scope.tenantId,
+      projectId: scope.projectId,
+      site,
+      timeRangePreset: query.timeRange,
+      ...(query.from ? { from: query.from } : {}),
+      ...(query.to ? { to: query.to } : {}),
+      comparisonMode: query.comparison,
+      breakpoint: query.breakpoint as Breakpoint,
+      locale: auth.locale,
+      permissionContextId: scope.permissionContextId,
+    },
+  };
 }
 
 /**

@@ -20,14 +20,15 @@
   },
   "home": {
     "title": "Welcome",
-    "subtitle": "This instance is under construction. Phase 0 delivers the foundation: processes, database, bootstrap and design system.",
+    "subtitle": "Your dashboards and your roles at a glance.",
     "signedInAs": "Signed in as {name}",
     "rolesTitle": "Your roles",
     "noRoles": "No role has been assigned to you yet.",
     "roleScope": "Scope: {scope}",
     "noAutomaticDataAccess": "A role alone grants no access to analytics data. Access to a dashboard is granted separately through groups or direct grants.",
-    "nextMilestone": "Next milestone",
-    "nextMilestoneBody": "Phase 1 – first vertical slice: project, Matomo connection, site, semantic metric, dashboard, widget, viewer."
+    "recentTitle": "Dashboards",
+    "recentEmpty": "No dashboard has been published for you yet.",
+    "allDashboards": "Show all dashboards"
   },
   "login": {
     "title": "Sign in",
@@ -92,7 +93,8 @@
       "invalid_credentials": "Email address or password is not correct.",
       "temporarily_locked": "Too many failed attempts. Please wait {retryAfterSeconds} seconds.",
       "session_required": "Please sign in.",
-      "session_expired": "Your session has expired. Please sign in again."
+      "session_expired": "Your session has expired. Please sign in again.",
+      "current_password_invalid": "The current password is not correct."
     },
     "bootstrap": {
       "already_initialized": "This instance has already been initialized.",
@@ -290,14 +292,20 @@
   },
   "widget": {
     "no_metric_configured": "No metric is configured for this widget yet.",
-    "no_metric_configured.action": "Choose a metric in the editor.",
+    "no_metric_configured_action": "Choose a metric in the editor.",
     "permission_denied": "You do not have permission for this widget's data.",
     "entitlement_required": "This module is not enabled for your contract.",
     "source_unavailable": "Data currently unavailable.",
-    "source_unavailable.action": "The data source is not responding right now. Try again shortly.",
-    "capability_unsupported.action": "The connected Matomo installation does not support this analysis.",
-    "setup_required.action": "Complete the project setup.",
-    "unexpected_error": "This widget could not be loaded."
+    "source_unavailable_action": "The data source is not responding right now. Try again shortly.",
+    "capability_unsupported_action": "The connected Matomo installation does not support this analysis.",
+    "setup_required_action": "Complete the project setup.",
+    "unexpected_error": "This widget could not be loaded.",
+    "not_found": "This widget is not part of this dashboard.",
+    "missing": {
+      "no_mapping": "No source is mapped for “{requirement}”.",
+      "source_field_absent": "“{requirement}” is not present on this site.",
+      "not_calculable": "Not calculable – missing: {inputs}."
+    }
   },
   "matomo": {
     "unreachable": "The Matomo installation is unreachable.",
@@ -330,7 +338,11 @@
       "blocked_host": "This host is not allowed.",
       "blocked_address": "This address is not allowed.",
       "private_address": "Addresses on the internal network are not allowed."
-    }
+    },
+    "source_unavailable": "This report is not answering right now. The other reports are not affected.",
+    "value_unreadable": "The source returned a value that cannot be read as a number.",
+    "not_tracked_here": "This site does not collect this report.",
+    "not_applicable_here": "This report does not make sense for this kind of site."
   },
   "analytics": {
     "site_not_configured": "No site is configured for this dashboard.",
@@ -799,5 +811,121 @@
     "noMapping": "No source mapped",
     "sourceFieldAbsent": "Not present on this site",
     "requirementNamed": "Needs: {requirement}"
+  },
+  "detail": {
+    "title": "Detail view",
+    "open": "Details",
+    "close": "Close",
+    "coreValue": "Core value",
+    "visualisation": "Over time",
+    "meaning": "What it means",
+    "context": "Context",
+    "dataQuality": "Data quality",
+    "breakdown": "Breakdown",
+    "explanation": "How the number is built",
+    "explanationHint": "Each step with its own state. A step that could not be computed says so rather than being skipped.",
+    "step": "Step",
+    "stepValue": "Value",
+    "stepPoints": "Points",
+    "stepShare": "Share",
+    "result": "result",
+    "actions": "Actions",
+    "linkCopied": "Link copied",
+    "loadFailedTitle": "The detail view could not be loaded",
+    "loadFailedBody": "The dashboard behind it is unchanged. Close this view and try again.",
+    "action": {
+      "copyLink": "Copy a link to this view",
+      "openDefinition": "Open the definition in the catalog",
+      "export": "Export",
+      "unavailable": "Not possible here",
+      "openDefinitionNoDefinition": "This widget has no definition recorded.",
+      "openDefinitionNoAccess": "You do not have access to the metric catalog.",
+      "exportLaterMilestone": "Export arrives with Phase 7."
+    }
+  },
+  "quality": {
+    "severity": {
+      "problem": "Problem",
+      "warning": "Warning",
+      "information": "Information",
+      "expected": "Expected behaviour"
+    },
+    "unspecified": "There is a note on this value with no further detail.",
+    "period_partially_processed": "The last day of the period has not finished processing. The number may still change slightly."
+  },
+  "cause": {
+    "whatHappened": "What happened?",
+    "whatItMeans": "What does it mean?",
+    "whatYouCanDo": "What can you do?",
+    "permission": {
+      "kind": "Permission missing",
+      "title": "No access to this dashboard",
+      "meaning": "The dashboard exists but has not been shared with your account. A role on its own grants no access to data.",
+      "action": "Ask the person who manages the project to share it with you."
+    },
+    "entitlement": {
+      "kind": "Not licensed",
+      "title": "This area is not part of your contract",
+      "meaning": "The feature exists, but it is not included in the agreed scope of service.",
+      "action": "Contact your administration if you need this area."
+    },
+    "capability": {
+      "kind": "Not supported",
+      "title": "The connected Matomo cannot provide this",
+      "meaning": "This is a property of the Matomo installation, not an error. Other reports are not affected.",
+      "action": "Your administration can check whether the missing capability can be enabled in Matomo."
+    },
+    "setup": {
+      "kind": "Setup incomplete",
+      "title": "This dashboard is not ready yet",
+      "meaning": "A setup step is missing - for example a publish or an assigned site.",
+      "action": "Open the project and finish the setup, or contact the person responsible."
+    },
+    "unavailable": {
+      "kind": "Temporarily unavailable",
+      "title": "Data currently unavailable",
+      "meaning": "The data source or service is not answering right now. It is not caused by your settings.",
+      "action": "Try again in a few minutes."
+    },
+    "not_found": {
+      "kind": "Not found",
+      "title": "This dashboard does not exist, or not for you",
+      "meaning": "A dashboard you may not see and one that does not exist look the same here - on purpose.",
+      "action": "Check the link, or open the dashboard from the project overview."
+    },
+    "unexpected": {
+      "kind": "Unexpected error",
+      "title": "The dashboard could not be loaded",
+      "meaning": "This should not have happened. The reference helps to find out why.",
+      "action": "Reload the page. If it persists, contact your administration with the reference."
+    }
+  },
+  "search": {
+    "label": "Search the product",
+    "placeholder": "Search …",
+    "title": "Search",
+    "resultCount": "{count, plural, =0 {No results} =1 {1 result} other {# results}} for “{query}”",
+    "tooShortTitle": "Please enter at least two characters",
+    "tooShortBody": "Search finds projects, dashboards and metric definitions by name.",
+    "emptyTitle": "Nothing found for “{query}”",
+    "emptyBody": "Search covers everything you may open: projects, dashboards and definitions. The data itself is not searched.",
+    "kind": {
+      "project": "Projects",
+      "dashboard": "Dashboards",
+      "definition": "Metrics"
+    }
+  },
+  "library": {
+    "title": "Dashboards",
+    "subtitle": "Every dashboard you may open, across all projects.",
+    "emptyTitle": "No dashboards for you yet",
+    "emptyBody": "As soon as a dashboard is shared with you and published, it appears here.",
+    "columnName": "Name",
+    "columnProject": "Project",
+    "columnVersion": "Status",
+    "columnUpdated": "Last changed",
+    "notPublished": "Not published yet",
+    "published": "Published, version {version}",
+    "draftChanges": "Draft with changes"
   }
 }

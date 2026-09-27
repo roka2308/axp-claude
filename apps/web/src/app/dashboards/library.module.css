@@ -1,0 +1,27 @@
+/* The table scrolls on its own, so the page never scrolls sideways (D10). */
+.scroller {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+
+.table th,
+.table td {
+  padding: var(--space-3) var(--space-4);
+  text-align: left;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.table thead th {
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-secondary);
+}
+
+.name {
+  font-weight: var(--font-weight-medium);
+  color: var(--text-link);
+}

@@ -1,0 +1,113 @@
+.detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+}
+
+.scope {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+}
+
+.heading {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+}
+
+.hint {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+/* The core value gets room: it is the answer people came for. */
+.core {
+  padding: var(--space-5);
+  background: var(--surface-sunken);
+  border-radius: var(--radius-md);
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: minmax(8rem, auto) 1fr;
+  gap: var(--space-2) var(--space-4);
+  margin: 0;
+  font-size: var(--font-size-sm);
+}
+
+.facts dt {
+  color: var(--text-muted);
+}
+
+.facts dd {
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.state {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  color: var(--text-secondary);
+}
+
+.stateLabel {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+}
+
+.stateAction {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.action {
+  color: var(--text-link);
+}
+
+/*
+ * An action that is not possible here is shown with its reason rather than as a
+ * button that does nothing (D10).
+ */
+.unavailableAction {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  color: var(--text-disabled);
+  font-size: var(--font-size-sm);
+}
+
+.unavailableReason {
+  color: var(--text-muted);
+  font-size: var(--font-size-xs);
+}
+
+@media (max-width: 767px) {
+  .detail {
+    gap: var(--space-5);
+  }
+
+  .facts {
+    grid-template-columns: 1fr;
+    gap: var(--space-1);
+  }
+
+  .facts dt {
+    margin-top: var(--space-2);
+  }
+}

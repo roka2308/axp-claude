@@ -20,14 +20,15 @@
   },
   "home": {
     "title": "Willkommen",
-    "subtitle": "Diese Instanz befindet sich im Aufbau. Phase 0 liefert das Fundament: Prozesse, Datenbank, Bootstrap und Design-System.",
+    "subtitle": "Ihre Dashboards und Ihre Rollen auf einen Blick.",
     "signedInAs": "Angemeldet als {name}",
     "rolesTitle": "Ihre Rollen",
     "noRoles": "Ihnen ist noch keine Rolle zugewiesen.",
     "roleScope": "Gültigkeitsbereich: {scope}",
     "noAutomaticDataAccess": "Eine Rolle allein gewährt keinen Zugriff auf Analytics-Daten. Der Zugriff auf ein Dashboard wird zusätzlich über Gruppen oder direkte Freigaben erteilt.",
-    "nextMilestone": "Nächster Meilenstein",
-    "nextMilestoneBody": "Phase 1 – erster vertikaler Schnitt: Projekt, Matomo-Verbindung, Site, semantische Kennzahl, Dashboard, Widget, Viewer."
+    "recentTitle": "Dashboards",
+    "recentEmpty": "Noch ist kein Dashboard für Sie veröffentlicht.",
+    "allDashboards": "Alle Dashboards anzeigen"
   },
   "login": {
     "title": "Anmelden",
@@ -92,7 +93,8 @@
       "invalid_credentials": "E-Mail-Adresse oder Passwort ist nicht korrekt.",
       "temporarily_locked": "Zu viele Fehlversuche. Bitte warten Sie {retryAfterSeconds} Sekunden.",
       "session_required": "Bitte melden Sie sich an.",
-      "session_expired": "Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an."
+      "session_expired": "Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an.",
+      "current_password_invalid": "Das aktuelle Passwort ist nicht korrekt."
     },
     "bootstrap": {
       "already_initialized": "Diese Instanz wurde bereits initialisiert.",
@@ -290,14 +292,20 @@
   },
   "widget": {
     "no_metric_configured": "Für dieses Widget ist noch keine Kennzahl konfiguriert.",
-    "no_metric_configured.action": "Wählen Sie im Editor eine Kennzahl aus.",
+    "no_metric_configured_action": "Wählen Sie im Editor eine Kennzahl aus.",
     "permission_denied": "Sie haben keine Berechtigung für die Daten dieses Widgets.",
     "entitlement_required": "Dieses Modul ist für Ihren Vertrag nicht freigeschaltet.",
     "source_unavailable": "Daten aktuell nicht verfügbar.",
-    "source_unavailable.action": "Die Datenquelle antwortet gerade nicht. Versuchen Sie es in Kürze erneut.",
-    "capability_unsupported.action": "Diese Auswertung wird von der verbundenen Matomo-Instanz nicht unterstützt.",
-    "setup_required.action": "Vervollständigen Sie die Einrichtung des Projekts.",
-    "unexpected_error": "Dieses Widget konnte nicht geladen werden."
+    "source_unavailable_action": "Die Datenquelle antwortet gerade nicht. Versuchen Sie es in Kürze erneut.",
+    "capability_unsupported_action": "Diese Auswertung wird von der verbundenen Matomo-Instanz nicht unterstützt.",
+    "setup_required_action": "Vervollständigen Sie die Einrichtung des Projekts.",
+    "unexpected_error": "Dieses Widget konnte nicht geladen werden.",
+    "not_found": "Dieses Widget gehört nicht zu diesem Dashboard.",
+    "missing": {
+      "no_mapping": "Für „{requirement}“ ist keine Quelle zugeordnet.",
+      "source_field_absent": "„{requirement}“ ist auf dieser Website nicht vorhanden.",
+      "not_calculable": "Nicht berechenbar – es fehlt: {inputs}."
+    }
   },
   "matomo": {
     "unreachable": "Die Matomo-Instanz ist nicht erreichbar.",
@@ -330,7 +338,11 @@
       "blocked_host": "Dieser Host ist nicht zulässig.",
       "blocked_address": "Diese Adresse ist nicht zulässig.",
       "private_address": "Adressen im internen Netz sind nicht zulässig."
-    }
+    },
+    "source_unavailable": "Dieser Bericht antwortet zurzeit nicht. Die übrigen Auswertungen sind davon nicht betroffen.",
+    "value_unreadable": "Die Quelle hat einen Wert geliefert, der sich nicht als Zahl lesen lässt.",
+    "not_tracked_here": "Diese Website erfasst diesen Bericht nicht.",
+    "not_applicable_here": "Dieser Bericht ist für diese Art von Website nicht sinnvoll."
   },
   "analytics": {
     "site_not_configured": "Für dieses Dashboard ist keine Site konfiguriert.",
@@ -799,5 +811,121 @@
     "noMapping": "Keine Quelle zugeordnet",
     "sourceFieldAbsent": "Auf dieser Website nicht vorhanden",
     "requirementNamed": "Benötigt: {requirement}"
+  },
+  "detail": {
+    "title": "Detailansicht",
+    "open": "Details",
+    "close": "Schließen",
+    "coreValue": "Kernwert",
+    "visualisation": "Verlauf",
+    "meaning": "Bedeutung",
+    "context": "Kontext",
+    "dataQuality": "Datenqualität",
+    "breakdown": "Aufschlüsselung",
+    "explanation": "Wie die Zahl entsteht",
+    "explanationHint": "Jeder Schritt mit seinem eigenen Zustand. Ein Schritt, der nicht berechnet werden konnte, steht als solcher da – er wird nicht übersprungen.",
+    "step": "Schritt",
+    "stepValue": "Wert",
+    "stepPoints": "Punkte",
+    "stepShare": "Anteil",
+    "result": "Ergebnis",
+    "actions": "Aktionen",
+    "linkCopied": "Link kopiert",
+    "loadFailedTitle": "Die Detailansicht konnte nicht geladen werden",
+    "loadFailedBody": "Das Dashboard dahinter ist unverändert. Schließen Sie die Ansicht und versuchen Sie es erneut.",
+    "action": {
+      "copyLink": "Link zu dieser Ansicht kopieren",
+      "openDefinition": "Definition im Katalog öffnen",
+      "export": "Exportieren",
+      "unavailable": "Hier nicht möglich",
+      "openDefinitionNoDefinition": "Für dieses Widget ist keine Definition hinterlegt.",
+      "openDefinitionNoAccess": "Sie haben keinen Zugriff auf den Kennzahlen-Katalog.",
+      "exportLaterMilestone": "Export kommt mit Phase 7."
+    }
+  },
+  "quality": {
+    "severity": {
+      "problem": "Problem",
+      "warning": "Hinweis",
+      "information": "Information",
+      "expected": "Erwartetes Verhalten"
+    },
+    "unspecified": "Zu diesem Wert gibt es einen Hinweis ohne weitere Angaben.",
+    "period_partially_processed": "Der letzte Tag des Zeitraums ist noch nicht vollständig verarbeitet. Die Zahl kann sich noch leicht ändern."
+  },
+  "cause": {
+    "whatHappened": "Was ist passiert?",
+    "whatItMeans": "Was bedeutet das?",
+    "whatYouCanDo": "Was können Sie tun?",
+    "permission": {
+      "kind": "Berechtigung fehlt",
+      "title": "Kein Zugriff auf dieses Dashboard",
+      "meaning": "Das Dashboard existiert, ist für Ihr Konto aber nicht freigegeben. Eine Rolle allein gewährt keinen Zugriff auf Daten.",
+      "action": "Bitten Sie die Person, die das Projekt verwaltet, um eine Freigabe."
+    },
+    "entitlement": {
+      "kind": "Nicht lizenziert",
+      "title": "Dieser Bereich ist für Ihren Vertrag nicht freigeschaltet",
+      "meaning": "Die Funktion gibt es, sie ist aber nicht Teil des vereinbarten Leistungsumfangs.",
+      "action": "Wenden Sie sich an Ihre Administration, wenn Sie den Bereich benötigen."
+    },
+    "capability": {
+      "kind": "Nicht unterstützt",
+      "title": "Die verbundene Matomo-Instanz kann das nicht liefern",
+      "meaning": "Das ist eine Eigenschaft der Matomo-Installation, kein Fehler. Andere Auswertungen sind davon nicht betroffen.",
+      "action": "Die Administration kann prüfen, ob sich die fehlende Fähigkeit in Matomo aktivieren lässt."
+    },
+    "setup": {
+      "kind": "Einrichtung unvollständig",
+      "title": "Dieses Dashboard ist noch nicht bereit",
+      "meaning": "Es fehlt ein Schritt der Einrichtung – etwa eine Veröffentlichung oder eine zugeordnete Website.",
+      "action": "Öffnen Sie das Projekt und schließen Sie die Einrichtung ab, oder wenden Sie sich an die zuständige Person."
+    },
+    "unavailable": {
+      "kind": "Vorübergehend nicht verfügbar",
+      "title": "Daten aktuell nicht verfügbar",
+      "meaning": "Die Datenquelle oder der Dienst antwortet gerade nicht. An Ihren Einstellungen liegt es nicht.",
+      "action": "Versuchen Sie es in einigen Minuten erneut."
+    },
+    "not_found": {
+      "kind": "Nicht gefunden",
+      "title": "Dieses Dashboard gibt es nicht oder nicht für Sie",
+      "meaning": "Ein Dashboard, das Sie nicht sehen dürfen, und eines, das nicht existiert, sehen hier gleich aus – das ist Absicht.",
+      "action": "Prüfen Sie den Link oder öffnen Sie das Dashboard über die Projektübersicht."
+    },
+    "unexpected": {
+      "kind": "Unerwarteter Fehler",
+      "title": "Das Dashboard konnte nicht geladen werden",
+      "meaning": "Das hätte nicht passieren sollen. Die Vorgangsnummer hilft bei der Klärung.",
+      "action": "Laden Sie die Seite neu. Bleibt der Fehler, wenden Sie sich mit der Vorgangsnummer an die Administration."
+    }
+  },
+  "search": {
+    "label": "Produkt durchsuchen",
+    "placeholder": "Suchen …",
+    "title": "Suche",
+    "resultCount": "{count, plural, =0 {Keine Treffer} =1 {1 Treffer} other {# Treffer}} für „{query}“",
+    "tooShortTitle": "Bitte mindestens zwei Zeichen eingeben",
+    "tooShortBody": "Die Suche findet Projekte, Dashboards und Kennzahlen-Definitionen nach ihrem Namen.",
+    "emptyTitle": "Nichts gefunden für „{query}“",
+    "emptyBody": "Gesucht wird in allem, was Sie öffnen dürfen: Projekte, Dashboards und Definitionen. Daten selbst werden nicht durchsucht.",
+    "kind": {
+      "project": "Projekte",
+      "dashboard": "Dashboards",
+      "definition": "Kennzahlen"
+    }
+  },
+  "library": {
+    "title": "Dashboards",
+    "subtitle": "Alle Dashboards, die Sie öffnen dürfen – über alle Projekte.",
+    "emptyTitle": "Noch keine Dashboards für Sie",
+    "emptyBody": "Sobald ein Dashboard für Sie freigegeben und veröffentlicht ist, erscheint es hier.",
+    "columnName": "Name",
+    "columnProject": "Projekt",
+    "columnVersion": "Stand",
+    "columnUpdated": "Zuletzt geändert",
+    "notPublished": "Noch nicht veröffentlicht",
+    "published": "Veröffentlicht, Version {version}",
+    "draftChanges": "Entwurf mit Änderungen"
   }
 }
