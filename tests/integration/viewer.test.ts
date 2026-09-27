@@ -14,6 +14,7 @@ import {
   createTestContext,
   resetDatabase,
   STRONG_TEST_PASSWORD,
+  grantProjectAccess,
   type TestContext,
 } from './harness';
 
@@ -414,6 +415,7 @@ describe('viewer, detail view and state model', () => {
       scopeType: 'project',
       scopeId,
     });
+    await grantProjectAccess(ctx, userId, scopeId, role === 'viewer' ? 'view' : 'edit');
     return { userId, email };
   }
 

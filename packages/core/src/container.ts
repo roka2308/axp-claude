@@ -5,6 +5,13 @@ import { type Clock, systemClock } from './clock';
 import { SecretBox } from './secret-box';
 import { AuditService } from './audit/audit-service';
 import { AuthorizationService } from './access/authorization-service';
+import { AccessService } from './access/access-service';
+import { GroupService } from './access/group-service';
+import { RoleAssignmentService } from './access/role-assignment-service';
+import { EffectiveAccessService } from './access/effective-access-service';
+import { UserAdminService } from './identity/user-admin-service';
+import { TenantAdminService } from './tenancy/tenant-admin-service';
+import { AuditQueryService } from './audit/audit-query';
 import { AuthService } from './identity/auth-service';
 import { UserService } from './identity/user-service';
 import { BootstrapService } from './platform/bootstrap-service';
@@ -35,6 +42,13 @@ export interface Container {
   readonly secretBox: SecretBox;
   readonly audit: AuditService;
   readonly authorization: AuthorizationService;
+  readonly access: AccessService;
+  readonly groups: GroupService;
+  readonly roles: RoleAssignmentService;
+  readonly effectiveAccess: EffectiveAccessService;
+  readonly userAdmin: UserAdminService;
+  readonly tenantAdmin: TenantAdminService;
+  readonly auditLog: AuditQueryService;
   readonly auth: AuthService;
   readonly users: UserService;
   readonly tenants: TenantService;
@@ -68,6 +82,7 @@ export function createContainer(options: CreateContainerOptions): Container {
   const secretBox = new SecretBox({ key: config.secrets.credentialEncryptionKey });
   const audit = new AuditService({ db, clock, logger });
   const authorization = new AuthorizationService({ db });
+  const access = new AccessService({ db, audit, authorization });
   const users = new UserService({ db, clock, audit });
   const tenants = new TenantService({ db, clock, audit });
   const projects = new ProjectService({ db });
@@ -83,6 +98,29 @@ export function createContainer(options: CreateContainerOptions): Container {
       reauthWindowMinutes: config.session.reauthWindowMinutes,
     },
   });
+
+  const revokeAllSessions = (userId: string, reason: string) =>
+    auth.revokeAllSessionsForUser(userId as never, reason);
+  const groupService = new GroupService({ db, audit });
+  const roles = new RoleAssignmentService({ db, audit });
+  const effectiveAccess = new EffectiveAccessService({ db });
+  const userAdmin = new UserAdminService({
+    db,
+    clock,
+    audit,
+    users,
+    revokeAllSessions,
+    invitationTtlHours: 72,
+  });
+  const tenantAdmin = new TenantAdminService({
+    db,
+    clock,
+    tenants,
+    userAdmin,
+    roles,
+    revokeAllSessions,
+  });
+  const auditLog = new AuditQueryService({ db });
 
   const bootstrap = new BootstrapService({
     db,
@@ -144,6 +182,7 @@ export function createContainer(options: CreateContainerOptions): Container {
     clock,
     audit,
     semantics,
+    grantCreator: (params) => access.grantCreator(params),
     leasePolicy: {
       ttlSeconds: config.editor.leaseTtlSeconds,
       heartbeatSeconds: config.editor.leaseHeartbeatSeconds,
@@ -159,6 +198,13 @@ export function createContainer(options: CreateContainerOptions): Container {
     secretBox,
     audit,
     authorization,
+    access,
+    groups: groupService,
+    roles,
+    effectiveAccess,
+    userAdmin,
+    tenantAdmin,
+    auditLog,
     auth,
     users,
     tenants,

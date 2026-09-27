@@ -145,3 +145,31 @@ export const loginAttempts = mysqlTable(
     index('idx_login_attempts_locked').on(table.lockedUntil),
   ],
 );
+
+/**
+ * A pending invitation (D5: invite).
+ *
+ * The token is shown once to the inviting administrator, who passes it on;
+ * only its hash is stored, like every other secret token in the product. An
+ * invitation is single-use and expires, and accepting it is the moment the
+ * invited person chooses their own password - nobody else ever knows it.
+ */
+export const userInvitations = mysqlTable(
+  'user_invitations',
+  {
+    id: idColumn().primaryKey(),
+    userId: char('user_id', { length: 36 })
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    /** The tenant the invitation was issued for; memberships follow from it. */
+    tenantId: char('tenant_id', { length: 36 }),
+    tokenHash: char('token_hash', { length: 64 }).notNull().unique(),
+    expiresAt: utcTimestamp().notNull(),
+    usedAt: utcTimestamp(),
+    createdByUserId: char('created_by_user_id', { length: 36 }).references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    createdAt: createdAt(),
+  },
+  (table) => [index('idx_user_invitations_user').on(table.userId)],
+);

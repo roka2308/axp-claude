@@ -68,17 +68,22 @@ describe('message catalogues', () => {
     );
 
     const pattern =
-      /(?:messageKey|actionKey|labelKey|unavailableKey|detailKey):\s*'([a-z][\w]*(?:\.[\w]+)+)'/g;
+      /(?:messageKey|actionKey|labelKey|unavailableKey|detailKey|summaryKey):\s*'([a-z][\w]*(?:\.[\w]+)+)'/g;
 
     // The absence constructors take their reason as an argument, not a field.
     const constructors =
       /valueEnvelope\.(?:unknown|notTracked|notApplicable)\('([a-z][\w]*(?:\.[\w]+)+)'\)/g;
+
+    // `admin.` and `access.` are message namespaces only - never audit actions -
+    // so any literal in them is a key, even inside a ternary or a helper call.
+    const namespaced = /'((?:admin|access)\.[a-z][\w.]*)'/g;
 
     const referenced = new Set<string>();
     for (const file of sources) {
       const source = readFileSync(file, 'utf8');
       for (const match of source.matchAll(pattern)) referenced.add(match[1]!);
       for (const match of source.matchAll(constructors)) referenced.add(match[1]!);
+      for (const match of source.matchAll(namespaced)) referenced.add(match[1]!);
     }
 
     expect(referenced.size).toBeGreaterThan(20);

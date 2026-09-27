@@ -15,6 +15,8 @@ import { registerMatomoRoutes } from './routes/matomo';
 import { registerDashboardRoutes } from './routes/dashboards';
 import { registerSemanticRoutes } from './routes/semantic';
 import { registerSearchRoutes } from './routes/search';
+import { registerAdminRoutes } from './routes/admin';
+import { registerSelfServiceRoutes } from './routes/me';
 
 export interface BuildServerOptions {
   readonly config: AppConfig;
@@ -66,6 +68,8 @@ export async function buildServer(options: BuildServerOptions): Promise<FastifyI
   registerMatomoRoutes(app, container);
   registerSemanticRoutes(app, container);
   registerSearchRoutes(app, container);
+  registerAdminRoutes(app, container);
+  registerSelfServiceRoutes(app, container);
   registerDashboardRoutes(app, container);
 
   // No CORS plugin on purpose: the browser never calls this service directly.

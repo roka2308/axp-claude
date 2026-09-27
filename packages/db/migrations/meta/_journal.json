@@ -29,6 +29,13 @@
       "when": 1790020182199,
       "tag": "0003_source_binding_review",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1790510907272,
+      "tag": "0004_invitations_and_groups",
+      "breakpoints": true
     }
   ]
 }

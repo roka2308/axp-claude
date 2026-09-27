@@ -74,10 +74,23 @@ export const OBJECT_ACCESS_LEVELS = ['view', 'edit'] as const;
 export const objectAccessSchema = z.enum(OBJECT_ACCESS_LEVELS);
 export type ObjectAccess = z.infer<typeof objectAccessSchema>;
 
+/**
+ * What an object grant can point at (ADR 0006).
+ *
+ * `dashboard` opens one dashboard. `project` opens the analytics data of every
+ * dashboard in a project - the grant a group gets, so that access scales by
+ * membership rather than by listing dashboards one by one (Master Spec §7).
+ */
+export const OBJECT_TYPES = ['dashboard', 'project'] as const;
+export const objectTypeSchema = z.enum(OBJECT_TYPES);
+export type ObjectType = z.infer<typeof objectTypeSchema>;
+
 export interface ObjectGrant {
+  readonly id: string;
+  readonly tenantId: string;
   readonly subjectType: SubjectType;
   readonly subjectId: UserId | GroupId;
-  readonly objectType: 'dashboard';
+  readonly objectType: ObjectType;
   readonly objectId: string;
   readonly access: ObjectAccess;
 }
@@ -100,9 +113,12 @@ export type AccessReasonLink =
   | { readonly kind: 'scope'; readonly scope: ScopeRef; readonly label: string }
   | {
       readonly kind: 'object_grant';
-      readonly objectType: 'dashboard';
+      readonly grantId: string;
+      readonly objectType: ObjectType;
       readonly objectId: string;
       readonly access: ObjectAccess;
+      /** The object's name, so the chain can be read without a lookup. */
+      readonly label?: string;
     };
 
 export interface AccessReason {
@@ -115,6 +131,26 @@ export interface EffectiveAccessEntry {
   readonly capability: string;
   readonly granted: boolean;
   readonly reasons: readonly AccessReason[];
+}
+
+/**
+ * Whether a subject may see or change the analytics data behind one dashboard.
+ *
+ * Two independent halves, both required (ADR 0006): a role that carries the
+ * capability in the dashboard's scope, and an object grant that covers the
+ * dashboard. "Rolle ist nicht gleich automatischer Datenzugriff" (§7) - the
+ * decision keeps both halves so the UI can say which one is missing.
+ */
+export interface DataAccessDecision {
+  readonly dashboardId: string;
+  readonly need: ObjectAccess;
+  readonly granted: boolean;
+  /** The role half: capability at the dashboard's project. */
+  readonly role: EffectiveAccessEntry;
+  /** The grant half: every grant that covers the dashboard at the needed level. */
+  readonly grants: readonly AccessReason[];
+  /** Which half is missing, when access is refused. */
+  readonly missing?: 'role' | 'grant' | 'role_and_grant';
 }
 
 /**

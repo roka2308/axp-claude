@@ -1,9 +1,9 @@
 import path from 'node:path';
-import { sql } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { migrate } from 'drizzle-orm/mysql2/migrator';
 import type { RowDataPacket } from 'mysql2';
 import { type AppConfig, loadConfig } from '@axp/config';
-import { createDatabase, type DatabaseHandle } from '@axp/db';
+import { createDatabase, type DatabaseHandle, projects } from '@axp/db';
 import { createLogger, type Logger } from '@axp/observability';
 import { type Container, createContainer, fixedClock } from '@axp/core';
 
@@ -135,3 +135,34 @@ export async function columnType(table: string, column: string): Promise<string>
 }
 
 export const STRONG_TEST_PASSWORD = 'korrekt-pferd-batterie-heftklammer';
+
+/**
+ * Grants a user data access to a whole project (ADR 0006).
+ *
+ * Roles open no data on their own. Tests that are about something else -
+ * editing, comparison, caching - give their users the grant a real tenant
+ * would give through a group, and the access rules are tested where they are
+ * the subject (`viewer.test.ts`, `access.test.ts`).
+ */
+export async function grantProjectAccess(
+  ctx: TestContext,
+  userId: string,
+  projectId: string,
+  access: 'view' | 'edit',
+): Promise<void> {
+  const [project] = await ctx.container.db
+    .select({ tenantId: projects.tenantId })
+    .from(projects)
+    .where(eq(projects.id, projectId))
+    .limit(1);
+  if (!project) throw new Error(`No project ${projectId}`);
+
+  await ctx.container.access.grant({
+    tenantId: project.tenantId,
+    subjectType: 'user',
+    subjectId: userId,
+    objectType: 'project',
+    objectId: projectId,
+    access,
+  });
+}

@@ -53,6 +53,7 @@ describe('product store persistence rules', () => {
       'source_bindings',
       'tenant_memberships',
       'tenants',
+      'user_invitations',
       'users',
     ]);
   });

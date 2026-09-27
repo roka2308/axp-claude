@@ -270,6 +270,10 @@ export function registerSemanticRoutes(app: FastifyInstance, container: Containe
         .parse(request.body);
 
       const scope = await requireProjectScope(container, auth, projectId, 'semantic.manage');
+      // A preview shows this project's real numbers, so it needs the same data
+      // grant a dashboard would (ADR 0006) - managing the catalog is not seeing
+      // the customer's data.
+      await container.access.assertProjectData(auth, scope.projectId);
       const site = await requireProjectSite(container, scope, input.siteId);
 
       const body = input.body as SemanticDefinitionBody;

@@ -9,6 +9,7 @@ import {
   createTestContext,
   resetDatabase,
   STRONG_TEST_PASSWORD,
+  grantProjectAccess,
   type TestContext,
 } from './harness';
 
@@ -97,6 +98,8 @@ describe('dashboard authoring', () => {
       scopeType: 'project',
       scopeId: projectId,
     });
+    // A role opens no data; the grant is what a group would give (ADR 0006).
+    await grantProjectAccess(ctx, userId, projectId, role === 'viewer' ? 'view' : 'edit');
     return { userId, email };
   }
 
@@ -400,18 +403,25 @@ describe('dashboard authoring', () => {
       });
       expect(created.statusCode).toBe(201);
 
-      const response = await app.inject({
-        method: 'GET',
-        url: `/projects/${projectId}/dashboards`,
-        headers: as(viewer),
-      });
-      const entry = (response.json().dashboards as { id: string; name: string }[]).find(
-        (candidate) => candidate.id === created.json().dashboardId,
-      );
+      const listed = async (token: string) =>
+        (
+          (
+            await app.inject({
+              method: 'GET',
+              url: `/projects/${projectId}/dashboards`,
+              headers: as(token),
+            })
+          ).json().dashboards as { id: string; name: string }[]
+        ).find((candidate) => candidate.id === created.json().dashboardId);
 
-      // Nothing is published yet, so the draft name is all there is - and a
-      // dashboard nobody can find is worse than one named provisionally.
-      expect(entry?.name).toBe('Noch unveröffentlicht');
+      // Nothing is published yet, so for the editor the draft name is all
+      // there is - and a dashboard nobody can find is worse than one named
+      // provisionally.
+      expect((await listed(anna))?.name).toBe('Noch unveröffentlicht');
+
+      // A viewer is not shown it at all: there is nothing published to open
+      // (ADR 0006).
+      expect(await listed(viewer)).toBeUndefined();
     });
 
     it('follows the new name once it is published', async () => {

@@ -5,6 +5,7 @@ import { type Container, generateSecretToken } from '@axp/core';
 import { DEMO_USER_NAMES, type DemoSeed, loadDemoSeed } from './demo-seed';
 import { seedReferenceDashboard, type SeedDashboardResult } from './seed-dashboard';
 import { seedStateModelDashboard, type SeedStateModelResult } from './seed-state-model';
+import { seedAccessDemo } from './seed-access';
 
 export interface SeedOptions {
   /**
@@ -202,6 +203,21 @@ export async function seedDemoData(
           actorUserId: editorUserId,
         })
       : undefined;
+
+  const idOf = async (key: string) => {
+    const account = accounts.find((entry) => entry.key === key);
+    return account ? findUserId(container, account.email) : null;
+  };
+  await seedAccessDemo(container, {
+    tenantId,
+    projectId,
+    viewerUserId: await idOf('viewer'),
+    semanticUserId: await idOf('semantic'),
+    editorUserId,
+    dashboardIds: [dashboard?.dashboardId, stateModel?.dashboardId].filter((id): id is string =>
+      Boolean(id),
+    ),
+  });
 
   await container.projects.refreshSetupState(tenantId, projectId);
 

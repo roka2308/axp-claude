@@ -94,7 +94,9 @@
       "temporarily_locked": "Zu viele Fehlversuche. Bitte warten Sie {retryAfterSeconds} Sekunden.",
       "session_required": "Bitte melden Sie sich an.",
       "session_expired": "Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an.",
-      "current_password_invalid": "Das aktuelle Passwort ist nicht korrekt."
+      "current_password_invalid": "Das aktuelle Passwort ist nicht korrekt.",
+      "reauthentication_required": "Bitte bestätigen Sie diese Aktion mit Ihrem Passwort.",
+      "reauthentication_failed": "Das Passwort ist nicht korrekt."
     },
     "bootstrap": {
       "already_initialized": "Diese Instanz wurde bereits initialisiert.",
@@ -114,7 +116,9 @@
       "bad_request": "Die Anfrage konnte nicht verarbeitet werden."
     },
     "permission_denied": {
-      "capability": "Für diese Aktion fehlt Ihnen die Berechtigung."
+      "capability": "Für diese Aktion fehlt Ihnen die Berechtigung.",
+      "no_object_grant": "Sie haben die Rolle dafür, aber dieses Dashboard ist für Sie nicht freigegeben.",
+      "no_project_data_grant": "Für die Daten dieses Projekts fehlt Ihnen eine Freigabe. Die Vorschau zeigt echte Zahlen des Kunden."
     },
     "not_found": {
       "route": "Die angeforderte Ressource wurde nicht gefunden."
@@ -927,5 +931,39 @@
     "notPublished": "Noch nicht veröffentlicht",
     "published": "Veröffentlicht, Version {version}",
     "draftChanges": "Entwurf mit Änderungen"
+  },
+  "access": {
+    "grant_not_found": "Diese Freigabe gibt es nicht (mehr).",
+    "object_not_found": "Das Objekt gehört nicht zu diesem Mandanten.",
+    "subject_not_found": "Diese Person oder Gruppe gehört nicht zu diesem Mandanten.",
+    "reason": {
+      "via_direct_role_scope": "Direkt zugewiesene Rolle in diesem Bereich",
+      "via_group_role_scope": "Rolle über eine Gruppe",
+      "via_inherited_scope": "Rolle aus dem übergeordneten Bereich",
+      "grant_direct_dashboard": "Direkte Freigabe für dieses Dashboard",
+      "grant_direct_project": "Direkte Freigabe für das Projekt",
+      "grant_via_group_dashboard": "Freigabe für dieses Dashboard über eine Gruppe",
+      "grant_via_group_project": "Freigabe für das Projekt über eine Gruppe"
+    }
+  },
+  "admin": {
+    "attribute_managed_by_idp": "Dieses Feld wird durch den Identity Provider verwaltet und kann hier nicht geändert werden.",
+    "cannot_change_own_status": "Das eigene Konto kann nicht deaktiviert werden.",
+    "confirmation_mismatch": "Die Bestätigung stimmt nicht mit dem Namen überein.",
+    "group_name_taken": "Eine Gruppe „{name}“ gibt es bereits.",
+    "group_not_found": "Diese Gruppe gibt es in diesem Mandanten nicht.",
+    "invitation_invalid": "Diese Einladung ist ungültig, abgelaufen oder bereits verwendet.",
+    "last_platform_admin": "Der letzte Platform Admin kann nicht entfernt werden.",
+    "last_tenant_admin": "Der letzte Tenant Admin eines Mandanten kann nicht entfernt werden – sonst kann ihn niemand mehr verwalten.",
+    "platform_role_needs_user": "Plattform-Rollen können nur Personen erhalten, keine Gruppen.",
+    "role_assignment_not_found": "Diese Rollenzuweisung gibt es nicht (mehr).",
+    "role_not_assignable": "Diese Rolle dürfen Sie in diesem Bereich nicht vergeben.",
+    "role_scope_not_allowed": "Diese Rolle kann in diesem Bereich nicht vergeben werden.",
+    "scope_not_found": "Diesen Bereich gibt es nicht.",
+    "target_is_platform_admin": "Ein Platform Admin kann hier nicht deaktiviert werden.",
+    "tenant_slug_taken": "Diese Kurzbezeichnung ist bereits vergeben.",
+    "user_in_other_tenants": "Diese Person gehört auch zu einem anderen Mandanten. Eine Deaktivierung würde sie dort ebenfalls aussperren.",
+    "user_not_found": "Diese Person gibt es in diesem Mandanten nicht.",
+    "user_not_invited": "Diese Person hat ihre Einladung bereits angenommen."
   }
 }

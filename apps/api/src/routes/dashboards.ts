@@ -91,7 +91,21 @@ export function registerDashboardRoutes(app: FastifyInstance, container: Contain
     const { projectId } = z.object({ projectId: z.string() }).parse(request.params);
     const scope = await requireProjectScope(container, auth, projectId, 'dashboard.read_published');
 
-    const list = await container.dashboards.listForProject(scope.tenantId, scope.projectId);
+    const all = await container.dashboards.listForProject(scope.tenantId, scope.projectId);
+    const editable = new Set(
+      (await container.access.filterDashboards(auth, all, 'edit')).map((entry) => entry.id),
+    );
+    const viewable = new Set(
+      (await container.access.filterDashboards(auth, all, 'view')).map((entry) => entry.id),
+    );
+
+    // Listed only when the caller could open it: a dashboard nobody granted
+    // them is not something to advertise (ADR 0006). A draft that was never
+    // published is an editor's working copy.
+    const list = all.filter(
+      (entry) =>
+        editable.has(entry.id) || (viewable.has(entry.id) && entry.publishedVersion !== null),
+    );
     return { dashboards: list };
   });
 
@@ -545,5 +559,19 @@ async function scopeForDashboard(
     });
   }
 
-  return requireProjectScope(container, auth, row.projectId, capability);
+  const scope = await requireProjectScope(container, auth, row.projectId, capability);
+
+  /*
+   * The role is half of it. Reading a dashboard's data, or changing it, also
+   * needs an object grant that covers the dashboard (ADR 0006, Master Spec
+   * §7). Checked after the scope, so a caller from another tenant still gets
+   * the same answer as for a dashboard that does not exist.
+   */
+  await container.access.assertDashboard(
+    auth,
+    dashboardId,
+    capability === 'dashboard.read_published' ? 'view' : 'edit',
+  );
+
+  return scope;
 }

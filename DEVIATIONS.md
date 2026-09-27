@@ -156,3 +156,37 @@ binding kinds execute.
 Keep. Implement the remaining call shapes against a real Matomo instance, with
 the capability probe deciding which are offered. The natural milestone is the
 first one with a live Matomo available.
+
+---
+
+## DEV-005 — A local account's e-mail address is not self-service yet
+
+- Status: `track_specific`
+- Milestone: F5
+- Specification reference: Master Spec §12 ("E-Mail-Änderungen bei Local Auth
+  erfordern Re-Auth und Verifikation")
+
+### What differs
+
+"Mein Profil" shows the e-mail address and explains why it cannot be changed
+there yet; first name, last name and language are editable. Invitations
+likewise return their single-use link to the inviting administrator, who
+passes it on, instead of the product mailing it.
+
+### Why
+
+Verification means sending a message to the new address. The product has no
+mail transport before scheduled reports (Phase 8). Changing the address without
+verification would let a hijacked session redirect password recovery to an
+attacker's mailbox, which is precisely what the requirement exists to prevent.
+
+### Risks / impact
+
+An administrator cannot correct a typo in someone's address from the UI; it
+takes an invitation to the right address. Nothing else depends on it.
+
+### Proposed action
+
+Implement the verified change - re-auth, token to the new address, switch on
+confirmation - together with the mail transport in Phase 8, and deliver
+invitation links by mail at the same time.

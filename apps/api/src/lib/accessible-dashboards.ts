@@ -44,14 +44,28 @@ export async function listAccessibleDashboards(
     if (canReadCatalog) catalogProjectIds.add(project.id);
     if (!canEdit && !canRead) continue;
 
-    for (const dashboard of await container.dashboards.listForProject(
-      project.tenantId,
-      project.id,
-    )) {
+    const all = await container.dashboards.listForProject(project.tenantId, project.id);
+
+    // A role opens nothing on its own; each dashboard also needs a grant
+    // (ADR 0006). Editable ones include drafts, viewable ones only what is
+    // published.
+    const editable = new Set(
+      canEdit
+        ? (await container.access.filterDashboards(auth, all, 'edit')).map((entry) => entry.id)
+        : [],
+    );
+    const viewable = new Set(
+      (await container.access.filterDashboards(auth, all, 'view')).map((entry) => entry.id),
+    );
+
+    for (const dashboard of all) {
       if (dashboard.lifecycle === 'trash') continue;
-      if (!canEdit && (dashboard.publishedVersion === null || dashboard.lifecycle === 'archived')) {
-        continue;
-      }
+      const mayEdit = editable.has(dashboard.id);
+      const mayView =
+        viewable.has(dashboard.id) &&
+        dashboard.publishedVersion !== null &&
+        dashboard.lifecycle !== 'archived';
+      if (!mayEdit && !mayView) continue;
       dashboards.push({ ...dashboard, projectName: project.name, tenantName: project.tenantName });
     }
   }

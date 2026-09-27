@@ -17,6 +17,7 @@ import {
   listTables,
   resetDatabase,
   STRONG_TEST_PASSWORD,
+  grantProjectAccess,
   type TestContext,
 } from './harness';
 
@@ -135,6 +136,10 @@ describe('analytics slice', () => {
       scopeType,
       scopeId,
     });
+    // A role opens no data; the grant is what a group would give (ADR 0006).
+    if (scopeType === 'project' && (role === 'viewer' || role === 'dashboard_editor')) {
+      await grantProjectAccess(ctx, userId, scopeId, role === 'viewer' ? 'view' : 'edit');
+    }
     return email;
   }
 

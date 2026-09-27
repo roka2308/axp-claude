@@ -36,6 +36,15 @@ export interface DashboardServiceDeps {
   readonly clock: Clock;
   readonly audit: AuditService;
   readonly semantics: SemanticService;
+  /**
+   * Hands a dashboard's creator an edit grant. Authorship is not an exception
+   * to the grant rule (ADR 0006); it produces a grant like any other.
+   */
+  readonly grantCreator: (params: {
+    tenantId: string;
+    dashboardId: string;
+    userId: string;
+  }) => Promise<void>;
   readonly leasePolicy: {
     readonly ttlSeconds: number;
     readonly heartbeatSeconds: number;
@@ -148,6 +157,12 @@ export class DashboardService {
       targetType: 'dashboard',
       targetId: dashboardId,
       metadata: { name: input.name },
+    });
+
+    await this.deps.grantCreator({
+      tenantId: input.tenantId,
+      dashboardId,
+      userId: input.actorUserId,
     });
 
     return {

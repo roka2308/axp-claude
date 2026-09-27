@@ -94,7 +94,9 @@
       "temporarily_locked": "Too many failed attempts. Please wait {retryAfterSeconds} seconds.",
       "session_required": "Please sign in.",
       "session_expired": "Your session has expired. Please sign in again.",
-      "current_password_invalid": "The current password is not correct."
+      "current_password_invalid": "The current password is not correct.",
+      "reauthentication_required": "Please confirm this action with your password.",
+      "reauthentication_failed": "The password is not correct."
     },
     "bootstrap": {
       "already_initialized": "This instance has already been initialized.",
@@ -114,7 +116,9 @@
       "bad_request": "The request could not be processed."
     },
     "permission_denied": {
-      "capability": "You do not have permission for this action."
+      "capability": "You do not have permission for this action.",
+      "no_object_grant": "You hold the role for this, but this dashboard has not been shared with you.",
+      "no_project_data_grant": "You have no grant for this project's data. The preview shows the customer's real numbers."
     },
     "not_found": {
       "route": "The requested resource was not found."
@@ -927,5 +931,39 @@
     "notPublished": "Not published yet",
     "published": "Published, version {version}",
     "draftChanges": "Draft with changes"
+  },
+  "access": {
+    "grant_not_found": "This grant does not exist (any more).",
+    "object_not_found": "The object does not belong to this tenant.",
+    "subject_not_found": "This person or group does not belong to this tenant.",
+    "reason": {
+      "via_direct_role_scope": "Role assigned directly in this scope",
+      "via_group_role_scope": "Role through a group",
+      "via_inherited_scope": "Role from the enclosing scope",
+      "grant_direct_dashboard": "Direct grant for this dashboard",
+      "grant_direct_project": "Direct grant for the project",
+      "grant_via_group_dashboard": "Grant for this dashboard through a group",
+      "grant_via_group_project": "Grant for the project through a group"
+    }
+  },
+  "admin": {
+    "attribute_managed_by_idp": "This field is managed by the identity provider and cannot be changed here.",
+    "cannot_change_own_status": "You cannot deactivate your own account.",
+    "confirmation_mismatch": "The confirmation does not match the name.",
+    "group_name_taken": "A group “{name}” already exists.",
+    "group_not_found": "This group does not exist in this tenant.",
+    "invitation_invalid": "This invitation is invalid, expired or already used.",
+    "last_platform_admin": "The last platform admin cannot be removed.",
+    "last_tenant_admin": "The last tenant admin of a tenant cannot be removed - nobody could administer it any more.",
+    "platform_role_needs_user": "Platform roles can only be given to people, not groups.",
+    "role_assignment_not_found": "This role assignment does not exist (any more).",
+    "role_not_assignable": "You may not assign this role in this scope.",
+    "role_scope_not_allowed": "This role cannot be assigned in this scope.",
+    "scope_not_found": "This scope does not exist.",
+    "target_is_platform_admin": "A platform admin cannot be deactivated here.",
+    "tenant_slug_taken": "This short name is already taken.",
+    "user_in_other_tenants": "This person also belongs to another tenant. Deactivating them would lock them out there too.",
+    "user_not_found": "This person does not exist in this tenant.",
+    "user_not_invited": "This person has already accepted their invitation."
   }
 }

@@ -29,11 +29,15 @@ export const AUDIT_ACTIONS = [
   'project.updated',
   // Users & access
   'user.invited',
+  'user.invitation.accepted',
   'user.activated',
   'user.deactivated',
   'user.updated',
   'role_assignment.created',
   'role_assignment.removed',
+  'group.created',
+  'group.updated',
+  'group.deleted',
   'group.membership.changed',
   'object_grant.changed',
   // Matomo connections and sites (Phase 1)

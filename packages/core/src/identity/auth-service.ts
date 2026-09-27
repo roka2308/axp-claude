@@ -245,6 +245,58 @@ export class AuthService {
     };
   }
 
+  /**
+   * Re-authentication for sensitive actions (D5).
+   *
+   * Confirms the password again and renews the session's authentication time,
+   * which opens the re-auth window for this session only. A failure is
+   * audited like a failed login, because it is one.
+   */
+  async reauthenticate(params: {
+    sessionId: string;
+    userId: string;
+    password: string;
+  }): Promise<void> {
+    const [identity] = await this.deps.db
+      .select({ passwordHash: authIdentities.passwordHash })
+      .from(authIdentities)
+      .where(
+        and(eq(authIdentities.userId, params.userId), eq(authIdentities.providerType, 'local')),
+      )
+      .limit(1);
+
+    const ok =
+      identity?.passwordHash !== null &&
+      identity?.passwordHash !== undefined &&
+      (await verifyPassword(identity.passwordHash, params.password));
+
+    if (!ok) {
+      await this.deps.audit.record({
+        action: 'auth.reauthenticated',
+        outcome: 'failure',
+        actorUserId: params.userId,
+        targetType: 'user',
+        targetId: params.userId,
+      });
+      throw new AppError('authentication_required', {
+        code: 'reauthentication_failed',
+        messageKey: 'auth.reauthentication_failed',
+        fieldErrors: { password: 'auth.reauthentication_failed' },
+      });
+    }
+
+    await this.deps.db
+      .update(sessions)
+      .set({ authenticatedAt: this.deps.clock.now() })
+      .where(and(eq(sessions.id, params.sessionId), eq(sessions.userId, params.userId)));
+
+    await this.deps.audit.success('auth.reauthenticated', {
+      actorUserId: params.userId,
+      targetType: 'user',
+      targetId: params.userId,
+    });
+  }
+
   async logout(token: string, actorUserId?: string): Promise<void> {
     const now = this.deps.clock.now();
     await this.deps.db

@@ -105,6 +105,64 @@ export class UserService {
   }
 
   /**
+   * Creates an account whose identity lives with an external provider (OIDC).
+   *
+   * No password is stored. The fields named in `managedAttributes` are owned
+   * by the provider: the product shows them as "Durch Identity Provider
+   * verwaltet" and refuses to edit them (Master Spec §12). Sign-in through the
+   * provider is not part of this milestone; the account model is.
+   */
+  async createFederatedUser(input: {
+    email: string;
+    firstName: string;
+    lastName: string;
+    providerSubject: string;
+    managedAttributes: readonly string[];
+    locale?: 'de' | 'en';
+    actorUserId?: string;
+  }): Promise<{ userId: string }> {
+    const email = normalizeEmail(input.email);
+    const [existing] = await this.deps.db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.emailNormalized, email))
+      .limit(1);
+    if (existing) return { userId: existing.id };
+
+    const userId = newId();
+    const now = this.deps.clock.now();
+    await this.deps.db.transaction(async (tx) => {
+      await tx.insert(users).values({
+        id: userId,
+        email: input.email.trim(),
+        emailNormalized: email,
+        // The provider vouches for the address.
+        emailVerifiedAt: now,
+        firstName: input.firstName.trim(),
+        lastName: input.lastName.trim(),
+        status: 'active',
+        locale: input.locale ?? 'de',
+      });
+      await tx.insert(authIdentities).values({
+        id: newId(),
+        userId,
+        providerType: 'oidc',
+        providerSubject: input.providerSubject,
+        passwordHash: null,
+        managedAttributes: [...input.managedAttributes],
+      });
+    });
+
+    await this.deps.audit.success('user.invited', {
+      actorUserId: input.actorUserId ?? null,
+      targetType: 'user',
+      targetId: userId,
+      metadata: { provider: 'oidc' },
+    });
+    return { userId };
+  }
+
+  /**
    * Changes a local password.
    *
    * Enforces the history rule (§6) and leaves session revocation to the caller,
