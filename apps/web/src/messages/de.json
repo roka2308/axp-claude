@@ -174,7 +174,8 @@
     "subtitle": "Projekte, auf die Sie Zugriff haben.",
     "emptyTitle": "Keine Projekte sichtbar",
     "emptyBody": "Ihnen ist noch kein Projekt zugewiesen. Wenden Sie sich an die Administration Ihres Kunden.",
-    "backToList": "Zurück zur Projektübersicht"
+    "backToList": "Zurück zur Projektübersicht",
+    "create": "Projekt anlegen"
   },
   "project": {
     "timezone": "Zeitzone {timezone}",
@@ -229,7 +230,8 @@
     "site_assignment": "Site dem Projekt zuordnen",
     "first_dashboard": "Erstes Dashboard veröffentlichen",
     "context_profile": "Kontextprofil hinterlegen",
-    "reporting": "Reporting einrichten"
+    "reporting": "Reporting einrichten",
+    "mapping": "Datenquellen zuordnen"
   },
   "viewer": {
     "controlsLabel": "Zeitraum und Vergleich",
@@ -284,7 +286,8 @@
     "barAria": "Balkendiagramm „{title}\" mit {categories} Kategorien. Die Werte stehen darunter als Tabelle zur Verfügung.",
     "donutAria": "Ringdiagramm „{title}\" mit {categories} Kategorien. Die Werte stehen darunter als Tabelle zur Verfügung.",
     "otherCategories": "Übrige",
-    "noAnnotations": "Für diesen Zeitraum sind keine Anmerkungen hinterlegt."
+    "noAnnotations": "Für diesen Zeitraum sind keine Anmerkungen hinterlegt.",
+    "evaluation": "Bewertung: {label}"
   },
   "units": {
     "count": "Anzahl",
@@ -483,7 +486,13 @@
     "sectionNotYoursTitle": "Für diesen Schritt nicht berechtigt",
     "connectionNotYoursBody": "Matomo-Verbindungen verwaltet die Kundenadministration. Ihre Rolle umfasst diesen Schritt nicht.",
     "siteNotYoursBody": "Die Zuordnung einer Site gehört zu den Projekteinstellungen. Ihre Rolle umfasst diesen Schritt nicht.",
-    "dashboardNotYoursBody": "Dashboards legen Dashboard Editoren an. Ihre Rolle umfasst diesen Schritt nicht."
+    "dashboardNotYoursBody": "Dashboards legen Dashboard Editoren an. Ihre Rolle umfasst diesen Schritt nicht.",
+    "markNotRelevant": "Als nicht relevant markieren",
+    "markRelevant": "Doch relevant",
+    "toMapping": "Zur Zuordnung",
+    "solutionsTitle": "Lösungen und Vorlagen",
+    "solutionsBody": "Eine Lösung bringt Kennzahlen, Formeln und Dashboard-Vorlagen mit. Aus einer Vorlage entsteht ein Dashboard in wenigen Schritten.",
+    "toSolutions": "Zu den Lösungen"
   },
   "matomoCompatibility": {
     "label": "Kompatibilität",
@@ -625,7 +634,9 @@
       "topPages": "Top-Seiten als Tabelle",
       "ranking": "Top-Seiten als Balken",
       "share": "Anteile als Ring"
-    }
+    },
+    "fromTemplates": "Aus Vorlagen",
+    "templateFailed": "Die Vorlage konnte nicht eingefügt werden."
   },
   "semantics": {
     "title": "Semantik",
@@ -1566,5 +1577,270 @@
     "definition_missing": "Die Vorlage braucht „{id}“, das es in diesem Projekt nicht gibt.",
     "not_a_dashboard_template": "Aus dieser Vorlage entsteht ein Widget, kein Dashboard.",
     "no_site": "Das Projekt liest noch keine Site. Ordnen Sie zuerst eine Site zu."
+  },
+  "setupStepCategory": {
+    "core": "Kern",
+    "conditional": "Bei Bedarf",
+    "optional": "Optional"
+  },
+  "contextProfile": {
+    "useCase": {
+      "label": "Anwendungsfall",
+      "hint": "Wofür gibt es dieses Projekt? Was soll man an den Zahlen ablesen können?"
+    },
+    "audience": {
+      "label": "Zielgruppe",
+      "hint": "Wer liest die Dashboards, und wer nutzt die Website?"
+    },
+    "goals": {
+      "label": "Ziele",
+      "hint": "Was soll erreicht werden?"
+    },
+    "content": {
+      "label": "Inhalte",
+      "hint": "Welche Inhalte oder Bereiche sind wichtig?"
+    },
+    "success": {
+      "label": "Erfolg",
+      "hint": "Woran erkennen Sie, dass es gut läuft?"
+    },
+    "actions": {
+      "label": "Handlungen",
+      "hint": "Was tun Sie, wenn sich eine Zahl deutlich ändert?"
+    },
+    "tracking": {
+      "label": "Tracking",
+      "hint": "Was wird gemessen, was bewusst nicht?"
+    },
+    "events": {
+      "label": "Ereignisse",
+      "hint": "Kampagnen, Relaunches oder andere Einflüsse auf die Zahlen."
+    },
+    "limits": {
+      "label": "Grenzen",
+      "hint": "Was die Zahlen nicht aussagen können."
+    },
+    "terms": {
+      "label": "Begriffe",
+      "hint": "Wörter, die in diesem Projekt eine besondere Bedeutung haben."
+    },
+    "title": "Kontextprofil",
+    "description": "Kontext vor Interpretation: Wer die Zahlen liest, soll zuerst wissen, wofür sie stehen.",
+    "optionalFields": "Weitere Angaben (optional)",
+    "save": "Kontextprofil speichern",
+    "saving": "Wird gespeichert …",
+    "saved": "Gespeichert.",
+    "readOnly": "Nur Tenant Admins ändern das Kontextprofil."
+  },
+  "sourceMetric": {
+    "visits": "Besuche",
+    "unique_visitors": "Eindeutige Besucher:innen",
+    "pageviews": "Seitenaufrufe",
+    "unique_pageviews": "Eindeutige Seitenaufrufe",
+    "bounce_rate": "Absprungrate",
+    "avg_time_on_site": "Durchschnittliche Verweildauer",
+    "mock_portal_active_users": "Portal: aktive Nutzer:innen (Demo-Bericht)",
+    "mock_portal_engaged_users": "Portal: engagierte Nutzer:innen (Demo-Bericht)",
+    "mock_portal_content_creators": "Portal: Beitragende (Demo-Bericht)",
+    "mock_portal_registered_users": "Portal: registrierte Nutzer:innen (Demo-Bericht)"
+  },
+  "templates": {
+    "title": "Vorlagen",
+    "subtitle": "Dashboard-Vorlagen, Widget-Vorlagen und Lösungen für ein Projekt.",
+    "noProjects": "Sie haben noch kein Projekt. Vorlagen gehören immer zu einem Projekt.",
+    "project": "Projekt",
+    "switchProject": "Wechseln",
+    "tabs": "Bereiche der Vorlagen",
+    "tab": {
+      "dashboards": "Dashboard-Vorlagen",
+      "widgets": "Widget-Vorlagen",
+      "solutions": "Lösungen"
+    },
+    "notAllowedTitle": "Keine Berechtigung",
+    "notAllowedBody": "Vorlagen sehen Personen, die in diesem Projekt Kennzahlen lesen dürfen.",
+    "emptyTitle": "Noch keine Vorlagen",
+    "emptyBody": "Vorlagen kommen mit Lösungen. Installieren Sie eine Lösung für dieses Projekt.",
+    "toSolutions": "Zu den Lösungen",
+    "readiness": {
+      "ready": "Bereit",
+      "setup_required": "Einrichtung nötig",
+      "not_fully_supported": "Nicht voll unterstützt"
+    },
+    "missing": "Es fehlt: {items}",
+    "widgetCount": "{count, plural, one {Ein Widget} other {# Widgets}}",
+    "fromSolution": "aus {name} {version}",
+    "layer": {
+      "global": "Produktvorlage",
+      "solution": "aus einer Lösung",
+      "tenant": "Kundenvorlage",
+      "project": "Projektvorlage"
+    },
+    "version": "Vorlagenversion {version}",
+    "widgetHint": "Widget-Vorlagen fügen Sie im Editor unter „Aus Vorlagen“ ein.",
+    "createDashboard": "Dashboard aus Vorlage erstellen",
+    "dashboardName": "Name des neuen Dashboards",
+    "copyHint": "Das Dashboard ist eine Kopie. Spätere Änderungen an der Vorlage verändern es nicht.",
+    "createAndEdit": "Erstellen und bearbeiten",
+    "creating": "Wird erstellt …",
+    "cancel": "Abbrechen",
+    "solutionsExplain": "Eine Lösung bringt Kennzahlen, Formeln, Bewertungen und Vorlagen mit. Sie enthält keine Daten und keine Zugangsdaten, und nichts daran wird ausgeführt.",
+    "available": "Verfügbare Lösungen",
+    "solutionMeta": "{publisher} · Version {version}",
+    "installedVersion": "Installiert: Version {version}",
+    "notInstalled": "Nicht installiert",
+    "install": "Lösung installieren",
+    "checkAgain": "Prüfen und aktualisieren",
+    "uploadPackage": "Lösung aus Datei installieren",
+    "installNeedsRole": "Lösungen installieren Semantic Catalog Manager.",
+    "installed": "Installiert in diesem Projekt",
+    "noneInstalled": "Noch keine Lösung installiert.",
+    "columnSolution": "Lösung",
+    "columnVersion": "Version",
+    "columnInstalled": "Installiert",
+    "columnStatus": "Status",
+    "current": "Aktuell",
+    "superseded": "Durch neuere Version ersetzt",
+    "dateLocale": "de-DE",
+    "exportTitle": "Als Lösung exportieren",
+    "exportBody": "Veröffentlichte Dashboards und alle Kennzahlen darunter als Datei, zum Installieren in anderen Projekten. Ohne Daten, Zugangsdaten und Kundenkennungen.",
+    "exportNothing": "Es gibt noch kein veröffentlichtes Dashboard zum Exportieren.",
+    "exportDashboards": "Dashboards",
+    "exportName": "Name der Lösung",
+    "exportPublisher": "Herausgeber",
+    "exportPackageId": "Paketkennung",
+    "exportPackageIdHint": "Umgekehrte Domain, z. B. com.firma.portal-kennzahlen",
+    "exportVersion": "Version",
+    "exportSubmit": "Exportieren",
+    "exporting": "Wird exportiert …",
+    "exportDone": "Die Datei wurde erstellt."
+  },
+  "install": {
+    "title": "Lösung installieren",
+    "titleFor": "{name} installieren",
+    "subtitle": "In das Projekt {project}. Geschrieben wird erst im letzten Schritt.",
+    "back": "Zurück",
+    "notAllowedTitle": "Keine Berechtigung",
+    "notAllowedBody": "Eine Lösung legt Kennzahlen an. Das dürfen Semantic Catalog Manager dieses Projekts.",
+    "uploadTitle": "Paketdatei wählen",
+    "uploadBody": "Eine Lösung ist eine JSON-Datei. Sie wird vollständig geprüft, bevor irgendetwas übernommen wird.",
+    "chooseFile": "Datei auswählen",
+    "notJson": "Die Datei ist kein gültiges JSON.",
+    "analysing": "Die Lösung wird geprüft …",
+    "progress": "Fortschritt",
+    "step": {
+      "check": "Prüfen",
+      "mapping": "Datenquellen zuordnen",
+      "conflicts": "Konflikte",
+      "preview": "Vorschau"
+    },
+    "packageLine": "{name} · Version {version} · {publisher}",
+    "updateFrom": "Aktualisierung von Version {version}",
+    "checkPassed": "Die Lösung ist gültig und passt zu diesem Projekt.",
+    "checkFailed": "Die Lösung kann so nicht installiert werden.",
+    "chooseOther": "Andere Datei wählen",
+    "compatibility": {
+      "supported": "Kompatibel: alles, was die Lösung braucht, ist vorhanden.",
+      "supported_with_limitations": "Kompatibel mit Einschränkungen – siehe Hinweise.",
+      "unsupported": "Nicht kompatibel mit diesem Projekt."
+    },
+    "stage": {
+      "validate": "Inhalt",
+      "compatibility": "Kompatibilität",
+      "dependencies": "Abhängigkeiten",
+      "mapping": "Zuordnung",
+      "conflicts": "Konflikte"
+    },
+    "error": "Fehler",
+    "warning": "Hinweis",
+    "mappingExplain": "Die Lösung beschreibt, was sie braucht. Welche Quelle Ihrer Site das liefert, entscheiden Sie hier.",
+    "mappingNone": "Diese Lösung braucht keine eigenen Datenquellen.",
+    "alreadyMapped": "Bereits zugeordnet: {source}",
+    "sourceFor": "Quelle für „{label}“",
+    "choose": "Bitte wählen",
+    "notAvailable": "Auf dieser Site nicht verfügbar",
+    "preview": "Vorschau",
+    "previewValue": "Letzte 7 Tage: {value}",
+    "previewNone": "Kein Wert",
+    "previewState": {
+      "empty": "Leer – im Zeitraum nichts gemessen",
+      "missing": "Fehlt",
+      "unknown": "Unbekannt",
+      "not_tracked": "Wird nicht erfasst",
+      "not_applicable": "Nicht anwendbar",
+      "unavailable": "Quelle nicht erreichbar",
+      "loading": "Lädt"
+    },
+    "numberLocale": "de-DE",
+    "noConflicts": "Keine Konflikte: Nichts im Projekt wird überschrieben.",
+    "conflictsExplain": "Diese Objekte gibt es im Projekt schon in anderer Form. Nichts wird überschrieben: Sie behalten das Bestehende, oder die Lösung legt eine neue Version an. Veröffentlichte Dashboards behalten ihre Version.",
+    "conflictObject": {
+      "semantic_definition": "Kennzahl",
+      "widget_template": "Widget-Vorlage",
+      "dashboard_template": "Dashboard-Vorlage"
+    },
+    "conflictKind": {
+      "identical": "identisch",
+      "changed": "geändert",
+      "foreign": "anderer Typ – muss zuerst geklärt werden"
+    },
+    "resolutionFor": "Entscheidung für {name}",
+    "resolution": {
+      "keep_existing": "Bestehendes behalten",
+      "new_version": "Neue Version der Lösung übernehmen"
+    },
+    "previewNew": "{count, plural, =0 {Keine neue Kennzahl} one {Eine neue Kennzahl} other {# neue Kennzahlen}}",
+    "previewReused": "{count, plural, =0 {Nichts wiederverwendet} one {Eine Kennzahl wird wiederverwendet} other {# Kennzahlen werden wiederverwendet}}",
+    "previewChanged": "{count, plural, =0 {Keine geänderte Kennzahl} one {Eine geänderte Kennzahl} other {# geänderte Kennzahlen}}",
+    "previewTemplates": "{dashboards, plural, one {Eine Dashboard-Vorlage} other {# Dashboard-Vorlagen}} und {widgets, plural, one {eine Widget-Vorlage} other {# Widget-Vorlagen}}",
+    "previewPromise": "Bestehende Dashboards bleiben unverändert. Neue Dashboards entstehen erst, wenn Sie eines aus einer Vorlage erstellen.",
+    "acceptWarnings": "Ich habe die Hinweise gelesen und möchte trotzdem installieren.",
+    "next": "Weiter",
+    "installNow": "Lösung installieren",
+    "update": "Lösung aktualisieren",
+    "installing": "Wird installiert …",
+    "doneTitle": "Installiert",
+    "doneBody": "{created} neu angelegt, {reused} wiederverwendet, {versions} neue Versionen, {templates} Vorlagen übernommen.",
+    "toTemplates": "Zu den Dashboard-Vorlagen"
+  },
+  "projectCreate": {
+    "title": "Projekt anlegen",
+    "back": "Zurück",
+    "notAllowedTitle": "Keine Berechtigung",
+    "notAllowedBody": "Projekte legen Tenant Admins an.",
+    "progress": "Fortschritt",
+    "step": {
+      "basics": "Grunddaten",
+      "context": "Kontext",
+      "source": "Datenquelle",
+      "done": "Fertig"
+    },
+    "tenant": "Kunde",
+    "name": "Name des Projekts",
+    "slug": "Kürzel",
+    "slugHint": "Kleinbuchstaben, Ziffern und Bindestriche. Eindeutig im Kunden.",
+    "description": "Beschreibung (optional)",
+    "timezone": "Zeitzone für Berichte",
+    "timezoneHint": "Die Tagesgrenzen der Zahlen folgen der Zeitzone der Matomo-Site.",
+    "locale": "Sprache",
+    "contextExplain": "Zwei Angaben genügen für den Anfang. Alles Weitere ergänzen Sie jederzeit im Kontextprofil.",
+    "contextLater": "Weitere Felder – Erfolg, Grenzen, Begriffe – finden Sie später im Setup.",
+    "sourceExplain": "Woher liest das Projekt seine Zahlen?",
+    "sourceExisting": "Eine Site, die der Kunde schon nutzt",
+    "site": "Site",
+    "siteDetail": "{connection} · {count, plural, =0 {noch in keinem Projekt} one {in einem Projekt} other {in # Projekten}}",
+    "sourceConnection": "Eine weitere Site einer bestehenden Matomo-Verbindung",
+    "connection": "Verbindung",
+    "matomoSite": "Site in Matomo",
+    "chooseSite": "Site wählen",
+    "loadingSites": "Sites werden geladen …",
+    "sourceLater": "Später festlegen",
+    "sourceLaterShort": "später",
+    "noConnection": "Dieser Kunde hat noch keine Matomo-Verbindung. Sie richten sie im Setup des Projekts ein.",
+    "reviewSource": "Datenquelle",
+    "reviewNext": "Danach",
+    "reviewNextBody": "Die Setup-Übersicht zeigt, was noch offen ist – in beliebiger Reihenfolge.",
+    "next": "Weiter",
+    "create": "Projekt anlegen",
+    "creating": "Wird angelegt …"
   }
 }

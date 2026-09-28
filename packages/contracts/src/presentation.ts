@@ -61,6 +61,12 @@ export interface MetricPresentation extends MetricValue {
   /** Pre-formatted for the current locale, so exports match the screen. */
   readonly formatted: string;
   readonly comparisonFormatted?: string;
+  /**
+   * For a score with an evaluation scheme: the band its value falls into.
+   * The label is the scheme's own word and always travels with the band
+   * colour - a band is never a colour alone (D9, D10).
+   */
+  readonly evaluation?: { readonly label: string; readonly band: 1 | 2 | 3 | 4 | 5 };
 }
 
 export type WidgetContent =

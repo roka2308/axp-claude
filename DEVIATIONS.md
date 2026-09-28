@@ -40,6 +40,11 @@ by the badge text naming a development phase rather than a product state.
 Keep. Remove each badge in the milestone that implements the entry. No change
 to the shared contract.
 
+### Resolution
+
+Resolved in Phase 6: "Vorlagen" was the last entry to become a link. All five
+primary entries now lead somewhere real; no badge remains.
+
 ---
 
 ## DEV-002 — `not_calculable` is modelled as a cause of `missing`, not an 11th state
@@ -190,3 +195,36 @@ takes an invitation to the right address. Nothing else depends on it.
 Implement the verified change - re-auth, token to the new address, switch on
 confirmation - together with the mail transport in Phase 8, and deliver
 invitation links by mail at the same time.
+
+---
+
+## DEV-006 — Solution package schema 1 carries no theme tokens
+
+- Status: `track_specific`
+- Milestone: F6
+- Specification reference: Master Spec §14 ("Solution Package kann deklarativ
+  enthalten: … optionale Theme Tokens")
+
+### What differs
+
+Package schema version 1 has no `themeTokens` section. A package that brings
+one is refused as containing an unknown field, like any other.
+
+### Why
+
+Tenant and project themes, their contrast checks and their override rules
+arrive in Phase 9 (D9). Accepting tokens now would mean either storing values
+nothing reads, or applying them without the accessibility checks the theme
+system requires ("Theme-Konfiguration darf Accessibility nicht stillschweigend
+brechen").
+
+### Risks / impact
+
+Low: the tokens are optional content, and the reference solution has none. A
+package author who wants to ship them cannot do so before Phase 9.
+
+### Proposed action
+
+Add an optional, validated `themeTokens` section in a schema extension with
+the theme work of Phase 9, running the same contrast checks as the theme
+editor. Record it for the cross-track comparison of package schemas.

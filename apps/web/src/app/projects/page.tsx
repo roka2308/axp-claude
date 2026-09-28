@@ -5,6 +5,7 @@ import { Callout, Card } from '@axp/ui';
 import { AppShell } from '@/components/AppShell';
 import { getApiVersion, getCurrentUser } from '@/lib/platform';
 import { listProjects } from '@/lib/analytics';
+import { getCreationOptions } from '@/lib/solutions';
 import { logoutAction } from '@/app/login/actions';
 import { Button } from '@axp/ui';
 import styles from './projects.module.css';
@@ -21,7 +22,7 @@ export default async function ProjectsPage() {
   const [user, version] = await Promise.all([getCurrentUser(), getApiVersion()]);
   if (!user) redirect('/login');
 
-  const projects = await listProjects();
+  const [projects, options] = await Promise.all([listProjects(), getCreationOptions()]);
 
   return (
     <AppShell
@@ -36,9 +37,17 @@ export default async function ProjectsPage() {
       }
     >
       <div className="stack stack--loose">
-        <div className="stack stack--tight">
-          <h1>{t('projects.title')}</h1>
-          <p className="text-secondary">{t('projects.subtitle')}</p>
+        <div className={styles.header}>
+          <div className="stack stack--tight">
+            <h1>{t('projects.title')}</h1>
+            <p className="text-secondary">{t('projects.subtitle')}</p>
+          </div>
+          {/* Offered only where the server says the caller may create one. */}
+          {options.tenants.length > 0 ? (
+            <Link href="/projects/new" className={styles.primaryLink}>
+              {t('projects.create')}
+            </Link>
+          ) : null}
         </div>
 
         {projects.length === 0 ? (

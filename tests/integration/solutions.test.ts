@@ -298,6 +298,21 @@ describe('solutions, templates and project setup', () => {
       }
       expect(await definitionCount()).toBe(2);
     });
+
+    it('refuses __proto__ keys already in the request parser', async () => {
+      const body = JSON.stringify({ source: { upload: PULSE_PACKAGE } }).replace(
+        '"manifest":{',
+        '"manifest":{"__proto__":{"admin":true},',
+      );
+      const response = await app.inject({
+        method: 'POST',
+        url: `/projects/${projectId}/solutions/analyze`,
+        headers: { authorization: `Bearer ${semantic}`, 'content-type': 'application/json' },
+        payload: body,
+      });
+      expect(response.statusCode).toBe(400);
+      expect(await definitionCount()).toBe(2);
+    });
   });
 
   // --- permissions -----------------------------------------------------------------------

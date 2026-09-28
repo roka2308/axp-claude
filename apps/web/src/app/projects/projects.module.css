@@ -49,3 +49,28 @@
   border-color: var(--status-serious);
   color: var(--status-serious-text);
 }
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.primaryLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-size-min);
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-sm);
+  background: var(--accent-default);
+  color: var(--text-on-accent);
+  text-decoration: none;
+  font-weight: var(--font-weight-medium);
+}
+
+.primaryLink:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}

@@ -50,6 +50,14 @@ async function CardContent({ widget }: { readonly widget: WidgetPresentation }) 
           <div key={metric.semanticVersionId} className={styles.metric}>
             <span className={`${styles.value} axp-numeric`}>{metric.formatted}</span>
 
+            {metric.evaluation ? (
+              // The band's word first; the colour mark only repeats it (D10).
+              <span className={styles.evaluation} data-band={metric.evaluation.band}>
+                <span className={styles.evaluationMark} aria-hidden="true" />
+                {t('viewer.evaluation', { label: metric.evaluation.label })}
+              </span>
+            ) : null}
+
             {metric.comparison ? (
               <span className={styles.comparison} data-direction={direction ?? 'none'}>
                 {/*

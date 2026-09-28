@@ -29,7 +29,8 @@ const NAV_ENTRIES: readonly NavEntry[] = [
   { key: 'projects', href: '/projects' },
   // The cross-project library: every dashboard the caller may open.
   { key: 'dashboards', href: '/dashboards' },
-  { key: 'templates', pendingPhase: 'Phase 6' },
+  // Widget and dashboard templates, and solutions (D7).
+  { key: 'templates', href: '/templates' },
   { key: 'administration', href: '/admin' },
 ];
 

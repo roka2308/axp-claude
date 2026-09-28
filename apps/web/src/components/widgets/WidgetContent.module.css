@@ -116,3 +116,41 @@
   font-size: var(--font-size-sm);
   color: var(--text-secondary);
 }
+
+/* Score evaluation: a word with a colour mark beside it, never colour alone. */
+.evaluation {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+}
+
+.evaluationMark {
+  display: inline-block;
+  inline-size: 0.75rem;
+  block-size: 0.75rem;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-strong);
+}
+
+.evaluation[data-band='1'] .evaluationMark {
+  background: var(--evaluation-band-1);
+}
+
+.evaluation[data-band='2'] .evaluationMark {
+  background: var(--evaluation-band-2);
+}
+
+.evaluation[data-band='3'] .evaluationMark {
+  background: var(--evaluation-band-3);
+}
+
+.evaluation[data-band='4'] .evaluationMark {
+  background: var(--evaluation-band-4);
+}
+
+.evaluation[data-band='5'] .evaluationMark {
+  background: var(--evaluation-band-5);
+}

@@ -174,7 +174,8 @@
     "subtitle": "Projects you have access to.",
     "emptyTitle": "No projects visible",
     "emptyBody": "No project has been assigned to you yet. Contact your tenant administration.",
-    "backToList": "Back to project list"
+    "backToList": "Back to project list",
+    "create": "Create project"
   },
   "project": {
     "timezone": "Time zone {timezone}",
@@ -229,7 +230,8 @@
     "site_assignment": "Assign a site to the project",
     "first_dashboard": "Publish the first dashboard",
     "context_profile": "Record the context profile",
-    "reporting": "Set up reporting"
+    "reporting": "Set up reporting",
+    "mapping": "Map data sources"
   },
   "viewer": {
     "controlsLabel": "Time range and comparison",
@@ -284,7 +286,8 @@
     "barAria": "Bar chart “{title}” with {categories} categories. The values are available as a table below.",
     "donutAria": "Donut chart “{title}” with {categories} categories. The values are available as a table below.",
     "otherCategories": "Other",
-    "noAnnotations": "No annotations are recorded for this period."
+    "noAnnotations": "No annotations are recorded for this period.",
+    "evaluation": "Evaluation: {label}"
   },
   "units": {
     "count": "Count",
@@ -483,7 +486,13 @@
     "sectionNotYoursTitle": "Not permitted for this step",
     "connectionNotYoursBody": "Matomo connections are managed by customer administration. Your role does not cover this step.",
     "siteNotYoursBody": "Assigning a site is part of project settings. Your role does not cover this step.",
-    "dashboardNotYoursBody": "Dashboards are created by dashboard editors. Your role does not cover this step."
+    "dashboardNotYoursBody": "Dashboards are created by dashboard editors. Your role does not cover this step.",
+    "markNotRelevant": "Mark as not relevant",
+    "markRelevant": "Relevant after all",
+    "toMapping": "Go to mapping",
+    "solutionsTitle": "Solutions and templates",
+    "solutionsBody": "A solution brings metrics, formulas and dashboard templates. A template becomes a dashboard in a few steps.",
+    "toSolutions": "Go to solutions"
   },
   "matomoCompatibility": {
     "label": "Compatibility",
@@ -625,7 +634,9 @@
       "topPages": "Top pages as a table",
       "ranking": "Top pages as bars",
       "share": "Shares as a ring"
-    }
+    },
+    "fromTemplates": "From templates",
+    "templateFailed": "The template could not be inserted."
   },
   "semantics": {
     "title": "Semantics",
@@ -1566,5 +1577,270 @@
     "definition_missing": "The template needs “{id}”, which does not exist in this project.",
     "not_a_dashboard_template": "This template creates a widget, not a dashboard.",
     "no_site": "The project does not read a site yet. Assign a site first."
+  },
+  "setupStepCategory": {
+    "core": "Core",
+    "conditional": "When needed",
+    "optional": "Optional"
+  },
+  "contextProfile": {
+    "useCase": {
+      "label": "Use case",
+      "hint": "What is this project for? What should the numbers tell you?"
+    },
+    "audience": {
+      "label": "Audience",
+      "hint": "Who reads the dashboards, and who uses the website?"
+    },
+    "goals": {
+      "label": "Goals",
+      "hint": "What should be achieved?"
+    },
+    "content": {
+      "label": "Content",
+      "hint": "Which content or areas matter?"
+    },
+    "success": {
+      "label": "Success",
+      "hint": "How do you tell that things are going well?"
+    },
+    "actions": {
+      "label": "Actions",
+      "hint": "What do you do when a number changes markedly?"
+    },
+    "tracking": {
+      "label": "Tracking",
+      "hint": "What is measured, and what deliberately not?"
+    },
+    "events": {
+      "label": "Events",
+      "hint": "Campaigns, relaunches or other influences on the numbers."
+    },
+    "limits": {
+      "label": "Limits",
+      "hint": "What the numbers cannot tell you."
+    },
+    "terms": {
+      "label": "Terms",
+      "hint": "Words that mean something particular in this project."
+    },
+    "title": "Context profile",
+    "description": "Context before interpretation: whoever reads the numbers should first know what they stand for.",
+    "optionalFields": "More details (optional)",
+    "save": "Save context profile",
+    "saving": "Saving …",
+    "saved": "Saved.",
+    "readOnly": "Only Tenant Admins change the context profile."
+  },
+  "sourceMetric": {
+    "visits": "Visits",
+    "unique_visitors": "Unique visitors",
+    "pageviews": "Pageviews",
+    "unique_pageviews": "Unique pageviews",
+    "bounce_rate": "Bounce rate",
+    "avg_time_on_site": "Average time on site",
+    "mock_portal_active_users": "Portal: active users (demo report)",
+    "mock_portal_engaged_users": "Portal: engaged users (demo report)",
+    "mock_portal_content_creators": "Portal: content creators (demo report)",
+    "mock_portal_registered_users": "Portal: registered users (demo report)"
+  },
+  "templates": {
+    "title": "Templates",
+    "subtitle": "Dashboard templates, widget templates and solutions for a project.",
+    "noProjects": "You have no project yet. Templates always belong to a project.",
+    "project": "Project",
+    "switchProject": "Switch",
+    "tabs": "Template sections",
+    "tab": {
+      "dashboards": "Dashboard templates",
+      "widgets": "Widget templates",
+      "solutions": "Solutions"
+    },
+    "notAllowedTitle": "No permission",
+    "notAllowedBody": "Templates are visible to people who may read metrics in this project.",
+    "emptyTitle": "No templates yet",
+    "emptyBody": "Templates come with solutions. Install a solution for this project.",
+    "toSolutions": "Go to solutions",
+    "readiness": {
+      "ready": "Ready",
+      "setup_required": "Setup required",
+      "not_fully_supported": "Not fully supported"
+    },
+    "missing": "Missing: {items}",
+    "widgetCount": "{count, plural, one {One widget} other {# widgets}}",
+    "fromSolution": "from {name} {version}",
+    "layer": {
+      "global": "Product template",
+      "solution": "from a solution",
+      "tenant": "Customer template",
+      "project": "Project template"
+    },
+    "version": "Template version {version}",
+    "widgetHint": "Insert widget templates in the editor under “From templates”.",
+    "createDashboard": "Create dashboard from template",
+    "dashboardName": "Name of the new dashboard",
+    "copyHint": "The dashboard is a copy. Later changes to the template do not change it.",
+    "createAndEdit": "Create and edit",
+    "creating": "Creating …",
+    "cancel": "Cancel",
+    "solutionsExplain": "A solution brings metrics, formulas, evaluations and templates. It contains no data and no credentials, and nothing in it is executed.",
+    "available": "Available solutions",
+    "solutionMeta": "{publisher} · version {version}",
+    "installedVersion": "Installed: version {version}",
+    "notInstalled": "Not installed",
+    "install": "Install solution",
+    "checkAgain": "Check and update",
+    "uploadPackage": "Install a solution from a file",
+    "installNeedsRole": "Solutions are installed by Semantic Catalog Managers.",
+    "installed": "Installed in this project",
+    "noneInstalled": "No solution installed yet.",
+    "columnSolution": "Solution",
+    "columnVersion": "Version",
+    "columnInstalled": "Installed",
+    "columnStatus": "Status",
+    "current": "Current",
+    "superseded": "Replaced by a newer version",
+    "dateLocale": "en-GB",
+    "exportTitle": "Export as a solution",
+    "exportBody": "Published dashboards and every metric beneath them as a file, to install in other projects. Without data, credentials or customer ids.",
+    "exportNothing": "There is no published dashboard to export yet.",
+    "exportDashboards": "Dashboards",
+    "exportName": "Solution name",
+    "exportPublisher": "Publisher",
+    "exportPackageId": "Package id",
+    "exportPackageIdHint": "Reverse domain, e.g. com.company.portal-metrics",
+    "exportVersion": "Version",
+    "exportSubmit": "Export",
+    "exporting": "Exporting …",
+    "exportDone": "The file has been created."
+  },
+  "install": {
+    "title": "Install solution",
+    "titleFor": "Install {name}",
+    "subtitle": "Into the project {project}. Nothing is written before the last step.",
+    "back": "Back",
+    "notAllowedTitle": "No permission",
+    "notAllowedBody": "A solution creates metrics. That is for Semantic Catalog Managers of this project.",
+    "uploadTitle": "Choose a package file",
+    "uploadBody": "A solution is a JSON file. It is checked completely before anything is taken over.",
+    "chooseFile": "Choose file",
+    "notJson": "The file is not valid JSON.",
+    "analysing": "Checking the solution …",
+    "progress": "Progress",
+    "step": {
+      "check": "Check",
+      "mapping": "Map data sources",
+      "conflicts": "Conflicts",
+      "preview": "Preview"
+    },
+    "packageLine": "{name} · version {version} · {publisher}",
+    "updateFrom": "Update from version {version}",
+    "checkPassed": "The solution is valid and fits this project.",
+    "checkFailed": "The solution cannot be installed as it is.",
+    "chooseOther": "Choose another file",
+    "compatibility": {
+      "supported": "Compatible: everything the solution needs is there.",
+      "supported_with_limitations": "Compatible with limitations – see the notes.",
+      "unsupported": "Not compatible with this project."
+    },
+    "stage": {
+      "validate": "Content",
+      "compatibility": "Compatibility",
+      "dependencies": "Dependencies",
+      "mapping": "Mapping",
+      "conflicts": "Conflicts"
+    },
+    "error": "Error",
+    "warning": "Note",
+    "mappingExplain": "The solution describes what it needs. You decide here which source of your site provides it.",
+    "mappingNone": "This solution needs no data sources of its own.",
+    "alreadyMapped": "Already mapped: {source}",
+    "sourceFor": "Source for “{label}”",
+    "choose": "Please choose",
+    "notAvailable": "Not available on this site",
+    "preview": "Preview",
+    "previewValue": "Last 7 days: {value}",
+    "previewNone": "No value",
+    "previewState": {
+      "empty": "Empty – nothing measured in the period",
+      "missing": "Missing",
+      "unknown": "Unknown",
+      "not_tracked": "Not tracked",
+      "not_applicable": "Not applicable",
+      "unavailable": "Source not reachable",
+      "loading": "Loading"
+    },
+    "numberLocale": "en-GB",
+    "noConflicts": "No conflicts: nothing in the project is overwritten.",
+    "conflictsExplain": "These objects already exist in the project in another form. Nothing is overwritten: keep what is there, or let the solution add a new version. Published dashboards keep their version.",
+    "conflictObject": {
+      "semantic_definition": "Metric",
+      "widget_template": "Widget template",
+      "dashboard_template": "Dashboard template"
+    },
+    "conflictKind": {
+      "identical": "identical",
+      "changed": "changed",
+      "foreign": "different type – has to be resolved first"
+    },
+    "resolutionFor": "Decision for {name}",
+    "resolution": {
+      "keep_existing": "Keep what is there",
+      "new_version": "Take the solution's new version"
+    },
+    "previewNew": "{count, plural, =0 {No new metric} one {One new metric} other {# new metrics}}",
+    "previewReused": "{count, plural, =0 {Nothing reused} one {One metric is reused} other {# metrics are reused}}",
+    "previewChanged": "{count, plural, =0 {No changed metric} one {One changed metric} other {# changed metrics}}",
+    "previewTemplates": "{dashboards, plural, one {One dashboard template} other {# dashboard templates}} and {widgets, plural, one {one widget template} other {# widget templates}}",
+    "previewPromise": "Existing dashboards stay unchanged. New dashboards only come about when you create one from a template.",
+    "acceptWarnings": "I have read the notes and want to install anyway.",
+    "next": "Next",
+    "installNow": "Install solution",
+    "update": "Update solution",
+    "installing": "Installing …",
+    "doneTitle": "Installed",
+    "doneBody": "{created} created, {reused} reused, {versions} new versions, {templates} templates taken over.",
+    "toTemplates": "Go to the dashboard templates"
+  },
+  "projectCreate": {
+    "title": "Create project",
+    "back": "Back",
+    "notAllowedTitle": "No permission",
+    "notAllowedBody": "Projects are created by Tenant Admins.",
+    "progress": "Progress",
+    "step": {
+      "basics": "Basics",
+      "context": "Context",
+      "source": "Data source",
+      "done": "Done"
+    },
+    "tenant": "Customer",
+    "name": "Project name",
+    "slug": "Slug",
+    "slugHint": "Lower-case letters, digits and hyphens. Unique within the customer.",
+    "description": "Description (optional)",
+    "timezone": "Time zone for reports",
+    "timezoneHint": "Day boundaries of the numbers follow the Matomo site's time zone.",
+    "locale": "Language",
+    "contextExplain": "Two answers are enough to start. Add the rest any time in the context profile.",
+    "contextLater": "More fields – success, limits, terms – are in the setup later.",
+    "sourceExplain": "Where does the project read its numbers from?",
+    "sourceExisting": "A site the customer already uses",
+    "site": "Site",
+    "siteDetail": "{connection} · {count, plural, =0 {in no project yet} one {in one project} other {in # projects}}",
+    "sourceConnection": "Another site of an existing Matomo connection",
+    "connection": "Connection",
+    "matomoSite": "Site in Matomo",
+    "chooseSite": "Choose a site",
+    "loadingSites": "Loading sites …",
+    "sourceLater": "Decide later",
+    "sourceLaterShort": "later",
+    "noConnection": "This customer has no Matomo connection yet. Set it up in the project setup.",
+    "reviewSource": "Data source",
+    "reviewNext": "Afterwards",
+    "reviewNextBody": "The setup overview shows what is still open – in any order.",
+    "next": "Next",
+    "create": "Create project",
+    "creating": "Creating …"
   }
 }

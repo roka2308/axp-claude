@@ -1,10 +1,14 @@
 import Link from 'next/link';
+import type { Route } from 'next';
 import { redirect } from 'next/navigation';
+import { DISMISSABLE_SETUP_STEPS } from '@axp/contracts';
 import { getTranslations } from 'next-intl/server';
 import type { SelectOption } from '@axp/ui';
 import { Button, Callout, Card } from '@axp/ui';
 import { AppShell } from '@/components/AppShell';
 import { CompatibilityReport } from '@/components/setup/CompatibilityReport';
+import { ContextProfileForm } from '@/components/setup/ContextProfileForm';
+import { StepRelevanceToggle } from '@/components/setup/StepRelevanceToggle';
 import { DashboardCreateForm } from '@/components/setup/DashboardCreateForm';
 import { MatomoConnectionForm } from '@/components/setup/MatomoConnectionForm';
 import { SiteAssignmentForm } from '@/components/setup/SiteAssignmentForm';
@@ -124,15 +128,43 @@ export default async function ProjectSetupPage({ params }: SetupPageProps) {
             {detail.setup.steps.map((step) => (
               <li key={step.key} className={styles.step} data-state={step.state}>
                 <span className={styles.stepState}>{t(`setupStepState.${step.state}`)}</span>
-                <span>
-                  {t(step.key)}
-                  {step.required ? null : (
-                    <span className="text-muted"> · {t('project.optionalStep')}</span>
-                  )}
+                <span className="stack stack--tight">
+                  <span>
+                    {t(step.key)}
+                    <span className="text-muted">
+                      {' · '}
+                      {t(`setupStepCategory.${step.category}`)}
+                      {step.detail ? ` · ${step.detail}` : ''}
+                    </span>
+                  </span>
+                  {step.step === 'mapping' &&
+                  step.state !== 'done' &&
+                  step.state !== 'not_relevant' ? (
+                    <Link href={`/projects/${projectId}/semantics`}>
+                      {t('projectSetup.toMapping')}
+                    </Link>
+                  ) : null}
+                  {canAssignSite &&
+                  DISMISSABLE_SETUP_STEPS.includes(step.step) &&
+                  step.state !== 'done' ? (
+                    <StepRelevanceToggle
+                      projectId={projectId}
+                      step={step.step}
+                      notRelevant={step.state === 'not_relevant'}
+                    />
+                  ) : null}
                 </span>
               </li>
             ))}
           </ol>
+        </Card>
+
+        <Card title={t('contextProfile.title')} description={t('contextProfile.description')}>
+          <ContextProfileForm
+            projectId={projectId}
+            initial={detail.project.contextProfile}
+            readOnly={!canAssignSite}
+          />
         </Card>
 
         {/* Step 1 - the Matomo installation itself. */}
@@ -229,6 +261,16 @@ export default async function ProjectSetupPage({ params }: SetupPageProps) {
               </Callout>
             )}
           </div>
+        </Card>
+
+        {/* A ready-made start: a solution, then a dashboard from its template. */}
+        <Card
+          title={t('projectSetup.solutionsTitle')}
+          description={t('projectSetup.solutionsBody')}
+        >
+          <Link href={`/templates?project=${projectId}&tab=solutions` as Route}>
+            {t('projectSetup.toSolutions')}
+          </Link>
         </Card>
 
         {/* Step 3 - something to look at. */}

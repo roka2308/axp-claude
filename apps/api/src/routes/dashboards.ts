@@ -7,6 +7,7 @@ import {
   type Breakpoint,
   comparisonModeSchema,
   type DashboardSnapshot,
+  type TimeRangePreset,
   responsivePlacementSchema,
   timeRangePresetSchema,
   widgetFamilySchema,
@@ -69,10 +70,11 @@ const snapshotSchema = z.object({
 });
 
 const viewQuerySchema = z.object({
-  timeRange: timeRangePresetSchema.default('last_30_days'),
+  /** Absent: the dashboard's own default applies (D4). */
+  timeRange: timeRangePresetSchema.optional(),
   from: z.string().optional(),
   to: z.string().optional(),
-  comparison: comparisonModeSchema.default('previous_period'),
+  comparison: comparisonModeSchema.optional(),
   breakpoint: z.enum(['desktop', 'tablet', 'mobile']).default('desktop'),
   /** `draft` renders the working copy through the published path (D3 preview). */
   source: z.enum(['published', 'draft']).default('published'),
@@ -353,10 +355,10 @@ export function registerDashboardRoutes(app: FastifyInstance, container: Contain
         tenantId: scope.tenantId,
         projectId: scope.projectId,
         site,
-        timeRangePreset: query.timeRange,
+        timeRangePreset: query.timeRange ?? defaultPreset(state.snapshot),
         ...(query.from ? { from: query.from } : {}),
         ...(query.to ? { to: query.to } : {}),
-        comparisonMode: query.comparison,
+        comparisonMode: query.comparison ?? state.snapshot.defaultComparison.mode,
         breakpoint: query.breakpoint as Breakpoint,
         locale: auth.locale,
         permissionContextId: scope.permissionContextId,
@@ -463,10 +465,10 @@ export function registerDashboardRoutes(app: FastifyInstance, container: Contain
         tenantId: scope.tenantId,
         projectId: scope.projectId,
         site,
-        timeRangePreset: query.timeRange,
+        timeRangePreset: query.timeRange ?? defaultPreset(state.snapshot),
         ...(query.from ? { from: query.from } : {}),
         ...(query.to ? { to: query.to } : {}),
-        comparisonMode: query.comparison,
+        comparisonMode: query.comparison ?? state.snapshot.defaultComparison.mode,
         breakpoint: query.breakpoint as Breakpoint,
         locale: auth.locale,
         permissionContextId: scope.permissionContextId,
@@ -522,10 +524,10 @@ async function resolveView(
       tenantId: scope.tenantId,
       projectId: scope.projectId,
       site,
-      timeRangePreset: query.timeRange,
+      timeRangePreset: query.timeRange ?? defaultPreset(state.snapshot),
       ...(query.from ? { from: query.from } : {}),
       ...(query.to ? { to: query.to } : {}),
-      comparisonMode: query.comparison,
+      comparisonMode: query.comparison ?? state.snapshot.defaultComparison.mode,
       breakpoint: query.breakpoint as Breakpoint,
       locale: auth.locale,
       permissionContextId: scope.permissionContextId,
@@ -574,4 +576,14 @@ async function scopeForDashboard(
   );
 
   return scope;
+}
+
+/**
+ * The period a dashboard opens on when the URL names none: its own default,
+ * as the author set it (D4). A stored custom range has no meaning without its
+ * dates, so it falls back to the last 30 days.
+ */
+function defaultPreset(snapshot: DashboardSnapshot): TimeRangePreset {
+  const preset = snapshot.defaultTimeRange.preset;
+  return preset === 'custom' ? 'last_30_days' : preset;
 }

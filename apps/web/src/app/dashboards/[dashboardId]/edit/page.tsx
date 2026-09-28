@@ -7,6 +7,7 @@ import { AppShell } from '@/components/AppShell';
 import { EditorWorkbench } from '@/components/editor/EditorWorkbench';
 import { ApiError, apiRequest } from '@/lib/api-client';
 import { getProject } from '@/lib/analytics';
+import { listTemplates } from '@/lib/solutions';
 import { getApiVersion, getCurrentUser } from '@/lib/platform';
 import { resolveError } from '@/lib/error-messages';
 import { logoutAction } from '@/app/login/actions';
@@ -56,9 +57,11 @@ export default async function DashboardEditorPage({ params }: EditorPageProps) {
 
   // The project the dashboard belongs to decides what this caller may do here
   // and which metrics the gallery can offer.
-  const [project, metrics] = await Promise.all([
+  const [project, metrics, widgetTemplates] = await Promise.all([
     getProject(draft.projectId),
     listMetrics(draft.projectId),
+    // Templates are an offer, not a requirement: the editor works without them.
+    listTemplates(draft.projectId, 'widget').catch(() => []),
   ]);
 
   return (
@@ -93,6 +96,8 @@ export default async function DashboardEditorPage({ params }: EditorPageProps) {
           initialLease={draft.lease}
           heartbeatSeconds={draft.heartbeatSeconds}
           metrics={metrics}
+          projectId={draft.projectId}
+          widgetTemplates={widgetTemplates}
           canPublish={project.capabilities.includes('dashboard.publish')}
         />
       </div>

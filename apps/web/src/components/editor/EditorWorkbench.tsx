@@ -12,6 +12,7 @@ import {
   type PublishImpact,
   type SemanticDefinitionRef,
   type WidgetConfig,
+  type TemplateSummary,
 } from '@axp/contracts';
 import { Button, Callout } from '@axp/ui';
 import { publishAction, publishImpactAction } from '@/app/dashboards/[dashboardId]/edit/actions';
@@ -28,6 +29,8 @@ export interface EditorWorkbenchProps {
   readonly initialLease: EditorLease | null;
   readonly heartbeatSeconds: number;
   readonly metrics: readonly SemanticDefinitionRef[];
+  readonly projectId: string;
+  readonly widgetTemplates: readonly TemplateSummary[];
   readonly canPublish: boolean;
 }
 
@@ -48,6 +51,8 @@ export function EditorWorkbench({
   initialLease,
   heartbeatSeconds,
   metrics,
+  projectId,
+  widgetTemplates,
   canPublish,
 }: EditorWorkbenchProps) {
   const t = useTranslations('editor');
@@ -196,7 +201,13 @@ export function EditorWorkbench({
 
       <div className={styles.workbench}>
         <div className="stack">
-          <WidgetGallery snapshot={editor.snapshot} metrics={metrics} onAdd={addWidget} />
+          <WidgetGallery
+            snapshot={editor.snapshot}
+            metrics={metrics}
+            projectId={projectId}
+            widgetTemplates={widgetTemplates}
+            onAdd={addWidget}
+          />
           <EditorCanvas
             snapshot={editor.snapshot}
             breakpoint={breakpoint}

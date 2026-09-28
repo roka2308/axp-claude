@@ -5,6 +5,7 @@ import { type Container, generateSecretToken } from '@axp/core';
 import { DEMO_USER_NAMES, type DemoSeed, loadDemoSeed } from './demo-seed';
 import { seedReferenceDashboard, type SeedDashboardResult } from './seed-dashboard';
 import { seedStateModelDashboard, type SeedStateModelResult } from './seed-state-model';
+import { seedPulseSolution, type SeedPulseResult } from './seed-pulse';
 import { seedAccessDemo } from './seed-access';
 
 export interface SeedOptions {
@@ -32,6 +33,7 @@ export interface SeedResult {
   readonly dashboard?: SeedDashboardResult;
   /** One widget per D10 value state, for Gate F4. */
   readonly stateModel?: SeedStateModelResult;
+  readonly pulse?: SeedPulseResult;
 }
 
 /**
@@ -208,15 +210,30 @@ export async function seedDemoData(
     const account = accounts.find((entry) => entry.key === key);
     return account ? findUserId(container, account.email) : null;
   };
+
+  // The Pulse reference solution, installed the way a catalog manager would.
+  const semanticUserId = await idOf('semantic');
+  const pulse =
+    editorUserId && semanticUserId && dashboard
+      ? await seedPulseSolution(container, {
+          tenantId,
+          projectId,
+          installerUserId: semanticUserId,
+          editorUserId,
+        })
+      : undefined;
+
   await seedAccessDemo(container, {
     tenantId,
     projectId,
     viewerUserId: await idOf('viewer'),
     semanticUserId: await idOf('semantic'),
     editorUserId,
-    dashboardIds: [dashboard?.dashboardId, stateModel?.dashboardId].filter((id): id is string =>
-      Boolean(id),
-    ),
+    dashboardIds: [
+      dashboard?.dashboardId,
+      stateModel?.dashboardId,
+      ...(pulse?.dashboardIds ?? []),
+    ].filter((id): id is string => Boolean(id)),
   });
 
   await container.projects.refreshSetupState(tenantId, projectId);
@@ -227,6 +244,7 @@ export async function seedDemoData(
     accounts,
     ...(dashboard ? { dashboard } : {}),
     ...(stateModel ? { stateModel } : {}),
+    ...(pulse ? { pulse } : {}),
   };
 }
 

@@ -1,21 +1,26 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import {
   type DashboardSnapshot,
   placeNewWidget,
   type SemanticDefinitionRef,
+  type TemplateSummary,
   type WidgetConfig,
   WIDGET_FAMILIES,
   type WidgetFamily,
 } from '@axp/contracts';
-import { Button, SelectField } from '@axp/ui';
+import { Button, Callout, SelectField } from '@axp/ui';
+import { resolveWidgetTemplateAction } from '@/app/templates/actions';
 import styles from './WidgetGallery.module.css';
 
 export interface WidgetGalleryProps {
   readonly snapshot: DashboardSnapshot;
   readonly metrics: readonly SemanticDefinitionRef[];
+  readonly projectId: string;
+  /** Widget templates of the project's layers - solutions, tenant, project (D7). */
+  readonly widgetTemplates: readonly TemplateSummary[];
   readonly onAdd: (widget: WidgetConfig) => void;
 }
 
@@ -45,8 +50,39 @@ const TEMPLATES: readonly Template[] = [
  * A template is copied on insert - it becomes an ordinary widget with no link
  * back, so editing it later cannot be surprised by the template changing (D7).
  */
-export function WidgetGallery({ snapshot, metrics, onAdd }: WidgetGalleryProps) {
+export function WidgetGallery({
+  snapshot,
+  metrics,
+  projectId,
+  widgetTemplates,
+  onAdd,
+}: WidgetGalleryProps) {
   const t = useTranslations('editor');
+  const tTemplates = useTranslations('templates');
+  const [pending, startTransition] = useTransition();
+  const [templateError, setTemplateError] = useState<string | null>(null);
+
+  /*
+   * A stored template becomes an ordinary widget: resolved on the server to
+   * today's active definitions, then copied in with a fresh id and a free
+   * place on the grid. Nothing links it back (copy-on-insert, D7).
+   */
+  function addFromTemplate(templateId: string) {
+    setTemplateError(null);
+    startTransition(async () => {
+      const outcome = await resolveWidgetTemplateAction(projectId, templateId);
+      if (outcome.status !== 'ok' || !outcome.data) {
+        setTemplateError(outcome.status === 'error' ? outcome.message : t('templateFailed'));
+        return;
+      }
+      const widget = outcome.data.widget;
+      onAdd({
+        ...widget,
+        id: `w-${Math.random().toString(36).slice(2, 10)}`,
+        placement: { desktop: placeNewWidget(snapshot.widgets, widget.family) },
+      });
+    });
+  }
   const usable = useMemo(() => metrics.filter((metric) => metric.currentVersionId), [metrics]);
   const [metricId, setMetricId] = useState(usable[0]?.currentVersionId ?? '');
 
@@ -109,6 +145,37 @@ export function WidgetGallery({ snapshot, metrics, onAdd }: WidgetGalleryProps) 
           </ul>
         </>
       )}
+
+      {widgetTemplates.length > 0 ? (
+        <section className="stack stack--tight" aria-labelledby="gallery-from-templates">
+          <h3 id="gallery-from-templates" className={styles.subheading}>
+            {t('fromTemplates')}
+          </h3>
+          {templateError ? (
+            <Callout tone="critical" live>
+              {templateError}
+            </Callout>
+          ) : null}
+          <ul className={styles.templates}>
+            {widgetTemplates.map((template) => (
+              <li key={template.id}>
+                <button
+                  type="button"
+                  className={styles.template}
+                  onClick={() => addFromTemplate(template.id)}
+                  disabled={pending}
+                >
+                  <span className={styles.templateName}>{template.name}</span>
+                  <span className={styles.templateFamily}>
+                    {tTemplates(`readiness.${template.readiness}`)}
+                    {template.solution ? ` · ${template.solution.name}` : ''}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       <details className={styles.blank}>
         <summary className={styles.blankSummary}>{t('blankWidgets')}</summary>

@@ -1,6 +1,8 @@
 import 'server-only';
 import type {
   Capability,
+  ContextProfile,
+  SetupStep,
   ComparisonMode,
   DashboardLayoutPresentation,
   DashboardPresentation,
@@ -11,7 +13,8 @@ import type {
   WidgetDetailPresentation,
   WidgetPresentation,
 } from '@axp/contracts';
-import { apiRequest } from './api-client';
+import { notFound } from 'next/navigation';
+import { ApiError, apiRequest } from './api-client';
 
 /**
  * Typed reads for the project and dashboard surfaces.
@@ -29,14 +32,10 @@ export interface ProjectSummary {
   readonly description: string | null;
   readonly timezone: string;
   readonly setupState: SetupReadiness;
+  readonly contextProfile: ContextProfile;
 }
 
-export interface SetupStep {
-  readonly key: string;
-  readonly state: 'open' | 'in_progress' | 'done' | 'review_required' | 'not_relevant';
-  readonly required: boolean;
-  readonly detail?: string;
-}
+export type { SetupStep } from '@axp/contracts';
 
 export interface ProjectSite {
   readonly id: string;
@@ -73,9 +72,17 @@ export async function listProjects(): Promise<ProjectSummary[]> {
 }
 
 export async function getProject(projectId: string): Promise<ProjectDetail> {
-  return apiRequest<ProjectDetail>(`/projects/${encodeURIComponent(projectId)}`, {
-    authenticated: true,
-  });
+  try {
+    return await apiRequest<ProjectDetail>(`/projects/${encodeURIComponent(projectId)}`, {
+      authenticated: true,
+    });
+  } catch (error) {
+    // A project that does not exist and one the caller may not see answer the
+    // same way on the API; here both become the ordinary "not found" page
+    // rather than a server error.
+    if (error instanceof ApiError && error.status === 404) notFound();
+    throw error;
+  }
 }
 
 export async function listDashboards(projectId: string): Promise<DashboardRef[]> {
@@ -87,16 +94,17 @@ export async function listDashboards(projectId: string): Promise<DashboardRef[]>
 }
 
 export interface PresentationQuery {
-  readonly timeRange: TimeRangePreset;
-  readonly comparison: ComparisonMode;
+  /** Absent: the dashboard's own default applies. */
+  readonly timeRange?: TimeRangePreset;
+  readonly comparison?: ComparisonMode;
   readonly breakpoint?: 'desktop' | 'tablet' | 'mobile';
   readonly source?: 'published' | 'draft';
 }
 
 function viewSearch(query: PresentationQuery): string {
   return new URLSearchParams({
-    timeRange: query.timeRange,
-    comparison: query.comparison,
+    ...(query.timeRange ? { timeRange: query.timeRange } : {}),
+    ...(query.comparison ? { comparison: query.comparison } : {}),
     breakpoint: query.breakpoint ?? 'desktop',
     source: query.source ?? 'published',
   }).toString();
@@ -142,15 +150,8 @@ export async function getWidgetDetail(
   widgetId: string,
   query: PresentationQuery,
 ): Promise<WidgetDetailPresentation> {
-  const search = new URLSearchParams({
-    timeRange: query.timeRange,
-    comparison: query.comparison,
-    breakpoint: query.breakpoint ?? 'desktop',
-    source: query.source ?? 'published',
-  });
-
   return apiRequest<WidgetDetailPresentation>(
-    `/dashboards/${encodeURIComponent(dashboardId)}/widgets/${encodeURIComponent(widgetId)}/detail?${search.toString()}`,
+    `/dashboards/${encodeURIComponent(dashboardId)}/widgets/${encodeURIComponent(widgetId)}/detail?${viewSearch(query)}`,
     { authenticated: true },
   );
 }
@@ -159,15 +160,8 @@ export async function getPresentation(
   dashboardId: string,
   query: PresentationQuery,
 ): Promise<DashboardPresentation> {
-  const search = new URLSearchParams({
-    timeRange: query.timeRange,
-    comparison: query.comparison,
-    breakpoint: query.breakpoint ?? 'desktop',
-    source: query.source ?? 'published',
-  });
-
   return apiRequest<DashboardPresentation>(
-    `/dashboards/${encodeURIComponent(dashboardId)}/presentation?${search.toString()}`,
+    `/dashboards/${encodeURIComponent(dashboardId)}/presentation?${viewSearch(query)}`,
     { authenticated: true },
   );
 }

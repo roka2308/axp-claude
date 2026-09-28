@@ -29,7 +29,7 @@ import type { AnalyticsQueryEngine } from '../analytics/query-engine';
 import { resolveComparison, resolveTimeRange } from '../analytics/calendar';
 import type { SemanticService } from '../semantic/semantic-service';
 import { evaluateFormula } from '../semantic/formula';
-import { evaluateScore } from '../semantic/score';
+import { bandFor, evaluateScore } from '../semantic/score';
 import type { Clock } from '../clock';
 
 export interface PresentationBuilderDeps {
@@ -579,12 +579,18 @@ export class PresentationBuilder {
     const described = descriptions.get(metric.semanticVersionId);
     const decimals = described && 'decimals' in described.body ? described.body.decimals : 0;
 
+    const band =
+      described?.body.kind === 'score' && hasNumericValue(metric.value)
+        ? bandFor(metric.value.value, described.body.evaluation)
+        : undefined;
+
     return {
       ...(metric as MetricPresentation),
       label: described?.name ?? 'Kennzahl',
       unit: unitOf(described?.body),
       decimals,
       formatted: formatValue(metric.value, decimals, unitOf(described?.body), locale),
+      ...(band ? { evaluation: { label: band.key, band: band.band } } : {}),
     };
   }
 }

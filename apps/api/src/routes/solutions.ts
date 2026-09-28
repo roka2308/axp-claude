@@ -45,6 +45,17 @@ export function registerSolutionRoutes(app: FastifyInstance, container: Containe
     return { solutions: container.solutions.catalog() };
   });
 
+  /**
+   * A catalogue package as it ships: declarative product content with no
+   * customer data in it, readable by anyone signed in - an author can start
+   * from it, a reviewer can read what an install would bring.
+   */
+  app.get('/solutions/catalog/:packageId', guard, async (request) => {
+    requireAuth(request);
+    const { packageId } = z.object({ packageId: packageIdSchema }).parse(request.params);
+    return { package: container.solutions.resolveSource({ catalog: { packageId } }) };
+  });
+
   app.get('/projects/:projectId/solutions', guard, async (request) => {
     const auth = requireAuth(request);
     const { projectId } = projectParams.parse(request.params);

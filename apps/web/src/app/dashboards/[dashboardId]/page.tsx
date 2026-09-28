@@ -48,20 +48,24 @@ export default async function DashboardPage({ params, searchParams }: DashboardP
   const [user, version] = await Promise.all([getCurrentUser(), getApiVersion()]);
   if (!user) redirect('/login');
 
-  const timeRange = asPreset(search.timeRange);
-  const comparison = asComparison(search.comparison);
   const source = search.source === 'draft' ? 'draft' : 'published';
 
   /*
    * The layout first, and only the layout: it comes from the stored snapshot
    * and asks Matomo nothing, so the grid is on screen while the widgets are
    * still being fetched. Each tile then streams in on its own (Master Spec §11).
+   *
+   * Without a period in the URL the dashboard opens on its own default, as
+   * its author set it; the layout says which period that resolved to, and
+   * everything after it - tiles, detail view, controls, links - uses that.
    */
-  const query = { timeRange, comparison, source } as const;
-
   let presentation;
   try {
-    presentation = await getDashboardLayout(dashboardId, query);
+    presentation = await getDashboardLayout(dashboardId, {
+      ...(asPreset(search.timeRange) ? { timeRange: asPreset(search.timeRange) } : {}),
+      ...(asComparison(search.comparison) ? { comparison: asComparison(search.comparison) } : {}),
+      source,
+    });
   } catch (error) {
     return (
       <AppShell activeKey="dashboards" version={version}>
@@ -69,6 +73,11 @@ export default async function DashboardPage({ params, searchParams }: DashboardP
       </AppShell>
     );
   }
+
+  const timeRange: TimeRangePreset =
+    presentation.timeRange.preset === 'custom' ? 'last_30_days' : presentation.timeRange.preset;
+  const comparison: ComparisonMode = presentation.comparison?.mode ?? 'none';
+  const query = { timeRange, comparison, source } as const;
 
   /*
    * The detail view is a URL, not a client-side state: `?widget=<id>` renders
@@ -198,14 +207,12 @@ export default async function DashboardPage({ params, searchParams }: DashboardP
   );
 }
 
-function asPreset(value: string | undefined): TimeRangePreset {
+function asPreset(value: string | undefined): TimeRangePreset | undefined {
   return TIME_RANGE_PRESETS.includes(value as TimeRangePreset)
     ? (value as TimeRangePreset)
-    : 'last_30_days';
+    : undefined;
 }
 
-function asComparison(value: string | undefined): ComparisonMode {
-  return COMPARISON_MODES.includes(value as ComparisonMode)
-    ? (value as ComparisonMode)
-    : 'previous_period';
+function asComparison(value: string | undefined): ComparisonMode | undefined {
+  return COMPARISON_MODES.includes(value as ComparisonMode) ? (value as ComparisonMode) : undefined;
 }
