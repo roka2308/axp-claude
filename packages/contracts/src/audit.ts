@@ -62,6 +62,10 @@ export const AUDIT_ACTIONS = [
   // A takeover ends someone else's editing session, so it is recorded even
   // though both parties were allowed to edit (Master Spec §21).
   'dashboard.editor_takeover',
+  // Solutions and templates (Phase 6)
+  'solution.installed',
+  'solution.exported',
+  'project.context_updated',
 ] as const;
 
 export const auditActionSchema = z.enum(AUDIT_ACTIONS);

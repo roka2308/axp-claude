@@ -45,3 +45,8 @@ export * from './semantic/score';
 export * from './dashboard/dashboard-service';
 export * from './dashboard/presentation-builder';
 export * from './search/product-search';
+
+export * from './solution/solution-service';
+export * from './solution/package-validation';
+export * from './solution/portable';
+export * from './solution/catalog/pulse';

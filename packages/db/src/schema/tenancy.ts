@@ -73,6 +73,11 @@ export const projects = mysqlTable(
      * and carries no analytics values.
      */
     setupChecklist: json('setup_checklist').$type<Record<string, unknown>>(),
+    /**
+     * Context Profile (Master Spec §13): what the project is for and for whom.
+     * Customer-authored text, never interpreted by the product.
+     */
+    contextProfile: json('context_profile').$type<Record<string, string>>(),
     archivedAt: utcTimestamp(),
     createdAt: createdAt(),
     updatedAt: updatedAt(),

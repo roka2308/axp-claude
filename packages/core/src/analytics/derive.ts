@@ -7,6 +7,7 @@ import {
   type TimeSeries,
   type TimeSeriesPoint,
   type ValueEnvelope,
+  valueEnvelope,
 } from '@axp/contracts';
 import { evaluateFormula, type TraceEntry } from '../semantic/formula';
 import { evaluateScore } from '../semantic/score';
@@ -142,20 +143,27 @@ function withPlaceholders(result: AnalyticsResult, context: DerivationContext): 
 
 /** One derived value per derivation, appended to the leaves it was built from. */
 function deriveMetrics(metrics: readonly MetricValue[], context: DerivationContext): MetricValue[] {
+  // Mutable on purpose: derivations arrive in dependency order, and each one
+  // has to see the values of the ones before it - a score built on a formula
+  // built on a formula (Pulse) needs the whole chain.
   const values = new Map(metrics.map((metric) => [metric.semanticVersionId, metric.value]));
   const comparisons = new Map(
     metrics
       .filter((metric) => metric.comparison)
       .map((metric) => [metric.semanticVersionId, metric.comparison!.value]),
   );
+  const hasComparison = comparisons.size > 0;
 
   const derived = context.derivations.map((derivation) => {
     const value = evaluate(derivation, values, context.names).value;
+    values.set(derivation.semanticVersionId, value);
 
     // The comparison is the same formula over the comparison period, not a
     // comparison of the formula against itself.
-    const comparisonValue =
-      comparisons.size > 0 ? evaluate(derivation, comparisons, context.names).value : null;
+    const comparisonValue = hasComparison
+      ? evaluate(derivation, comparisons, context.names).value
+      : null;
+    if (comparisonValue) comparisons.set(derivation.semanticVersionId, comparisonValue);
 
     return {
       semanticVersionId: derivation.semanticVersionId,
@@ -171,26 +179,29 @@ function deriveSeries(series: readonly TimeSeries[], context: DerivationContext)
   const first = series[0];
   if (!first) return [...series];
 
-  const derived = context.derivations.map((derivation) => {
+  // Grows as derivations are computed, so each one can use the previous ones.
+  const available: TimeSeries[] = [...series];
+
+  for (const derivation of context.derivations) {
     const points = first.points.map((point, index) =>
-      derivePoint(derivation, series, index, point.date, context, false),
+      derivePoint(derivation, available, index, point.date, context, false),
     );
 
     const comparisonPoints = first.comparisonPoints
       ? first.comparisonPoints.map((point, index) =>
-          derivePoint(derivation, series, index, point.date, context, true),
+          derivePoint(derivation, available, index, point.date, context, true),
         )
       : undefined;
 
-    return {
+    available.push({
       semanticVersionId: derivation.semanticVersionId,
       granularity: first.granularity,
       points,
       ...(comparisonPoints ? { comparisonPoints } : {}),
-    } satisfies TimeSeries;
-  });
+    } satisfies TimeSeries);
+  }
 
-  return [...series, ...derived];
+  return available;
 }
 
 /** Evaluates one derivation at one position of every input series. */
@@ -222,7 +233,29 @@ function evaluate(
     return { value: evaluated.value, trace: evaluated.trace };
   }
 
-  return evaluateFormula(derivation.body.ast, { values, names });
+  const evaluated = evaluateFormula(derivation.body.ast, { values, names });
+  return { value: roundTo(evaluated.value, derivation.decimals), trace: evaluated.trace };
+}
+
+/**
+ * A derived value, rounded to the decimals its definition declares.
+ *
+ * Rounding happens where the value is produced, so what a dependent formula
+ * or score consumes is exactly what the dashboard shows for it: a reader can
+ * recompute a score from the numbers on the screen (ADR 0007). Scores already
+ * round in `evaluateScore`.
+ */
+function roundTo(envelope: ValueEnvelope, decimals: number): ValueEnvelope {
+  const factor = 10 ** decimals;
+  switch (envelope.state) {
+    case 'ready':
+    case 'zero':
+      return valueEnvelope.measured(Math.round(envelope.value * factor) / factor);
+    case 'warning':
+      return { ...envelope, value: Math.round(envelope.value * factor) / factor };
+    default:
+      return envelope;
+  }
 }
 
 /**

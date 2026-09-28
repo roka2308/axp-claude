@@ -86,6 +86,32 @@ export const MOCK_STATE_METRICS = {
   unavailable: 'mock_state_unavailable',
 } as const;
 
+/**
+ * Reports a portal analytics setup typically adds to Matomo: active, engaged
+ * and registered people, and people who created content (Pulse reference
+ * solution, `06_Canonical_Demo_Data_Pulse_v1.0.md`).
+ *
+ * Offered by the mock as ordinary source metrics of the site, so the Pulse
+ * package is mapped onto them at install time like onto any real report -
+ * nothing in the package names them. For the period a widget asks about they
+ * answer with the canonical reference-week inputs; for comparison periods and
+ * for the points of a time series they answer with synthetic values, which
+ * are demo fixture data and never presented as history.
+ */
+export const MOCK_PULSE_METRICS = {
+  activeUsers: 'mock_portal_active_users',
+  engagedUsers: 'mock_portal_engaged_users',
+  contentCreators: 'mock_portal_content_creators',
+  registeredUsers: 'mock_portal_registered_users',
+} as const;
+
+const PULSE_REFERENCE: Readonly<Record<string, number>> = {
+  [MOCK_PULSE_METRICS.activeUsers]: 5000,
+  [MOCK_PULSE_METRICS.engagedUsers]: 898,
+  [MOCK_PULSE_METRICS.contentCreators]: 251,
+  [MOCK_PULSE_METRICS.registeredUsers]: 9800,
+};
+
 export const MOCK_CONNECTION_PREFIX = 'mock://';
 export const MOCK_MATOMO_VERSION = '5.3.2';
 
@@ -174,7 +200,10 @@ export class MockMatomoAdapter implements MatomoConnector {
       siteId: String(matomoSiteId),
       refreshedAt: this.clock.now().toISOString(),
       site: site!,
-      availableMetrics: Object.values(NORMALIZED_METRICS),
+      availableMetrics: [
+        ...Object.values(NORMALIZED_METRICS),
+        ...Object.values(MOCK_PULSE_METRICS),
+      ],
       availableDimensions: scenario === 'limited' ? [] : Object.values(NORMALIZED_DIMENSIONS),
     };
   }
@@ -369,6 +398,21 @@ export class MockMatomoAdapter implements MatomoConnector {
     if (scenario === 'empty') return valueEnvelope.empty();
     if (scenario === 'zero') return valueEnvelope.measured(0);
 
+    const reference = PULSE_REFERENCE[sourceMetric];
+    if (reference !== undefined) {
+      // The period asked about answers with the canonical inputs; any other
+      // period (the comparison) with a synthetic neighbour of them.
+      const asked = from === query.timeRange.from && to === query.timeRange.to;
+      return valueEnvelope.measured(
+        asked
+          ? reference
+          : Math.round(
+              reference *
+                (0.85 + 0.2 * hashUnitInterval(`${query.siteId}|${sourceMetric}|${from}`)),
+            ),
+      );
+    }
+
     let total = 0;
     for (let date = from; compareDates(date, to) <= 0; date = addDays(date, 1)) {
       total += this.dailyValue(query.siteId, sourceMetric, date);
@@ -396,6 +440,15 @@ export class MockMatomoAdapter implements MatomoConnector {
 
     if (scenario === 'empty') return valueEnvelope.empty();
     if (scenario === 'zero') return valueEnvelope.measured(0);
+
+    const reference = PULSE_REFERENCE[sourceMetric];
+    if (reference !== undefined) {
+      // People, not events: a week's active users are not seven days' summed.
+      // Synthetic points around the reference week, scaled to the period.
+      const scale = granularity === 'day' ? 0.3 : granularity === 'week' ? 1 : 2.2;
+      const noise = hashUnitInterval(`${query.siteId}|${sourceMetric}|${periodStart}`);
+      return valueEnvelope.measured(Math.round(reference * scale * (0.85 + 0.3 * noise)));
+    }
 
     let total = 0;
     for (let offset = 0; offset < days; offset += 1) {

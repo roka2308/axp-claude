@@ -200,7 +200,10 @@
     "dashboardsNotYoursTitle": "Dashboards not visible",
     "dashboardsNotYoursBody": "Your role does not include reading dashboards in this project. A role alone never grants access to analytics data.",
     "editDashboard": "Edit",
-    "openSemantics": "Open the catalog"
+    "openSemantics": "Open the catalog",
+    "slug_taken": "This slug is already taken in this customer.",
+    "site_not_found": "This site does not belong to this customer.",
+    "step_not_dismissable": "This step is needed for readiness and cannot be skipped."
   },
   "setupReadiness": {
     "ready": "Ready",
@@ -1522,5 +1525,46 @@
       "restored": "Dashboard restored",
       "editor_takeover": "Editing taken over"
     }
+  },
+  "solution": {
+    "not_found": "This solution is not in the catalogue.",
+    "not_installable": "The solution cannot be installed as it is. The check lists the reasons.",
+    "warnings_not_accepted": "Please confirm the notes before installing.",
+    "conflicts_unresolved": "{count, plural, one {One conflict still needs} other {# conflicts still need}} your decision.",
+    "mapping_incomplete": "No data source has been chosen for “{key}” yet.",
+    "mapping_not_offered": "This site does not offer the source chosen for “{key}”.",
+    "export_unpublished": "Only published dashboards can be exported.",
+    "export_invalid": "The export could not be created. Please contact support.",
+    "too_large": "The package is too large (at most {maxKb} KB).",
+    "not_json": "The file is not valid JSON.",
+    "unknown_field": "The package contains fields a solution may not contain: {fields}. Packages are purely declarative.",
+    "unsupported_schema_version": "The product does not support this package version.",
+    "invalid_field": "Invalid content in “{field}”.",
+    "duplicate_id": "The identifier “{id}” appears more than once.",
+    "type_mismatch": "For “{id}”, type and content do not match.",
+    "undeclared_requirement": "The requirement “{key}” is used but not described.",
+    "formula_too_deep": "The formula “{id}” is nested too deeply.",
+    "formula_too_large": "The formula “{id}” is too large.",
+    "bands_not_ascending": "The evaluation bands of “{id}” are not ascending.",
+    "cycle": "“{id}” refers back to itself.",
+    "duplicate_metric": "A widget names the same metric more than once.",
+    "outside_grid": "The widget “{id}” extends beyond the grid.",
+    "widgets_overlap": "The widgets “{a}” and “{b}” overlap.",
+    "manifest_mismatch": "The manifest does not fully describe the content: {objects}.",
+    "product_version": "The solution does not fit this product version ({version}; expected {range}).",
+    "no_site": "The project does not read a site yet. Assign a site first.",
+    "capabilities_unknown": "The Matomo connection’s capabilities have not been detected yet. The solution may have gaps.",
+    "capability_missing": "The Matomo connection does not offer “{capability}”, which the solution needs.",
+    "dependency_missing": "Requires the solution {packageId} version {version} or later first.",
+    "candidates_unavailable": "The available data sources could not be read right now. Please try again later.",
+    "conflict_foreign": "“{id}” already exists in the project as something else. That has to be resolved first.",
+    "unknown_reference": "The solution refers to “{id}”, which does not exist in this project.",
+    "downgrade": "The newer version {installed} is already installed."
+  },
+  "template": {
+    "not_found": "This template does not exist in this project.",
+    "definition_missing": "The template needs “{id}”, which does not exist in this project.",
+    "not_a_dashboard_template": "This template creates a widget, not a dashboard.",
+    "no_site": "The project does not read a site yet. Assign a site first."
   }
 }

@@ -94,6 +94,54 @@ export class AnalyticsQueryEngine {
     return pending;
   }
 
+  /**
+   * One source metric's value, before anything is mapped to it.
+   *
+   * The mapping step of a solution install shows what a candidate would
+   * produce (Master Spec §13: "Mapping zeigt Preview-Werte"). Same path as any
+   * query - site time zone, tenant check, timeout, concurrency limit - but not
+   * cached: a preview is a question about a source, not about the product.
+   */
+  async previewSource(request: {
+    tenantId: string;
+    projectId: string;
+    siteId: string;
+    sourceMetric: string;
+    timeRangePreset: TimeRangePreset;
+    permissionContextId: string;
+  }): Promise<ValueEnvelope> {
+    const { query } = await this.resolve({
+      kind: 'scalar',
+      tenantId: request.tenantId,
+      projectId: request.projectId,
+      siteId: request.siteId,
+      semanticVersionIds: [],
+      timeRangePreset: request.timeRangePreset,
+      comparisonMode: 'none',
+      permissionContextId: request.permissionContextId,
+    });
+
+    await this.acquire();
+    try {
+      const connection = await this.deps.connections.resolveConnection(
+        query.tenantId,
+        query.connectionId,
+      );
+      const result = await this.withTimeout(
+        this.deps.connectorFor(connection.baseUrl).execute(connection, {
+          ...query,
+          sourceMetrics: [
+            { semanticVersionId: 'preview', sourceMetric: request.sourceMetric, decimals: 0 },
+          ],
+        }),
+      );
+      const value = result.kind === 'scalar' ? result.metrics[0]?.value : undefined;
+      return value ?? valueEnvelope.empty();
+    } finally {
+      this.release();
+    }
+  }
+
   private async run(
     query: ResolvedQuery,
     derivation: DerivationContext,

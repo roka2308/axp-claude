@@ -22,3 +22,5 @@ export * from './layout';
 export * from './presentation';
 export * from './search';
 export * from './admin';
+export * from './project';
+export * from './solution';

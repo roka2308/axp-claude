@@ -25,6 +25,7 @@ import { MemoryAnalyticsCache } from './analytics/memory-cache';
 import { AnalyticsQueryEngine } from './analytics/query-engine';
 import { SemanticService } from './semantic/semantic-service';
 import { DashboardService } from './dashboard/dashboard-service';
+import { SolutionService } from './solution/solution-service';
 import { PresentationBuilder } from './dashboard/presentation-builder';
 
 /**
@@ -60,6 +61,7 @@ export interface Container {
   readonly analyticsCache: MemoryAnalyticsCache;
   readonly dashboards: DashboardService;
   readonly presentation: PresentationBuilder;
+  readonly solutions: SolutionService;
   close(): Promise<void>;
 }
 
@@ -85,7 +87,6 @@ export function createContainer(options: CreateContainerOptions): Container {
   const access = new AccessService({ db, audit, authorization });
   const users = new UserService({ db, clock, audit });
   const tenants = new TenantService({ db, clock, audit });
-  const projects = new ProjectService({ db });
 
   const auth = new AuthService({
     db,
@@ -162,6 +163,7 @@ export function createContainer(options: CreateContainerOptions): Container {
   });
 
   const semantics = new SemanticService({ db, clock, audit });
+  const projects = new ProjectService({ db, audit, tenants, matomo, semantics });
 
   const analyticsCache = new MemoryAnalyticsCache(clock, config.analytics.cacheMaxEntries);
   const analytics = new AnalyticsQueryEngine({
@@ -189,6 +191,15 @@ export function createContainer(options: CreateContainerOptions): Container {
     },
   });
   const presentation = new PresentationBuilder({ clock, logger, engine: analytics, semantics });
+  const solutions = new SolutionService({
+    db,
+    clock,
+    audit,
+    semantics,
+    matomo,
+    dashboards,
+    projects,
+  });
 
   return {
     config,
@@ -216,6 +227,7 @@ export function createContainer(options: CreateContainerOptions): Container {
     analyticsCache,
     dashboards,
     presentation,
+    solutions,
     close: async () => {
       await analyticsCache.clear();
       if (ownsHandle) await handle.close();

@@ -16,3 +16,4 @@ export * from './matomo';
 export * from './semantic';
 export * from './dashboard';
 export * from './audit';
+export * from './solution';

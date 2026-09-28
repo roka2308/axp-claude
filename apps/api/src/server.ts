@@ -17,6 +17,7 @@ import { registerDashboardRoutes } from './routes/dashboards';
 import { registerSemanticRoutes } from './routes/semantic';
 import { registerSearchRoutes } from './routes/search';
 import { registerAdminRoutes } from './routes/admin';
+import { registerSolutionRoutes } from './routes/solutions';
 import { registerSelfServiceRoutes } from './routes/me';
 
 export interface BuildServerOptions {
@@ -78,6 +79,7 @@ export async function buildServer(options: BuildServerOptions): Promise<FastifyI
   registerSemanticRoutes(app, container);
   registerSearchRoutes(app, container);
   registerAdminRoutes(app, container);
+  registerSolutionRoutes(app, container);
   registerSelfServiceRoutes(app, container);
   registerDashboardRoutes(app, container);
 

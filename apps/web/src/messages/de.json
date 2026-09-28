@@ -200,7 +200,10 @@
     "dashboardsNotYoursTitle": "Dashboards nicht sichtbar",
     "dashboardsNotYoursBody": "Ihre Rolle umfasst das Lesen von Dashboards in diesem Projekt nicht. Eine Rolle allein gewährt keinen Zugriff auf Analytics-Daten.",
     "editDashboard": "Bearbeiten",
-    "openSemantics": "Katalog öffnen"
+    "openSemantics": "Katalog öffnen",
+    "slug_taken": "Dieses Kürzel ist in diesem Kunden bereits vergeben.",
+    "site_not_found": "Diese Site gehört nicht zu diesem Kunden.",
+    "step_not_dismissable": "Dieser Schritt ist für die Einsatzbereitschaft nötig und kann nicht übersprungen werden."
   },
   "setupReadiness": {
     "ready": "Bereit",
@@ -1522,5 +1525,46 @@
       "restored": "Dashboard wiederhergestellt",
       "editor_takeover": "Bearbeitung übernommen"
     }
+  },
+  "solution": {
+    "not_found": "Diese Lösung gibt es im Katalog nicht.",
+    "not_installable": "Die Lösung kann so nicht installiert werden. Die Prüfung nennt die Gründe.",
+    "warnings_not_accepted": "Bitte bestätigen Sie die Hinweise, bevor Sie installieren.",
+    "conflicts_unresolved": "{count, plural, one {Für einen Konflikt} other {Für # Konflikte}} fehlt noch Ihre Entscheidung.",
+    "mapping_incomplete": "Für „{key}“ ist noch keine Datenquelle gewählt.",
+    "mapping_not_offered": "Die für „{key}“ gewählte Quelle bietet diese Site nicht an.",
+    "export_unpublished": "Exportiert werden nur veröffentlichte Dashboards.",
+    "export_invalid": "Der Export konnte nicht erstellt werden. Bitte wenden Sie sich an den Support.",
+    "too_large": "Das Paket ist zu groß (höchstens {maxKb} KB).",
+    "not_json": "Die Datei ist kein gültiges JSON.",
+    "unknown_field": "Das Paket enthält Felder, die eine Lösung nicht enthalten darf: {fields}. Pakete sind rein deklarativ.",
+    "unsupported_schema_version": "Diese Paketversion unterstützt das Produkt nicht.",
+    "invalid_field": "Ungültiger Inhalt in „{field}“.",
+    "duplicate_id": "Die Kennung „{id}“ kommt mehrfach vor.",
+    "type_mismatch": "Bei „{id}“ passen Typ und Inhalt nicht zusammen.",
+    "undeclared_requirement": "Die Anforderung „{key}“ wird genutzt, aber nicht beschrieben.",
+    "formula_too_deep": "Die Formel „{id}“ ist zu tief verschachtelt.",
+    "formula_too_large": "Die Formel „{id}“ ist zu groß.",
+    "bands_not_ascending": "Die Bewertungsstufen von „{id}“ sind nicht aufsteigend.",
+    "cycle": "„{id}“ verweist im Kreis auf sich selbst.",
+    "duplicate_metric": "Ein Widget nennt dieselbe Kennzahl mehrfach.",
+    "outside_grid": "Das Widget „{id}“ ragt über das Raster hinaus.",
+    "widgets_overlap": "Die Widgets „{a}“ und „{b}“ überlappen.",
+    "manifest_mismatch": "Das Manifest beschreibt den Inhalt nicht vollständig: {objects}.",
+    "product_version": "Die Lösung passt nicht zu dieser Produktversion ({version}; erwartet {range}).",
+    "no_site": "Das Projekt liest noch keine Site. Ordnen Sie zuerst eine Site zu.",
+    "capabilities_unknown": "Die Fähigkeiten der Matomo-Verbindung wurden noch nicht ermittelt. Die Lösung kann Lücken haben.",
+    "capability_missing": "Die Matomo-Verbindung bietet „{capability}“ nicht, die Lösung braucht es.",
+    "dependency_missing": "Benötigt zuerst die Lösung {packageId} ab Version {version}.",
+    "candidates_unavailable": "Die verfügbaren Datenquellen konnten gerade nicht gelesen werden. Versuchen Sie es später erneut.",
+    "conflict_foreign": "„{id}“ gibt es im Projekt bereits als etwas anderes. Das muss zuerst geklärt werden.",
+    "unknown_reference": "Die Lösung verweist auf „{id}“, das es in diesem Projekt nicht gibt.",
+    "downgrade": "Installiert ist bereits die neuere Version {installed}."
+  },
+  "template": {
+    "not_found": "Diese Vorlage gibt es in diesem Projekt nicht.",
+    "definition_missing": "Die Vorlage braucht „{id}“, das es in diesem Projekt nicht gibt.",
+    "not_a_dashboard_template": "Aus dieser Vorlage entsteht ein Widget, kein Dashboard.",
+    "no_site": "Das Projekt liest noch keine Site. Ordnen Sie zuerst eine Site zu."
   }
 }
