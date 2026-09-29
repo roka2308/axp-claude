@@ -4,13 +4,17 @@ import type { WidgetShell } from '@axp/contracts';
 import { WidgetFrame } from '@/components/widgets/WidgetFrame';
 import { WidgetContent } from '@/components/widgets/WidgetContent';
 import { getWidgetTile, type PresentationQuery } from '@/lib/analytics';
+import { getSharedTile, type SharedViewQuery } from '@/lib/sharing';
 import styles from './WidgetTile.module.css';
 
 export interface WidgetTileProps {
   readonly dashboardId: string;
   readonly shell: WidgetShell;
   readonly query: PresentationQuery;
-  readonly detailHref: Route;
+  /** Absent where no detail view may be opened, e.g. a share without that right. */
+  readonly detailHref?: Route;
+  /** Set on a shared link: the tile is fetched through the share, not a session. */
+  readonly share?: { readonly token: string; readonly query: SharedViewQuery };
 }
 
 /**
@@ -24,10 +28,18 @@ export interface WidgetTileProps {
  * response, because independence that only exists in the rendering is not
  * independence: the slowest query would still gate the first paint.
  */
-export async function WidgetTile({ dashboardId, shell, query, detailHref }: WidgetTileProps) {
+export async function WidgetTile({
+  dashboardId,
+  shell,
+  query,
+  detailHref,
+  share,
+}: WidgetTileProps) {
   let widget;
   try {
-    widget = await getWidgetTile(dashboardId, shell.widgetId, query);
+    widget = share
+      ? await getSharedTile(share.token, shell.widgetId, share.query)
+      : await getWidgetTile(dashboardId, shell.widgetId, query);
   } catch {
     /*
      * The transport failed - the API is unreachable, or it refused. Either way
@@ -47,7 +59,7 @@ export async function WidgetTile({ dashboardId, shell, query, detailHref }: Widg
   }
 
   return (
-    <WidgetFrame widget={widget} detailHref={detailHref}>
+    <WidgetFrame widget={widget} {...(detailHref ? { detailHref } : {})}>
       <WidgetContent widget={widget} />
     </WidgetFrame>
   );

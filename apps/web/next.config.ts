@@ -18,10 +18,21 @@ const config: NextConfig = {
         headers: [
           { key: 'X-Content-Type-Options', value: 'nosniff' },
           { key: 'Referrer-Policy', value: 'same-origin' },
+          // Neither the product nor a shared dashboard is ever framed: a
+          // share is opened as a page of its own, not embedded (Phase 7).
           { key: 'X-Frame-Options', value: 'DENY' },
-          // External dashboard shares get their own relaxed policy in Phase 7;
-          // the product UI itself is never framed.
           { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+        ],
+      },
+      {
+        // A shared link's URL is its key. It must not leak through a Referer
+        // header to a site the page links to, must not be indexed, and the
+        // numbers behind it must not sit in a shared cache (Master Spec §15).
+        source: '/s/:path*',
+        headers: [
+          { key: 'Referrer-Policy', value: 'no-referrer' },
+          { key: 'X-Robots-Tag', value: 'noindex, nofollow, noarchive' },
+          { key: 'Cache-Control', value: 'private, no-store' },
         ],
       },
     ];

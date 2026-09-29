@@ -287,7 +287,9 @@
     "donutAria": "Donut chart “{title}” with {categories} categories. The values are available as a table below.",
     "otherCategories": "Other",
     "noAnnotations": "No annotations are recorded for this period.",
-    "evaluation": "Evaluation: {label}"
+    "evaluation": "Evaluation: {label}",
+    "internalNoteTitle": "Internal note",
+    "internalNoteHint": "Visible to your team only. It appears in no share and no export."
   },
   "units": {
     "count": "Count",
@@ -636,7 +638,9 @@
       "share": "Shares as a ring"
     },
     "fromTemplates": "From templates",
-    "templateFailed": "The template could not be inserted."
+    "templateFailed": "The template could not be inserted.",
+    "internalNote": "Internal note",
+    "internalNoteHint": "Visible only to signed-in people in the product - never in external shares or exports."
   },
   "semantics": {
     "title": "Semantics",
@@ -861,7 +865,8 @@
       "unavailable": "Not possible here",
       "openDefinitionNoDefinition": "This widget has no definition recorded.",
       "openDefinitionNoAccess": "You do not have access to the metric catalog.",
-      "exportLaterMilestone": "Export arrives with Phase 7."
+      "exportNothing": "This widget has no values to export right now.",
+      "exportNoAccess": "You are not allowed to create exports."
     }
   },
   "quality": {
@@ -1441,7 +1446,9 @@
       "read_published": "View published dashboards",
       "create": "Create dashboards",
       "edit_draft": "Edit dashboard drafts",
-      "publish": "Publish dashboards"
+      "publish": "Publish dashboards",
+      "share": "Share dashboards externally",
+      "export": "Export the current view"
     },
     "semantic": {
       "read": "Read semantic catalog",
@@ -1535,6 +1542,13 @@
       "trashed": "Dashboard moved to trash",
       "restored": "Dashboard restored",
       "editor_takeover": "Editing taken over"
+    },
+    "share": {
+      "created": "External link created",
+      "revoked": "External link revoked"
+    },
+    "export": {
+      "created": "Export created"
     }
   },
   "solution": {
@@ -1842,5 +1856,149 @@
     "next": "Next",
     "create": "Create project",
     "creating": "Creating …"
+  },
+  "export": {
+    "sectionLabel": "Export and share",
+    "format": "Format",
+    "formats": {
+      "pdf": "PDF",
+      "xlsx": "Excel (XLSX)",
+      "pptx": "PowerPoint (PPTX)",
+      "csv": "CSV"
+    },
+    "create": "Create export",
+    "createOne": "Export as {format}",
+    "creating": "Creating …",
+    "creatingLong": "The export is being created. This can take a few seconds.",
+    "currentView": "The export shows the current view: {state}.",
+    "readyTitle": "Export ready",
+    "download": "Download {file}",
+    "validUntil": "The download is available until {time}; after that the file is deleted.",
+    "failedTitle": "Export not possible",
+    "draft_refused": "Only the published version of a dashboard can be exported.",
+    "not_found": "This export file no longer exists. Please create the export again."
+  },
+  "share": {
+    "open": "Share",
+    "backToDashboard": "Back to the dashboard",
+    "title": "Share \"{name}\"",
+    "intro": "Inside your organisation, access is granted through permissions. For people outside it, you create a link that expires and can be revoked at any time.",
+    "internal": {
+      "title": "Inside the organisation",
+      "body": "Colleagues get access through permissions, not through a link, so the same permission model applies to them as to everyone else.",
+      "none": "Nobody has an explicit grant for this dashboard yet.",
+      "manage": "Grant access in administration",
+      "askAdmin": "Access is granted by your customer's administration. Ask them to grant this dashboard or the project.",
+      "subject": {
+        "user": "Person",
+        "group": "Group"
+      },
+      "access": {
+        "view": "view",
+        "edit": "edit"
+      },
+      "via": {
+        "dashboard": "for this dashboard",
+        "project": "for the whole project"
+      }
+    },
+    "external": {
+      "title": "External link",
+      "promisePublished": "The link always shows the latest published version - never a draft.",
+      "promiseNoInternal": "Internal notes are not included.",
+      "promiseExpiry": "Every link has an expiry date (at most 90 days) and can be revoked at any time.",
+      "promiseCreator": "A link works only while you yourself have access to the dashboard and it is published.",
+      "notPublishedTitle": "Not published yet",
+      "notPublishedBody": "A link can only be created once the dashboard is published."
+    },
+    "create": {
+      "title": "Create a new link",
+      "label": "Name",
+      "labelHint": "For you and your team, e.g. \"Board Q3\". Recipients do not see it.",
+      "expiresOn": "Valid up to and including",
+      "expiresOnHint": "At most {max}. The link ends at the end of that day ({timezone}).",
+      "rightsLegend": "What recipients may do",
+      "rightsHint": "Without any ticks, recipients see the dashboard exactly as it was published.",
+      "passwordLegend": "Password protection",
+      "protect": "Also protect the link with a password",
+      "password": "Password for the link",
+      "passwordHint": "At least {min} characters. Pass it on separately from the link.",
+      "passwordTooShort": "The password needs at least {min} characters.",
+      "submit": "Create link",
+      "creating": "Creating …",
+      "failedTitle": "The link could not be created",
+      "createdTitle": "Link \"{label}\" created",
+      "createdBody": "Copy the link now. For security reasons it is shown only this once.",
+      "linkLabel": "Link to the shared dashboard",
+      "copy": "Copy link",
+      "copied": "Copied"
+    },
+    "rights": {
+      "timeRange": "Change the time range",
+      "comparison": "Change the comparison",
+      "detail": "Open detail views",
+      "export": "Export (PDF, XLSX, PPTX, CSV)"
+    },
+    "status": {
+      "active": "Active",
+      "expired": "Expired",
+      "revoked": "Revoked",
+      "unavailable": "Currently not working"
+    },
+    "unavailableReason": {
+      "dashboard_not_published": "The dashboard is archived or in the trash. Once it is restored, the link works again.",
+      "tenant_inactive": "The customer is suspended. While that lasts, no link works.",
+      "creator_lost_access": "The person who created the link no longer has access to the dashboard. Create a new link if needed."
+    },
+    "list": {
+      "title": "Existing links",
+      "empty": "There are no links for this dashboard yet.",
+      "expires": "Valid until",
+      "rights": "Rights",
+      "rightsNone": "View only",
+      "password": "Password",
+      "passwordYes": "Yes",
+      "passwordNo": "No",
+      "createdBy": "Created by",
+      "unknownCreator": "Unknown",
+      "usage": "Use",
+      "usageSeen": "{count, plural, one {# visit} other {# visits}}, last {last}",
+      "usageNever": "Not opened yet",
+      "revoke": "Revoke",
+      "confirmLabel": "Confirm revocation",
+      "confirmText": "The link stops working immediately. This cannot be undone.",
+      "confirmRevoke": "Revoke for good",
+      "cancel": "Cancel",
+      "revokeFailed": "The link could not be revoked"
+    },
+    "password_required": "This link needs a password.",
+    "unavailable": "This link is not available.",
+    "right_missing": {
+      "timeRange": "The time range cannot be changed through this link.",
+      "comparison": "The comparison cannot be changed through this link.",
+      "detail": "Detail views are not enabled for this link.",
+      "export": "Exports are not enabled for this link."
+    },
+    "expiry_in_past": "The expiry date is in the past. Choose today or a later day.",
+    "expiry_too_far": "A link may be valid for at most {days} days.",
+    "needs_published_dashboard": "A link can only be created for a published dashboard that is not archived.",
+    "not_found": "This link does not exist for this dashboard.",
+    "unlock_paused": "Too many wrong passwords. The link is paused for {minutes} minutes - please try again afterwards.",
+    "password_wrong": "The password is not correct."
+  },
+  "shared": {
+    "badge": "Shared view",
+    "eyebrow": "Shared by {tenant}",
+    "validUntil": "This link is valid until {date}.",
+    "footer": "This view was shared with you. It shows the published version of the dashboard; the numbers are fetched when you open it.",
+    "unavailableTitle": "This link is not available",
+    "unavailableBody": "The link has expired, was withdrawn, or the dashboard is no longer available.",
+    "unavailableAction": "Please contact the person who sent you the link.",
+    "passwordTitle": "Password required",
+    "passwordBody": "This dashboard is protected with a password. The person who shared it with you gives it to you separately.",
+    "password": "Password",
+    "unlock": "Open dashboard",
+    "unlocking": "Checking …",
+    "unlockFailed": "That did not work"
   }
 }

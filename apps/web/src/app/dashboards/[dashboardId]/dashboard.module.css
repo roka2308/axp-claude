@@ -22,3 +22,22 @@
   font-size: var(--font-size-sm);
   color: var(--text-muted);
 }
+
+/* Export and share: what can be done with the view on screen (Master Spec §15). */
+.distribution {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+}
+
+.shareLink {
+  align-self: center;
+  color: var(--text-link);
+  font-weight: var(--font-weight-semibold);
+}

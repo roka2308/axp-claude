@@ -52,6 +52,8 @@ export interface ApiRequestOptions {
   readonly token?: string;
   readonly cache?: RequestCache;
   readonly timeoutMs?: number;
+  /** Extra headers - the share token travels this way, never in a URL. */
+  readonly headers?: Readonly<Record<string, string>>;
 }
 
 const DEFAULT_TIMEOUT_MS = 15_000;
@@ -66,6 +68,7 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions = {
   };
 
   if (options.body !== undefined) requestHeaders['content-type'] = 'application/json';
+  Object.assign(requestHeaders, options.headers ?? {});
 
   const token = options.token ?? (options.authenticated ? await readSessionToken() : null);
   if (token) requestHeaders.authorization = `Bearer ${token}`;
@@ -122,4 +125,54 @@ async function currentCorrelationId(): Promise<string> {
     // Outside a request scope (build-time evaluation) there is no header store.
     return newCorrelationId();
   }
+}
+
+/**
+ * Fetches a file from the API and hands back its bytes and headers.
+ *
+ * For export downloads, which are not JSON. Errors still arrive as the
+ * product's JSON error body and are raised as `ApiError` like everywhere else.
+ */
+export async function apiDownload(
+  path: string,
+  options: Pick<ApiRequestOptions, 'authenticated' | 'headers' | 'timeoutMs'> = {},
+): Promise<{ body: ArrayBuffer; contentType: string; disposition: string }> {
+  const config = getConfig();
+  const correlationId = await currentCorrelationId();
+  const requestHeaders: Record<string, string> = {
+    [CORRELATION_ID_HEADER]: correlationId,
+    ...(options.headers ?? {}),
+  };
+  const token = options.authenticated ? await readSessionToken() : null;
+  if (token) requestHeaders.authorization = `Bearer ${token}`;
+
+  let response: Response;
+  try {
+    response = await fetch(`${config.api.publicUrl}${path}`, {
+      headers: requestHeaders,
+      cache: 'no-store',
+      signal: AbortSignal.timeout(options.timeoutMs ?? DEFAULT_TIMEOUT_MS),
+    });
+  } catch (error) {
+    throw new ApiUnreachableError(correlationId, error);
+  }
+
+  if (!response.ok) {
+    const payload = (await response.json().catch(() => null)) as ProductErrorResponse | null;
+    throw new ApiError(
+      response.status,
+      payload?.error ?? {
+        category: 'internal_error',
+        code: 'unparsable_error',
+        messageKey: 'errors.internal_error.unexpected',
+        correlationId,
+      },
+    );
+  }
+
+  return {
+    body: await response.arrayBuffer(),
+    contentType: response.headers.get('content-type') ?? 'application/octet-stream',
+    disposition: response.headers.get('content-disposition') ?? 'attachment',
+  };
 }

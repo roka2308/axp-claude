@@ -8,6 +8,9 @@ import styles from './ViewerControls.module.css';
 export interface ViewerControlsProps {
   readonly timeRange: string;
   readonly comparison: string;
+  /** A shared link may fix either one; a fixed control is not offered. */
+  readonly allowTimeRange?: boolean;
+  readonly allowComparison?: boolean;
 }
 
 /**
@@ -21,7 +24,12 @@ export interface ViewerControlsProps {
  * There is deliberately no filter control here. Fixed filters are Data Scope:
  * visible, but read-only for viewers.
  */
-export function ViewerControls({ timeRange, comparison }: ViewerControlsProps) {
+export function ViewerControls({
+  timeRange,
+  comparison,
+  allowTimeRange = true,
+  allowComparison = true,
+}: ViewerControlsProps) {
   const t = useTranslations('viewer');
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -29,43 +37,51 @@ export function ViewerControls({ timeRange, comparison }: ViewerControlsProps) {
 
   return (
     <form ref={formRef} method="get" className={styles.controls} aria-label={t('controlsLabel')}>
-      <div className={styles.field}>
-        <label className={styles.label} htmlFor="viewer-time-range">
-          {t('timeRange')}
-        </label>
-        <select
-          id="viewer-time-range"
-          name="timeRange"
-          className={styles.select}
-          defaultValue={timeRange}
-          onChange={submit}
-        >
-          {TIME_RANGE_PRESETS.filter((preset) => preset !== 'custom').map((preset) => (
-            <option key={preset} value={preset}>
-              {t(`presets.${preset}`)}
-            </option>
-          ))}
-        </select>
-      </div>
+      {allowTimeRange ? (
+        <div className={styles.field}>
+          <label className={styles.label} htmlFor="viewer-time-range">
+            {t('timeRange')}
+          </label>
+          <select
+            id="viewer-time-range"
+            name="timeRange"
+            className={styles.select}
+            defaultValue={timeRange}
+            onChange={submit}
+          >
+            {TIME_RANGE_PRESETS.filter((preset) => preset !== 'custom').map((preset) => (
+              <option key={preset} value={preset}>
+                {t(`presets.${preset}`)}
+              </option>
+            ))}
+          </select>
+        </div>
+      ) : (
+        <input type="hidden" name="timeRange" value={timeRange} />
+      )}
 
-      <div className={styles.field}>
-        <label className={styles.label} htmlFor="viewer-comparison">
-          {t('comparison')}
-        </label>
-        <select
-          id="viewer-comparison"
-          name="comparison"
-          className={styles.select}
-          defaultValue={comparison}
-          onChange={submit}
-        >
-          {COMPARISON_MODES.filter((mode) => mode !== 'custom').map((mode) => (
-            <option key={mode} value={mode}>
-              {t(`comparisons.${mode}`)}
-            </option>
-          ))}
-        </select>
-      </div>
+      {allowComparison ? (
+        <div className={styles.field}>
+          <label className={styles.label} htmlFor="viewer-comparison">
+            {t('comparison')}
+          </label>
+          <select
+            id="viewer-comparison"
+            name="comparison"
+            className={styles.select}
+            defaultValue={comparison}
+            onChange={submit}
+          >
+            {COMPARISON_MODES.filter((mode) => mode !== 'custom').map((mode) => (
+              <option key={mode} value={mode}>
+                {t(`comparisons.${mode}`)}
+              </option>
+            ))}
+          </select>
+        </div>
+      ) : (
+        <input type="hidden" name="comparison" value={comparison} />
+      )}
 
       <button type="submit" className={styles.apply}>
         {t('apply')}

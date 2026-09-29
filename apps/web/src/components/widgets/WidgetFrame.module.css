@@ -45,6 +45,17 @@
   justify-content: center;
 }
 
+.internalNote {
+  flex: none;
+  margin: 0;
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  background: var(--surface-sunken);
+  border-left: 3px solid var(--border-strong);
+  border-radius: var(--radius-xs);
+}
+
 .context {
   flex: none;
   margin: 0;

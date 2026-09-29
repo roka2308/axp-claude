@@ -19,6 +19,9 @@ import { WidgetDetail } from '@/components/viewer/WidgetDetail';
 import { WidgetTile, WidgetTileSkeleton } from '@/components/viewer/WidgetTile';
 import { getApiVersion, getCurrentUser } from '@/lib/platform';
 import { getDashboardLayout, getWidgetDetail } from '@/lib/analytics';
+import { getDashboardPermissions } from '@/lib/sharing';
+import { ExportMenu } from '@/components/sharing/ExportMenu';
+import { exportDashboardAction } from '@/app/sharing/actions';
 import { logoutAction } from '@/app/login/actions';
 import styles from './dashboard.module.css';
 
@@ -88,6 +91,16 @@ export default async function DashboardPage({ params, searchParams }: DashboardP
    * Fetched separately and tolerantly: a detail view that fails must not take
    * the dashboard behind it down with it.
    */
+  /*
+   * Distribution is offered only where the server says it is allowed, and only
+   * for the published dashboard: an export or a link always shows what was
+   * published, never a draft preview (Master Spec §15).
+   */
+  const permissions =
+    source === 'published' ? await getDashboardPermissions(dashboardId).catch(() => null) : null;
+  const stateLabel = `${t(`viewer.presets.${timeRange}`)} · ${t(`viewer.comparisons.${comparison}`)}`;
+  const exportAction = exportDashboardAction.bind(null, dashboardId);
+
   const openWidgetId = search.widget;
   const detail = openWidgetId
     ? await getWidgetDetail(dashboardId, openWidgetId, { timeRange, comparison, source }).catch(
@@ -132,6 +145,34 @@ export default async function DashboardPage({ params, searchParams }: DashboardP
         </header>
 
         <ViewerControls timeRange={timeRange} comparison={comparison} />
+
+        {presentation.dashboard.internalNote ? (
+          // For the team only. The server leaves it out of every share and file.
+          <Callout tone="info" title={t('viewer.internalNoteTitle')}>
+            <p>{presentation.dashboard.internalNote}</p>
+            <p className="text-muted">{t('viewer.internalNoteHint')}</p>
+          </Callout>
+        ) : null}
+
+        {permissions && (permissions.canExport || permissions.canShare) ? (
+          <section className={styles.distribution} aria-label={t('export.sectionLabel')}>
+            {permissions.canExport ? (
+              <ExportMenu
+                action={exportAction}
+                formats={['pdf', 'xlsx', 'pptx']}
+                timeRange={timeRange}
+                comparison={comparison}
+                stateLabel={stateLabel}
+                idPrefix="dashboard"
+              />
+            ) : null}
+            {permissions.canShare ? (
+              <Link href={`/dashboards/${dashboardId}/share` as Route} className={styles.shareLink}>
+                {t('share.open')}
+              </Link>
+            ) : null}
+          </section>
+        ) : null}
 
         {/*
           Data Scope: what the numbers are about. Visible so a value can be
@@ -195,7 +236,22 @@ export default async function DashboardPage({ params, searchParams }: DashboardP
           title={detail?.widget.title ?? t('detail.title')}
         >
           {detail ? (
-            <WidgetDetail detail={detail} />
+            <WidgetDetail
+              detail={detail}
+              exportControl={
+                permissions?.canExport ? (
+                  <ExportMenu
+                    action={exportAction}
+                    formats={['csv']}
+                    widgetId={detail.widget.widgetId}
+                    timeRange={timeRange}
+                    comparison={comparison}
+                    stateLabel={stateLabel}
+                    idPrefix="detail"
+                  />
+                ) : undefined
+              }
+            />
           ) : (
             <Callout tone="critical" title={t('detail.loadFailedTitle')}>
               {t('detail.loadFailedBody')}

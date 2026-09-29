@@ -228,3 +228,65 @@ package author who wants to ship them cannot do so before Phase 9.
 Add an optional, validated `themeTokens` section in a schema extension with
 the theme work of Phase 9, running the same contrast checks as the theme
 editor. Record it for the cross-track comparison of package schemas.
+
+---
+
+## DEV-007 — Export files use the default theme, not the tenant's
+
+- Status: `track_specific`
+- Milestone: F7
+- Specification reference: Master Spec §16 (D9: Themes gelten für Web und
+  Exporte), §15 (Export-Formate)
+
+### What differs
+
+PDF, XLSX and PPTX files are drawn with the default theme's token values
+(`packages/core/src/export/palette.ts`, compared with `tokens.css` by a test),
+whatever theme a tenant uses on screen.
+
+### Why
+
+Tenant themes do not exist before Phase 9. The export palette already reads
+from named tokens, so switching it to the tenant's resolved theme is a change
+of input, not of the renderers.
+
+### Risks / impact
+
+Low: until Phase 9 every tenant sees the default theme on screen too, so file
+and screen agree.
+
+### Proposed action
+
+In Phase 9, resolve the tenant's published theme for an export (including its
+contrast-checked evaluation band colours) and pass it to the renderers.
+
+---
+
+## DEV-008 — Scheduled delivery and a presentation stability gate come with Phase 8
+
+- Status: `accepted_shared`
+- Milestone: F7
+- Specification reference: Master Spec §15 ("PDF/XLSX; PPTX nur nach Stability
+  Gate"), development plan Phase 8
+
+### What differs
+
+Phase 7 renders exports in the API process, on request. Rendering for
+scheduled reports, and the stability gate that decides when PPTX may be
+delivered by schedule, are not built.
+
+### Why
+
+That is the split the development plan makes: manual exports in Phase 7,
+scheduled reporting with its job queue in Phase 8. The renderers take a
+presentation model and return bytes, so the worker can call them unchanged.
+
+### Risks / impact
+
+A very large dashboard is rendered inside an API request (at most two at
+once). The reference dashboards render in about a second.
+
+### Proposed action
+
+Move rendering to the worker's job queue in Phase 8 and define the PPTX
+stability gate there.

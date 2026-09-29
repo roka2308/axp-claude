@@ -64,6 +64,16 @@ export function Inspector({
           hint={t('dashboardDescriptionHint')}
           onChange={(event) => onChange({ ...snapshot, description: event.target.value })}
         />
+
+        <TextField
+          label={t('internalNote')}
+          value={snapshot.internalNote ?? ''}
+          hint={t('internalNoteHint')}
+          maxLength={2000}
+          onChange={(event) =>
+            onChange({ ...snapshot, internalNote: event.target.value || undefined })
+          }
+        />
       </aside>
     );
   }
@@ -111,6 +121,18 @@ export function Inspector({
           hint={t('widgetDescriptionHint')}
           onChange={(event) =>
             update({ context: { ...widget.context, description: event.target.value } })
+          }
+        />
+
+        <TextField
+          label={t('internalNote')}
+          value={widget.context.internalNote ?? ''}
+          hint={t('internalNoteHint')}
+          maxLength={2000}
+          onChange={(event) =>
+            update({
+              context: { ...widget.context, internalNote: event.target.value || undefined },
+            })
           }
         />
       </section>

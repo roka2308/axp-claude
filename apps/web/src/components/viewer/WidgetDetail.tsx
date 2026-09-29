@@ -14,6 +14,11 @@ import styles from './WidgetDetail.module.css';
 
 export interface WidgetDetailProps {
   readonly detail: WidgetDetailPresentation;
+  /**
+   * The control behind the `export` action, supplied by the page that knows
+   * where an export goes - the signed-in viewer or a shared link.
+   */
+  readonly exportControl?: React.ReactNode;
 }
 
 /**
@@ -28,7 +33,7 @@ export interface WidgetDetailProps {
  * Every module is omitted when it has nothing to say. A detail view padded with
  * empty sections teaches people to stop reading it.
  */
-export async function WidgetDetail({ detail }: WidgetDetailProps) {
+export async function WidgetDetail({ detail, exportControl }: WidgetDetailProps) {
   const t = await getTranslations();
   const { widget } = detail;
 
@@ -133,6 +138,8 @@ export async function WidgetDetail({ detail }: WidgetDetailProps) {
             <li key={action.kind}>
               {action.kind === 'copy_link' && action.available ? (
                 <CopyLinkButton label={t(action.labelKey)} copiedLabel={t('detail.linkCopied')} />
+              ) : action.kind === 'export' && action.available && exportControl ? (
+                exportControl
               ) : action.available && action.href ? (
                 // The API decides where an action leads, so the literal-route
                 // check cannot see it. The set of shapes it may produce is

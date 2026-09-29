@@ -69,6 +69,13 @@ export async function WidgetFrame({
 
       {widget.context ? <p className={styles.context}>{widget.context}</p> : null}
 
+      {widget.internalNote ? (
+        // Only the signed-in product receives it; shares and files never do.
+        <p className={styles.internalNote}>
+          <strong>{t('viewer.internalNoteTitle')}:</strong> {widget.internalNote}
+        </p>
+      ) : null}
+
       {widget.definition ? (
         <details className={styles.definition}>
           <summary className={styles.definitionSummary}>{t('viewer.definition')}</summary>

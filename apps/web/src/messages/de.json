@@ -287,7 +287,9 @@
     "donutAria": "Ringdiagramm „{title}\" mit {categories} Kategorien. Die Werte stehen darunter als Tabelle zur Verfügung.",
     "otherCategories": "Übrige",
     "noAnnotations": "Für diesen Zeitraum sind keine Anmerkungen hinterlegt.",
-    "evaluation": "Bewertung: {label}"
+    "evaluation": "Bewertung: {label}",
+    "internalNoteTitle": "Interne Notiz",
+    "internalNoteHint": "Nur für Ihr Team sichtbar. Sie erscheint in keiner Freigabe und in keinem Export."
   },
   "units": {
     "count": "Anzahl",
@@ -636,7 +638,9 @@
       "share": "Anteile als Ring"
     },
     "fromTemplates": "Aus Vorlagen",
-    "templateFailed": "Die Vorlage konnte nicht eingefügt werden."
+    "templateFailed": "Die Vorlage konnte nicht eingefügt werden.",
+    "internalNote": "Interne Notiz",
+    "internalNoteHint": "Nur für angemeldete Personen im Produkt sichtbar – nie in externen Freigaben oder Exporten."
   },
   "semantics": {
     "title": "Semantik",
@@ -861,7 +865,8 @@
       "unavailable": "Hier nicht möglich",
       "openDefinitionNoDefinition": "Für dieses Widget ist keine Definition hinterlegt.",
       "openDefinitionNoAccess": "Sie haben keinen Zugriff auf den Kennzahlen-Katalog.",
-      "exportLaterMilestone": "Export kommt mit Phase 7."
+      "exportNothing": "Dieses Widget hat gerade keine Werte, die sich exportieren ließen.",
+      "exportNoAccess": "Sie haben keine Berechtigung, Exporte zu erstellen."
     }
   },
   "quality": {
@@ -1441,7 +1446,9 @@
       "read_published": "Veröffentlichte Dashboards ansehen",
       "create": "Dashboards anlegen",
       "edit_draft": "Dashboard-Entwürfe bearbeiten",
-      "publish": "Dashboards veröffentlichen"
+      "publish": "Dashboards veröffentlichen",
+      "share": "Dashboards extern teilen",
+      "export": "Aktuelle Ansicht exportieren"
     },
     "semantic": {
       "read": "Semantischen Katalog lesen",
@@ -1535,6 +1542,13 @@
       "trashed": "Dashboard in den Papierkorb gelegt",
       "restored": "Dashboard wiederhergestellt",
       "editor_takeover": "Bearbeitung übernommen"
+    },
+    "share": {
+      "created": "Externer Link erstellt",
+      "revoked": "Externer Link widerrufen"
+    },
+    "export": {
+      "created": "Export erstellt"
     }
   },
   "solution": {
@@ -1842,5 +1856,149 @@
     "next": "Weiter",
     "create": "Projekt anlegen",
     "creating": "Wird angelegt …"
+  },
+  "export": {
+    "sectionLabel": "Exportieren und teilen",
+    "format": "Format",
+    "formats": {
+      "pdf": "PDF",
+      "xlsx": "Excel (XLSX)",
+      "pptx": "PowerPoint (PPTX)",
+      "csv": "CSV"
+    },
+    "create": "Export erstellen",
+    "createOne": "Als {format} exportieren",
+    "creating": "Wird erstellt …",
+    "creatingLong": "Der Export wird erstellt. Das kann einige Sekunden dauern.",
+    "currentView": "Exportiert wird die aktuelle Ansicht: {state}.",
+    "readyTitle": "Export bereit",
+    "download": "{file} herunterladen",
+    "validUntil": "Der Download ist bis {time} Uhr möglich, danach wird die Datei gelöscht.",
+    "failedTitle": "Export nicht möglich",
+    "draft_refused": "Exportiert werden kann nur die veröffentlichte Fassung eines Dashboards.",
+    "not_found": "Diese Exportdatei gibt es nicht mehr. Erstellen Sie den Export bitte erneut."
+  },
+  "share": {
+    "open": "Teilen",
+    "backToDashboard": "Zurück zum Dashboard",
+    "title": "„{name}“ teilen",
+    "intro": "Innerhalb Ihrer Organisation vergeben Sie Zugriff über Berechtigungen. Für Personen außerhalb erstellen Sie einen Link, der abläuft und jederzeit widerrufen werden kann.",
+    "internal": {
+      "title": "Innerhalb der Organisation",
+      "body": "Kolleginnen und Kollegen erhalten Zugriff über Berechtigungen, nicht über einen Link. So gilt für sie dasselbe Rechtemodell wie für alle anderen.",
+      "none": "Bisher hat niemand eine ausdrückliche Freigabe für dieses Dashboard.",
+      "manage": "Zugriff in der Verwaltung vergeben",
+      "askAdmin": "Zugriff vergibt die Administration Ihres Kunden. Bitten Sie sie, dieses Dashboard oder das Projekt freizugeben.",
+      "subject": {
+        "user": "Person",
+        "group": "Gruppe"
+      },
+      "access": {
+        "view": "ansehen",
+        "edit": "bearbeiten"
+      },
+      "via": {
+        "dashboard": "für dieses Dashboard",
+        "project": "für das ganze Projekt"
+      }
+    },
+    "external": {
+      "title": "Externer Link",
+      "promisePublished": "Der Link zeigt immer die zuletzt veröffentlichte Fassung – nie einen Entwurf.",
+      "promiseNoInternal": "Interne Notizen sind nicht enthalten.",
+      "promiseExpiry": "Jeder Link hat ein Ablaufdatum (höchstens 90 Tage) und kann jederzeit widerrufen werden.",
+      "promiseCreator": "Ein Link funktioniert nur, solange Sie selbst Zugriff auf das Dashboard haben und es veröffentlicht ist.",
+      "notPublishedTitle": "Noch nicht veröffentlicht",
+      "notPublishedBody": "Ein Link kann erst erstellt werden, wenn das Dashboard veröffentlicht ist."
+    },
+    "create": {
+      "title": "Neuen Link erstellen",
+      "label": "Bezeichnung",
+      "labelHint": "Für Sie und Ihr Team, z. B. „Vorstand Q3“. Empfänger:innen sehen sie nicht.",
+      "expiresOn": "Gültig bis einschließlich",
+      "expiresOnHint": "Spätestens {max}. Der Link endet am Ende dieses Tages ({timezone}).",
+      "rightsLegend": "Was Empfänger:innen tun dürfen",
+      "rightsHint": "Ohne Häkchen sehen Empfänger:innen das Dashboard genau so, wie es veröffentlicht wurde.",
+      "passwordLegend": "Passwortschutz",
+      "protect": "Link zusätzlich mit einem Passwort schützen",
+      "password": "Passwort für den Link",
+      "passwordHint": "Mindestens {min} Zeichen. Geben Sie es auf einem anderen Weg weiter als den Link.",
+      "passwordTooShort": "Das Passwort braucht mindestens {min} Zeichen.",
+      "submit": "Link erstellen",
+      "creating": "Wird erstellt …",
+      "failedTitle": "Der Link konnte nicht erstellt werden",
+      "createdTitle": "Link „{label}“ erstellt",
+      "createdBody": "Kopieren Sie den Link jetzt. Er wird aus Sicherheitsgründen nur dieses eine Mal angezeigt.",
+      "linkLabel": "Link zum geteilten Dashboard",
+      "copy": "Link kopieren",
+      "copied": "Kopiert"
+    },
+    "rights": {
+      "timeRange": "Zeitraum ändern",
+      "comparison": "Vergleich ändern",
+      "detail": "Detailansichten öffnen",
+      "export": "Exportieren (PDF, XLSX, PPTX, CSV)"
+    },
+    "status": {
+      "active": "Aktiv",
+      "expired": "Abgelaufen",
+      "revoked": "Widerrufen",
+      "unavailable": "Zurzeit nicht erreichbar"
+    },
+    "unavailableReason": {
+      "dashboard_not_published": "Das Dashboard ist archiviert oder im Papierkorb. Wird es wiederhergestellt, funktioniert der Link wieder.",
+      "tenant_inactive": "Der Kunde ist gesperrt. Solange das so ist, funktioniert kein Link.",
+      "creator_lost_access": "Die Person, die den Link erstellt hat, hat keinen Zugriff mehr auf das Dashboard. Erstellen Sie bei Bedarf einen neuen Link."
+    },
+    "list": {
+      "title": "Bestehende Links",
+      "empty": "Für dieses Dashboard gibt es noch keine Links.",
+      "expires": "Gültig bis",
+      "rights": "Rechte",
+      "rightsNone": "Nur ansehen",
+      "password": "Passwort",
+      "passwordYes": "Ja",
+      "passwordNo": "Nein",
+      "createdBy": "Erstellt von",
+      "unknownCreator": "Unbekannt",
+      "usage": "Nutzung",
+      "usageSeen": "{count, plural, one {# Aufruf} other {# Aufrufe}}, zuletzt {last}",
+      "usageNever": "Noch nicht geöffnet",
+      "revoke": "Widerrufen",
+      "confirmLabel": "Widerruf bestätigen",
+      "confirmText": "Der Link hört sofort auf zu funktionieren. Das lässt sich nicht rückgängig machen.",
+      "confirmRevoke": "Endgültig widerrufen",
+      "cancel": "Abbrechen",
+      "revokeFailed": "Der Link konnte nicht widerrufen werden"
+    },
+    "password_required": "Für diesen Link ist ein Passwort nötig.",
+    "unavailable": "Dieser Link ist nicht verfügbar.",
+    "right_missing": {
+      "timeRange": "Bei diesem Link kann der Zeitraum nicht geändert werden.",
+      "comparison": "Bei diesem Link kann der Vergleich nicht geändert werden.",
+      "detail": "Bei diesem Link sind Detailansichten nicht freigegeben.",
+      "export": "Bei diesem Link sind Exporte nicht freigegeben."
+    },
+    "expiry_in_past": "Das Ablaufdatum liegt in der Vergangenheit. Wählen Sie heute oder einen späteren Tag.",
+    "expiry_too_far": "Ein Link darf höchstens {days} Tage gültig sein.",
+    "needs_published_dashboard": "Ein Link kann nur für ein veröffentlichtes Dashboard erstellt werden, das nicht archiviert ist.",
+    "not_found": "Diesen Link gibt es für dieses Dashboard nicht.",
+    "unlock_paused": "Zu viele falsche Passwörter. Der Link ist für {minutes} Minuten gesperrt – versuchen Sie es danach erneut.",
+    "password_wrong": "Das Passwort stimmt nicht."
+  },
+  "shared": {
+    "badge": "Geteilte Ansicht",
+    "eyebrow": "Geteilt von {tenant}",
+    "validUntil": "Dieser Link ist gültig bis {date}.",
+    "footer": "Diese Ansicht wurde mit Ihnen geteilt. Sie zeigt die veröffentlichte Fassung des Dashboards; die Zahlen werden beim Öffnen abgerufen.",
+    "unavailableTitle": "Dieser Link ist nicht verfügbar",
+    "unavailableBody": "Der Link ist abgelaufen, wurde zurückgezogen oder das Dashboard steht nicht mehr zur Verfügung.",
+    "unavailableAction": "Wenden Sie sich an die Person, die Ihnen den Link geschickt hat.",
+    "passwordTitle": "Passwort erforderlich",
+    "passwordBody": "Dieses Dashboard ist mit einem Passwort geschützt. Die Person, die es mit Ihnen geteilt hat, gibt es Ihnen gesondert.",
+    "password": "Passwort",
+    "unlock": "Dashboard öffnen",
+    "unlocking": "Wird geprüft …",
+    "unlockFailed": "Das hat nicht geklappt"
   }
 }

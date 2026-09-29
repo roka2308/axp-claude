@@ -47,8 +47,12 @@ test.describe('viewer and detail view', () => {
     await expect(dialog.getByRole('region', { name: 'Definition' })).toBeVisible();
     await expect(dialog.getByRole('region', { name: 'Aktionen' })).toBeVisible();
 
-    // An action that is not possible says why, instead of being a dead button.
-    await expect(dialog.getByText('Export kommt mit Phase 7.')).toBeVisible();
+    // An action that is not possible says why, instead of being a dead button;
+    // one that is possible is a real control.
+    await expect(
+      dialog.getByText('Sie haben keinen Zugriff auf den Kennzahlen-Katalog.'),
+    ).toBeVisible();
+    await expect(dialog.getByRole('button', { name: 'Als CSV exportieren' })).toBeVisible();
   });
 
   test('offers the chart inside the detail view as a table too', async ({ page }) => {
