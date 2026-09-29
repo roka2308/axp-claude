@@ -27,7 +27,21 @@ export interface PresentationMeta {
   readonly isDraftPreview: boolean;
   readonly projectName: string;
   readonly tenantName: string;
+  /**
+   * The author's note for the team. Present only for the signed-in product;
+   * the builder leaves it out for every other audience.
+   */
+  readonly internalNote?: string;
 }
+
+/**
+ * Who a presentation is built for (Master Spec §15).
+ *
+ * `internal` is the signed-in product. `external` is a share recipient and
+ * `export` a file that leaves the product: both get the numbers and their
+ * meaning, never the team's internal notes.
+ */
+export type PresentationAudience = 'internal' | 'external' | 'export';
 
 /**
  * The read-only Data Scope shown to viewers (D4).
@@ -79,6 +93,9 @@ export type WidgetContent =
       readonly kind: 'time_series';
       readonly series: readonly TimeSeries[];
       readonly labels: readonly string[];
+      /** Per series, aligned with `series`: how its values are read and rounded. */
+      readonly units?: readonly string[];
+      readonly decimals?: readonly number[];
     }
   | {
       readonly kind: 'table';
@@ -86,6 +103,7 @@ export type WidgetContent =
         readonly key: string;
         readonly label: string;
         readonly unit?: string;
+        readonly decimals?: number;
       }[];
       readonly rows: readonly BreakdownRow[];
       readonly totalRows: number;
@@ -212,6 +230,8 @@ export interface WidgetPresentation {
   readonly definition?: WidgetDefinitionPresentation;
   readonly freshness?: AnalyticsFreshness;
   readonly context?: string;
+  /** Internal audience only; see PresentationMeta.internalNote. */
+  readonly internalNote?: string;
 }
 
 export interface AnnotationPresentation {

@@ -33,8 +33,10 @@ describe('product store persistence rules', () => {
       'auth_identities',
       'bootstrap_tokens',
       'dashboard_drafts',
+      'dashboard_shares',
       'dashboard_versions',
       'dashboards',
+      'export_artifacts',
       'group_members',
       'groups',
       'login_attempts',
@@ -50,6 +52,7 @@ describe('product store persistence rules', () => {
       'semantic_definitions',
       'semantic_versions',
       'sessions',
+      'share_sessions',
       'solution_installations',
       'source_bindings',
       'templates',
@@ -160,6 +163,32 @@ describe('product store persistence rules', () => {
     expect(versionColumns).toContain('pinned_semantic_version_ids');
     for (const cached of ['values', 'metrics', 'data', 'results', 'rendered']) {
       expect(versionColumns, `dashboard_versions.${cached}`).not.toContain(cached);
+    }
+  });
+
+  it('keeps shares as configuration, with the link and password only as hashes', async () => {
+    // Phase 7: a share names a dashboard, an expiry and rights. The link token
+    // and the optional password are unusable if the table is read.
+    const shareColumns = await listColumns('dashboard_shares');
+    expect(shareColumns).toContain('token_hash');
+    expect(shareColumns).toContain('password_hash');
+    expect(shareColumns).toContain('expires_at');
+    for (const plaintext of ['token', 'password', 'link', 'url']) {
+      expect(shareColumns, `dashboard_shares.${plaintext}`).not.toContain(plaintext);
+    }
+    const sessionColumns = await listColumns('share_sessions');
+    expect(sessionColumns).toContain('token_hash');
+    expect(sessionColumns).not.toContain('token');
+  });
+
+  it('records export files by reference, never their content', async () => {
+    // The export file holds analytics values, so it lives encrypted outside
+    // the database and is deleted when it expires. The row is metadata.
+    const columns = await listColumns('export_artifacts');
+    expect(columns).toContain('storage_key');
+    expect(columns).toContain('expires_at');
+    for (const content of ['content', 'body', 'data', 'bytes', 'payload', 'values', 'blob']) {
+      expect(columns, `export_artifacts.${content}`).not.toContain(content);
     }
   });
 });

@@ -43,6 +43,13 @@
       "when": 1790613613273,
       "tag": "0005_solutions_and_templates",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1790703382169,
+      "tag": "0006_shares_and_exports",
+      "breakpoints": true
     }
   ]
 }

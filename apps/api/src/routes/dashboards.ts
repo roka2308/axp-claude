@@ -1,21 +1,20 @@
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
-import { eq } from 'drizzle-orm';
 import {
   AppError,
   type AuthContext,
   type Breakpoint,
+  type Capability,
   comparisonModeSchema,
   type DashboardSnapshot,
-  type TimeRangePreset,
   responsivePlacementSchema,
   timeRangePresetSchema,
   widgetFamilySchema,
 } from '@axp/contracts';
-import { dashboards as dashboardsTable } from '@axp/db';
 import type { Container } from '@axp/core';
 import { requireAuth } from '../plugins/authentication';
 import { requireProjectScope, requireProjectSite } from '../lib/project-scope';
+import { defaultPreset, scopeForDashboard } from '../lib/dashboard-scope';
 
 const filterSpecSchema = z.object({
   field: z.string().min(1),
@@ -45,6 +44,7 @@ const widgetSchema = z.object({
     descriptionKey: z.string().optional(),
     description: z.string().max(2000).optional(),
     showDefinition: z.boolean().default(false),
+    internalNote: z.string().max(2000).optional(),
   }),
 });
 
@@ -52,6 +52,7 @@ const snapshotSchema = z.object({
   schemaVersion: z.literal(1),
   name: z.string().min(1).max(200),
   description: z.string().max(1000).optional(),
+  internalNote: z.string().max(2000).optional(),
   siteId: z.string().min(1),
   defaultTimeRange: z.object({
     preset: timeRangePresetSchema,
@@ -69,7 +70,9 @@ const snapshotSchema = z.object({
   widgets: z.array(widgetSchema).max(50),
 });
 
-const viewQuerySchema = z.object({
+export type ViewQuery = z.infer<typeof viewQuerySchema>;
+
+export const viewQuerySchema = z.object({
   /** Absent: the dashboard's own default applies (D4). */
   timeRange: timeRangePresetSchema.optional(),
   from: z.string().optional(),
@@ -347,6 +350,7 @@ export function registerDashboardRoutes(app: FastifyInstance, container: Contain
           dashboardId,
           name: state.snapshot.name,
           ...(state.snapshot.description ? { description: state.snapshot.description } : {}),
+          ...(state.snapshot.internalNote ? { internalNote: state.snapshot.internalNote } : {}),
           publishedVersion: 'version' in state ? state.version : null,
           isDraftPreview: query.source === 'draft',
           projectName: scope.projectName,
@@ -444,19 +448,32 @@ export function registerDashboardRoutes(app: FastifyInstance, container: Contain
 
       // Only the capabilities the detail view's actions depend on, rather than
       // the whole project surface: this runs on every widget a viewer opens.
-      const canReadCatalog = await container.authorization.can(auth, 'semantic.read', {
-        type: 'project',
-        projectId: scope.projectId,
-      });
+      const [canReadCatalog, canExport] = await Promise.all([
+        container.authorization.can(auth, 'semantic.read', {
+          type: 'project',
+          projectId: scope.projectId,
+        }),
+        // Exports describe the published dashboard, never a draft preview.
+        query.source === 'published'
+          ? container.authorization.can(auth, 'dashboard.export', {
+              type: 'project',
+              projectId: scope.projectId,
+            })
+          : Promise.resolve(false),
+      ]);
 
       return container.presentation.buildDetail({
         widgetId,
-        capabilities: canReadCatalog ? ['semantic.read'] : [],
+        capabilities: [
+          ...(canReadCatalog ? ['semantic.read'] : []),
+          ...(canExport ? ['dashboard.export'] : []),
+        ],
         snapshot: state.snapshot,
         meta: {
           dashboardId,
           name: state.snapshot.name,
           ...(state.snapshot.description ? { description: state.snapshot.description } : {}),
+          ...(state.snapshot.internalNote ? { internalNote: state.snapshot.internalNote } : {}),
           publishedVersion: 'version' in state ? state.version : null,
           isDraftPreview: query.source === 'draft',
           projectName: scope.projectName,
@@ -484,13 +501,17 @@ export function registerDashboardRoutes(app: FastifyInstance, container: Contain
  * time range. Sharing the resolution is what keeps the layout, a tile and a
  * detail view from ever disagreeing about which snapshot they are describing.
  */
-async function resolveView(
+export async function resolveView(
   container: Container,
   auth: AuthContext,
   dashboardId: string,
-  query: z.infer<typeof viewQuerySchema>,
+  query: ViewQuery,
+  /** A different right for the same view: exporting it, for instance. */
+  capabilityOverride?: Capability,
 ) {
-  const capability = query.source === 'draft' ? 'dashboard.edit_draft' : 'dashboard.read_published';
+  const capability =
+    capabilityOverride ??
+    (query.source === 'draft' ? 'dashboard.edit_draft' : 'dashboard.read_published');
   const scope = await scopeForDashboard(container, auth, dashboardId, capability);
 
   const state =
@@ -516,6 +537,7 @@ async function resolveView(
         dashboardId,
         name: state.snapshot.name,
         ...(state.snapshot.description ? { description: state.snapshot.description } : {}),
+        ...(state.snapshot.internalNote ? { internalNote: state.snapshot.internalNote } : {}),
         publishedVersion: 'version' in state ? state.version : null,
         isDraftPreview: query.source === 'draft',
         projectName: scope.projectName,
@@ -533,57 +555,4 @@ async function resolveView(
       permissionContextId: scope.permissionContextId,
     },
   };
-}
-
-/**
- * Resolves the project a dashboard belongs to, then authorizes against it.
- *
- * The dashboard id comes from the browser; its project and tenant are read
- * from the database before any capability check happens.
- */
-async function scopeForDashboard(
-  container: Container,
-  auth: Parameters<typeof requireProjectScope>[1],
-  dashboardId: string,
-  capability: Parameters<typeof requireProjectScope>[3],
-) {
-  const [row] = await container.db
-    .select({ projectId: dashboardsTable.projectId })
-    .from(dashboardsTable)
-    .where(eq(dashboardsTable.id, dashboardId))
-    .limit(1);
-
-  if (!row) {
-    throw new AppError('not_found', {
-      code: 'dashboard_not_found',
-      messageKey: 'dashboard.not_found',
-      internalMessage: `Dashboard ${dashboardId} does not exist.`,
-    });
-  }
-
-  const scope = await requireProjectScope(container, auth, row.projectId, capability);
-
-  /*
-   * The role is half of it. Reading a dashboard's data, or changing it, also
-   * needs an object grant that covers the dashboard (ADR 0006, Master Spec
-   * §7). Checked after the scope, so a caller from another tenant still gets
-   * the same answer as for a dashboard that does not exist.
-   */
-  await container.access.assertDashboard(
-    auth,
-    dashboardId,
-    capability === 'dashboard.read_published' ? 'view' : 'edit',
-  );
-
-  return scope;
-}
-
-/**
- * The period a dashboard opens on when the URL names none: its own default,
- * as the author set it (D4). A stored custom range has no meaning without its
- * dates, so it falls back to the last 30 days.
- */
-function defaultPreset(snapshot: DashboardSnapshot): TimeRangePreset {
-  const preset = snapshot.defaultTimeRange.preset;
-  return preset === 'custom' ? 'last_30_days' : preset;
 }

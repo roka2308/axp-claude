@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { AppError } from '@axp/contracts';
 import {
+  startOfDayInstant,
   addDays,
   addYears,
   daysBetween,
@@ -159,5 +160,32 @@ describe('date arithmetic', () => {
     expect(addDays('2026-03-28', 1)).toBe('2026-03-29');
     expect(addDays('2026-03-29', 1)).toBe('2026-03-30');
     expect(daysBetween('2026-03-28', '2026-03-30')).toBe(3);
+  });
+});
+
+describe('start of a day in a time zone', () => {
+  it('finds midnight in the zone, in summer and in winter', () => {
+    expect(startOfDayInstant('2026-07-15', 'Europe/Berlin').toISOString()).toBe(
+      '2026-07-14T22:00:00.000Z',
+    );
+    expect(startOfDayInstant('2026-12-15', 'Europe/Berlin').toISOString()).toBe(
+      '2026-12-14T23:00:00.000Z',
+    );
+    expect(startOfDayInstant('2026-07-15', 'UTC').toISOString()).toBe('2026-07-15T00:00:00.000Z');
+    expect(startOfDayInstant('2026-07-15', 'America/New_York').toISOString()).toBe(
+      '2026-07-15T04:00:00.000Z',
+    );
+  });
+
+  it('handles the days daylight saving time starts and ends', () => {
+    expect(startOfDayInstant('2026-03-29', 'Europe/Berlin').toISOString()).toBe(
+      '2026-03-28T23:00:00.000Z',
+    );
+    expect(startOfDayInstant('2026-03-30', 'Europe/Berlin').toISOString()).toBe(
+      '2026-03-29T22:00:00.000Z',
+    );
+    expect(startOfDayInstant('2026-10-26', 'Europe/Berlin').toISOString()).toBe(
+      '2026-10-25T23:00:00.000Z',
+    );
   });
 });

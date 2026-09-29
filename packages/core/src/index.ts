@@ -50,3 +50,8 @@ export * from './solution/solution-service';
 export * from './solution/package-validation';
 export * from './solution/portable';
 export * from './solution/catalog/pulse';
+
+export * from './export/document';
+export * from './export/export-service';
+export * from './export/artifact-store';
+export * from './sharing/share-service';

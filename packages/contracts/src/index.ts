@@ -24,3 +24,5 @@ export * from './search';
 export * from './admin';
 export * from './project';
 export * from './solution';
+export * from './sharing';
+export * from './export';

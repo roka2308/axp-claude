@@ -102,4 +102,45 @@ export class SecretBox {
       return false;
     }
   }
+
+  /**
+   * Encrypts a file's bytes (export artifacts, Master Spec §15).
+   *
+   * Layout: key version (1 byte) | nonce (12) | ciphertext | tag (16). The
+   * associated data binds the ciphertext to what it belongs to - an artifact
+   * id - so a file cannot be served under another record's name.
+   */
+  sealBytes(plaintext: Buffer, associatedData: string): Buffer {
+    const nonce = randomBytes(NONCE_BYTES);
+    const cipher = createCipheriv(ALGORITHM, this.key, nonce);
+    cipher.setAAD(Buffer.from(associatedData, 'utf8'));
+    const encrypted = Buffer.concat([cipher.update(plaintext), cipher.final()]);
+    return Buffer.concat([
+      Buffer.from([this.keyVersion & 0xff]),
+      nonce,
+      encrypted,
+      cipher.getAuthTag(),
+    ]);
+  }
+
+  openBytes(sealed: Buffer, associatedData: string): Buffer {
+    try {
+      if (sealed.length <= 1 + NONCE_BYTES + TAG_BYTES) throw new Error('sealed file too short');
+      if (sealed[0] !== (this.keyVersion & 0xff)) throw new Error('key version mismatch');
+
+      const nonce = sealed.subarray(1, 1 + NONCE_BYTES);
+      const encrypted = sealed.subarray(1 + NONCE_BYTES, sealed.length - TAG_BYTES);
+      const tag = sealed.subarray(sealed.length - TAG_BYTES);
+      const decipher = createDecipheriv(ALGORITHM, this.key, nonce);
+      decipher.setAAD(Buffer.from(associatedData, 'utf8'));
+      decipher.setAuthTag(tag);
+      return Buffer.concat([decipher.update(encrypted), decipher.final()]);
+    } catch (error) {
+      throw new AppError('internal_error', {
+        code: 'artifact_decrypt_failed',
+        internalMessage: 'Stored file could not be decrypted.',
+        cause: error,
+      });
+    }
+  }
 }

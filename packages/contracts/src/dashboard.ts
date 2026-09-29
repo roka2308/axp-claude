@@ -112,6 +112,12 @@ export interface WidgetContextConfig {
   readonly descriptionKey?: string;
   readonly description?: string;
   readonly showDefinition: boolean;
+  /**
+   * A note for the team, never for the audience: shown to signed-in users of
+   * the product, left out of every external share and every export file
+   * (Master Spec §15).
+   */
+  readonly internalNote?: string;
 }
 
 export interface WidgetConfig {
@@ -135,6 +141,8 @@ export interface DashboardSnapshot {
   readonly schemaVersion: 1;
   readonly name: string;
   readonly description?: string;
+  /** For the team only; never in a share or an export (see WidgetContextConfig). */
+  readonly internalNote?: string;
   readonly siteId: string;
   readonly defaultTimeRange: TimeRange;
   readonly defaultComparison: ComparisonSpec;

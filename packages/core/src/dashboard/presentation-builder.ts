@@ -12,6 +12,7 @@ import {
   hasNumericValue,
   type Locale,
   type MetricPresentation,
+  type PresentationAudience,
   type PresentationMeta,
   type SemanticDefinitionBody,
   type TimeRange,
@@ -56,6 +57,12 @@ export interface BuildPresentationInput {
   readonly breakpoint: Breakpoint;
   readonly locale: Locale;
   readonly permissionContextId: string;
+  /**
+   * Who will read the result. Anything but `internal` loses the team's
+   * internal notes here, in the builder, so no caller can forget to strip
+   * them (Master Spec §15). Defaults to `internal`.
+   */
+  readonly audience?: PresentationAudience;
 }
 
 export interface BuildDetailInput extends BuildPresentationInput {
@@ -109,7 +116,7 @@ export class PresentationBuilder {
     });
 
     return {
-      dashboard: input.meta,
+      dashboard: metaFor(input),
       timeRange,
       ...(comparison.mode === 'none' ? {} : { comparison }),
       dataScope: this.dataScope(input),
@@ -139,7 +146,7 @@ export class PresentationBuilder {
     const comparison = resolveComparison(timeRange, input.comparisonMode);
 
     return {
-      dashboard: input.meta,
+      dashboard: metaFor(input),
       timeRange,
       ...(comparison.mode === 'none' ? {} : { comparison }),
       dataScope: this.dataScope(input),
@@ -245,7 +252,7 @@ export class PresentationBuilder {
         : undefined;
 
     return {
-      dashboard: input.meta,
+      dashboard: metaFor(input),
       timeRange,
       ...(comparison.mode === 'none' ? {} : { comparison }),
       dataScope: this.dataScope(input),
@@ -295,6 +302,12 @@ export class PresentationBuilder {
       series: result.series,
       labels: result.series.map(
         (series) => descriptions.get(series.semanticVersionId)?.name ?? 'Kennzahl',
+      ),
+      units: result.series.map((series) =>
+        unitOf(descriptions.get(series.semanticVersionId)?.body),
+      ),
+      decimals: result.series.map((series) =>
+        decimalsOf(descriptions.get(series.semanticVersionId)?.body),
       ),
     };
   }
@@ -387,27 +400,41 @@ export class PresentationBuilder {
     input: BuildDetailInput,
   ): readonly WidgetDetailAction[] {
     const canReadCatalog = input.capabilities.includes('semantic.read');
+    const canExport = input.capabilities.includes('dashboard.export');
+    const hasData =
+      tile.content !== undefined &&
+      tile.content.kind !== 'text' &&
+      tile.state !== 'unavailable' &&
+      tile.state !== 'not_applicable';
+
+    const openDefinition: WidgetDetailAction = {
+      kind: 'open_definition',
+      labelKey: 'detail.action.openDefinition',
+      available: canReadCatalog && Boolean(tile.definition),
+      ...(canReadCatalog && tile.definition
+        ? { href: `/projects/${input.projectId}/semantics` }
+        : {}),
+      ...(canReadCatalog
+        ? tile.definition
+          ? {}
+          : { unavailableKey: 'detail.action.openDefinitionNoDefinition' }
+        : { unavailableKey: 'detail.action.openDefinitionNoAccess' }),
+    };
 
     return [
       { kind: 'copy_link', labelKey: 'detail.action.copyLink', available: true },
-      {
-        kind: 'open_definition',
-        labelKey: 'detail.action.openDefinition',
-        available: canReadCatalog && Boolean(tile.definition),
-        ...(canReadCatalog && tile.definition
-          ? { href: `/projects/${input.projectId}/semantics` }
-          : {}),
-        ...(canReadCatalog
-          ? tile.definition
-            ? {}
-            : { unavailableKey: 'detail.action.openDefinitionNoDefinition' }
-          : { unavailableKey: 'detail.action.openDefinitionNoAccess' }),
-      },
+      // A share recipient has no catalog to open; offering a door that is
+      // always locked to them would only be noise.
+      ...((input.audience ?? 'internal') === 'internal' ? [openDefinition] : []),
       {
         kind: 'export',
         labelKey: 'detail.action.export',
-        available: false,
-        unavailableKey: 'detail.action.exportLaterMilestone',
+        available: canExport && hasData,
+        ...(canExport
+          ? hasData
+            ? {}
+            : { unavailableKey: 'detail.action.exportNothing' }
+          : { unavailableKey: 'detail.action.exportNoAccess' }),
       },
     ];
   }
@@ -440,6 +467,7 @@ export class PresentationBuilder {
         state: 'ready',
         content: { kind: 'text', body: widget.context.description ?? '' },
         dataQuality: [],
+        ...internalNoteOf(widget, input),
       };
     }
 
@@ -516,6 +544,7 @@ export class PresentationBuilder {
       ...stateMessageOf(result, state),
       freshness: result.freshness,
       ...(widget.context.description ? { context: widget.context.description } : {}),
+      ...internalNoteOf(widget, input),
       ...(widget.context.showDefinition && described
         ? {
             definition: {
@@ -551,6 +580,12 @@ export class PresentationBuilder {
           labels: result.series.map(
             (series) => descriptions.get(series.semanticVersionId)?.name ?? 'Kennzahl',
           ),
+          units: result.series.map((series) =>
+            unitOf(descriptions.get(series.semanticVersionId)?.body),
+          ),
+          decimals: result.series.map((series) =>
+            decimalsOf(descriptions.get(series.semanticVersionId)?.body),
+          ),
         };
 
       case 'breakdown':
@@ -562,6 +597,7 @@ export class PresentationBuilder {
               key: versionId,
               label: descriptions.get(versionId)?.name ?? 'Kennzahl',
               unit: unitOf(descriptions.get(versionId)?.body),
+              decimals: decimalsOf(descriptions.get(versionId)?.body),
             })),
           ],
           rows: result.rows,
@@ -593,6 +629,21 @@ export class PresentationBuilder {
       ...(band ? { evaluation: { label: band.key, band: band.band } } : {}),
     };
   }
+}
+
+/** The meta for this audience: internal notes stay inside the product. */
+function metaFor(input: BuildPresentationInput): PresentationMeta {
+  if ((input.audience ?? 'internal') === 'internal') return input.meta;
+  const { internalNote: _internal, ...rest } = input.meta;
+  return rest;
+}
+
+function internalNoteOf(
+  widget: WidgetConfig,
+  input: BuildPresentationInput,
+): Pick<WidgetPresentation, 'internalNote'> {
+  if ((input.audience ?? 'internal') !== 'internal') return {};
+  return widget.context.internalNote ? { internalNote: widget.context.internalNote } : {};
 }
 
 /** Which query shape a widget family needs. */
@@ -798,6 +849,10 @@ function toUnavailableReason(error: unknown): WidgetUnavailableReason {
 
 function unitOf(body: SemanticDefinitionBody | undefined): string {
   return body && 'unit' in body ? body.unit : 'count';
+}
+
+function decimalsOf(body: SemanticDefinitionBody | undefined): number {
+  return body && 'decimals' in body ? body.decimals : 0;
 }
 
 function scopeOf(body: SemanticDefinitionBody | undefined): string {

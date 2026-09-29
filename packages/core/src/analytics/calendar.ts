@@ -57,6 +57,50 @@ export function parseCalendarDate(date: CalendarDate): {
   return { year: Number(match[1]), month: Number(match[2]), day: Number(match[3]) };
 }
 
+/**
+ * The instant a calendar day begins in a time zone.
+ *
+ * For deadlines people set as a date - "valid until 15 October" means until
+ * that day ends where the project lives, not where the server runs. Handles
+ * daylight-saving days, where a day is 23 or 25 hours long.
+ */
+export function startOfDayInstant(date: CalendarDate, timezone: string): Date {
+  const { year, month, day } = parseCalendarDate(date);
+  const wall = Date.UTC(year, month - 1, day);
+  let instant = wall;
+  // Two rounds settle the offset even when the guess lands across a switch.
+  for (let round = 0; round < 2; round += 1) {
+    instant = wall - zoneOffsetMs(new Date(instant), timezone);
+  }
+  return new Date(instant);
+}
+
+function zoneOffsetMs(instant: Date, timezone: string): number {
+  const parts = Object.fromEntries(
+    new Intl.DateTimeFormat('en-US', {
+      timeZone: timezone,
+      hourCycle: 'h23',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    })
+      .formatToParts(instant)
+      .map((part) => [part.type, part.value]),
+  );
+  const asUtc = Date.UTC(
+    Number(parts.year),
+    Number(parts.month) - 1,
+    Number(parts.day),
+    Number(parts.hour),
+    Number(parts.minute),
+    Number(parts.second),
+  );
+  return asUtc - Math.floor(instant.getTime() / 1000) * 1000;
+}
+
 function toUtcMillis(date: CalendarDate): number {
   const { year, month, day } = parseCalendarDate(date);
   return Date.UTC(year, month - 1, day);

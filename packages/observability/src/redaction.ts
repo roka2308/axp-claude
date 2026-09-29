@@ -35,6 +35,12 @@ export const REDACTED_KEYS: readonly string[] = [
   'encryptionKey',
   'privateKey',
   'sessionId',
+  // Share links and their password sessions (Phase 7): a token in a log is
+  // the share itself, handed to whoever reads the log.
+  'x-share-token',
+  'x-share-session',
+  'shareToken',
+  'sessionToken',
 ];
 
 /**

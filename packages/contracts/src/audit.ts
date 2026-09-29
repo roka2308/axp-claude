@@ -66,6 +66,10 @@ export const AUDIT_ACTIONS = [
   'solution.installed',
   'solution.exported',
   'project.context_updated',
+  // Sharing and exports (Phase 7)
+  'share.created',
+  'share.revoked',
+  'export.created',
 ] as const;
 
 export const auditActionSchema = z.enum(AUDIT_ACTIONS);

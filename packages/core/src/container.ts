@@ -27,6 +27,9 @@ import { SemanticService } from './semantic/semantic-service';
 import { DashboardService } from './dashboard/dashboard-service';
 import { SolutionService } from './solution/solution-service';
 import { PresentationBuilder } from './dashboard/presentation-builder';
+import { ArtifactStore } from './export/artifact-store';
+import { ExportService } from './export/export-service';
+import { ShareService } from './sharing/share-service';
 
 /**
  * Composition root for the domain layer.
@@ -62,6 +65,8 @@ export interface Container {
   readonly dashboards: DashboardService;
   readonly presentation: PresentationBuilder;
   readonly solutions: SolutionService;
+  readonly exports: ExportService;
+  readonly shares: ShareService;
   close(): Promise<void>;
 }
 
@@ -201,6 +206,24 @@ export function createContainer(options: CreateContainerOptions): Container {
     projects,
   });
 
+  const exportsService = new ExportService({
+    db,
+    clock,
+    logger,
+    audit,
+    presentation,
+    store: new ArtifactStore({ dir: config.exports.artifactDir, secretBox }),
+    ttlMinutes: config.exports.artifactTtlMinutes,
+  });
+  const shares = new ShareService({
+    db,
+    clock,
+    audit,
+    authorization,
+    access,
+    discardExports: (shareId) => exportsService.discardForShare(shareId),
+  });
+
   return {
     config,
     db,
@@ -228,6 +251,8 @@ export function createContainer(options: CreateContainerOptions): Container {
     dashboards,
     presentation,
     solutions,
+    exports: exportsService,
+    shares,
     close: async () => {
       await analyticsCache.clear();
       if (ownsHandle) await handle.close();

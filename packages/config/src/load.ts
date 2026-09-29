@@ -82,6 +82,12 @@ function raw(env: NodeJS.ProcessEnv) {
       smtpHost: env.SMTP_HOST,
       smtpPort: env.SMTP_PORT,
     },
+    exports: {
+      artifactDir:
+        env.EXPORT_ARTIFACT_DIR ??
+        path.join(findRepoRoot(path.dirname(fileURLToPath(import.meta.url))), '.local', 'exports'),
+      artifactTtlMinutes: env.EXPORT_ARTIFACT_TTL_MINUTES,
+    },
     features: { demoFixtures: env.ENABLE_DEMO_FIXTURES },
   };
 }

@@ -105,6 +105,17 @@ export const configSchema = z.object({
     leaseHeartbeatSeconds: positiveInt.max(600).default(30),
   }),
 
+  exports: z.object({
+    /**
+     * Where finished export files wait for their download, encrypted. Outside
+     * the database on purpose: a file of numbers is analytics content, and it
+     * is deleted when it expires (Master Spec §4, §15).
+     */
+    artifactDir: z.string().min(1),
+    /** How long a finished file can be downloaded. Short by design. */
+    artifactTtlMinutes: positiveInt.max(120).default(15),
+  }),
+
   mail: z.object({
     transport: z.enum(['console', 'smtp']).default('console'),
     from: z.string().min(1).default('Analytics Experience <no-reply@example.invalid>'),

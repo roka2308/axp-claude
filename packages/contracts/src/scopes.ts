@@ -31,6 +31,9 @@ export const CAPABILITIES = [
   'dashboard.create',
   'dashboard.edit_draft',
   'dashboard.publish',
+  // Distribution (Phase 7): an external link, and a file of the current view
+  'dashboard.share',
+  'dashboard.export',
   // Semantic catalog
   'semantic.read',
   'semantic.manage',
@@ -45,13 +48,15 @@ export type Capability = (typeof CAPABILITIES)[number];
  * requires an object grant (Master Spec §7).
  */
 export const CAPABILITIES_BY_ROLE: Readonly<Record<SystemRole, readonly Capability[]>> = {
-  viewer: ['project.read', 'dashboard.read_published'],
+  viewer: ['project.read', 'dashboard.read_published', 'dashboard.export'],
   dashboard_editor: [
     'project.read',
     'dashboard.read_published',
     'dashboard.create',
     'dashboard.edit_draft',
     'dashboard.publish',
+    'dashboard.share',
+    'dashboard.export',
     'semantic.read',
   ],
   semantic_catalog_manager: ['project.read', 'semantic.read', 'semantic.manage'],

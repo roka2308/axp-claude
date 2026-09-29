@@ -176,10 +176,9 @@ describe('viewer, detail view and state model', () => {
         available: false,
         unavailableKey: 'detail.action.openDefinitionNoAccess',
       });
-      expect(byKind.export).toMatchObject({
-        available: false,
-        unavailableKey: 'detail.action.exportLaterMilestone',
-      });
+      // Exporting the current view is a viewer's right (Phase 7).
+      expect(byKind.export).toMatchObject({ available: true });
+      expect(byKind.export?.unavailableKey).toBeUndefined();
     });
 
     it('explains how a formula arrived at its value', async () => {
