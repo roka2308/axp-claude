@@ -114,6 +114,13 @@ scheduled work, not debt.
 Keep. Implement `JobQueue` in Phase 8 as specified. The scheduler stays for
 periodic maintenance that does not need durability.
 
+### Resolution
+
+Resolved in Phase 8: the durable `JobQueue` (MySQL, leases, retry with
+backoff, dead jobs, idempotent enqueue) runs report delivery
+([ADR 0010](docs/adr/0010-durable-jobs-scheduled-reports-attention.md)). The
+in-process scheduler remains for housekeeping and for finding due schedules.
+
 ---
 
 ## DEV-004 — Only `native_metric` source bindings are executable
@@ -196,6 +203,10 @@ Implement the verified change - re-auth, token to the new address, switch on
 confirmation - together with the mail transport in Phase 8, and deliver
 invitation links by mail at the same time.
 
+Update (Phase 8): the mail transport exists now (console, SMTP; ADR 0010) and
+carries reports and attention notices. The verified address change and mailed
+invitations are still to be built; they move to Phase 10 hardening.
+
 ---
 
 ## DEV-006 — Solution package schema 1 carries no theme tokens
@@ -264,7 +275,7 @@ contrast-checked evaluation band colours) and pass it to the renderers.
 
 ## DEV-008 — Scheduled delivery and a presentation stability gate come with Phase 8
 
-- Status: `accepted_shared`
+- Status: `resolved`
 - Milestone: F7
 - Specification reference: Master Spec §15 ("PDF/XLSX; PPTX nur nach Stability
   Gate"), development plan Phase 8
@@ -290,3 +301,10 @@ once). The reference dashboards render in about a second.
 
 Move rendering to the worker's job queue in Phase 8 and define the PPTX
 stability gate there.
+
+### Resolution
+
+Resolved in Phase 8: scheduled reports render in the worker, through the job
+queue; manual exports stay in the API request. The PPTX stability gate is the
+`REPORTS_PPTX_ENABLED` switch, off by default; schedules cannot choose PPTX
+until it is turned on (ADR 0010).

@@ -13,14 +13,16 @@ Read before changing anything substantial:
 4. `../analytics_experience_version_d_v1.0/acceptance/acceptance_checklist.md`
 5. `docs/adr/` — decisions already taken here
 
-Current milestone: **Phase 8 — Scheduled Reporting and Attention Center**.
-Phases 0–7 are complete and their gates are demonstrated
-(`npm run gate:f0|f1|f2|f3|f4|f5|f6|f7`, see `docs/gates/`). Data access needs a
+Current milestone: **Phase 9 — Themes, Entitlements, Diagnostics and Release
+Metadata**. Phases 0–8 are complete and their gates are demonstrated
+(`npm run gate:f0|…|f8`, see `docs/gates/`). Data access needs a
 role capability and an object grant (ADR 0006) — a new data path must check
 both. Solution packages are untrusted declarative data (ADR 0008). Shares lend
 their creator's access and exports are ephemeral encrypted files; anything
 built for an audience outside the product uses the `external` or `export`
-presentation audience, which drops internal notes (ADR 0009). Still open
+presentation audience, which drops internal notes (ADR 0009). Background work
+goes through the durable job queue with ids-only payloads; attention kinds are
+a closed operational list (ADR 0010). Still open
 from earlier phases: the Inspector cannot yet pick a catalog definition per
 widget, and annotations have no store. Gate criteria are in the development
 plan.

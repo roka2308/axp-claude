@@ -44,6 +44,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
   const canPublish = detail.capabilities.includes('dashboard.publish');
   const canPreview = detail.capabilities.includes('dashboard.edit_draft');
   const canReadSemantics = detail.capabilities.includes('semantic.read');
+  const canManageReports = detail.capabilities.includes('report.manage');
 
   const [dashboards, connections] = await Promise.all([
     canReadDashboards ? listDashboards(projectId) : Promise.resolve([]),
@@ -159,6 +160,15 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           <Card title={t('semantics.title')} description={t('semantics.subtitle')}>
             <Link href={`/projects/${projectId}/semantics`} className={styles.setupCta}>
               {t('project.openSemantics')}
+            </Link>
+          </Card>
+        ) : null}
+
+        {canManageReports ? (
+          // Projekt → Reports (D1): scheduled delivery of published dashboards.
+          <Card title={t('reports.title')} description={t('reports.projectCardBody')}>
+            <Link href={`/projects/${projectId}/reports`} className={styles.setupCta}>
+              {t('reports.open')}
             </Link>
           </Card>
         ) : null}

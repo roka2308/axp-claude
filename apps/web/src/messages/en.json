@@ -16,7 +16,8 @@
     "help": "Help",
     "profile": "Profile",
     "tenantSwitcher": "Switch tenant",
-    "projectSwitcher": "Switch project"
+    "projectSwitcher": "Switch project",
+    "attentionWithCount": "Attention, {count} open"
   },
   "home": {
     "title": "Welcome",
@@ -1453,6 +1454,9 @@
     "semantic": {
       "read": "Read semantic catalog",
       "manage": "Maintain semantic catalog"
+    },
+    "report": {
+      "manage": "Schedule and manage reports"
     }
   },
   "auditAction": {
@@ -1549,6 +1553,19 @@
     },
     "export": {
       "created": "Export created"
+    },
+    "report_schedule": {
+      "created": "Report scheduled",
+      "updated": "Report changed",
+      "paused": "Report paused",
+      "resumed": "Report resumed",
+      "deleted": "Report deleted"
+    },
+    "report": {
+      "run_finished": "Report ran"
+    },
+    "attention": {
+      "acknowledged": "Notice acknowledged"
     }
   },
   "solution": {
@@ -2000,5 +2017,211 @@
     "unlock": "Open dashboard",
     "unlocking": "Checking …",
     "unlockFailed": "That did not work"
+  },
+  "attention": {
+    "title": "Attention",
+    "intro": "What needs your attention in operation: failed reports, expiring links, mappings to check, unused accounts. Repeats of the same problem appear as one entry.",
+    "emptyTitle": "All clear",
+    "emptyBody": "There is nothing that needs you right now.",
+    "severity": {
+      "action_required": "Action required",
+      "warning": "Warning",
+      "information": "Information"
+    },
+    "kind": {
+      "report_failed": "Report not sent",
+      "report_recipient_without_access": "Recipients without access",
+      "share_expiring": "Link expiring",
+      "mapping_review": "Check mapping",
+      "inactivity_review": "Unused account"
+    },
+    "fix": {
+      "report_failed": "Go to the report",
+      "report_recipient_without_access": "Check recipients",
+      "share_expiring": "Manage link",
+      "mapping_review": "Open mappings",
+      "inactivity_review": "View account"
+    },
+    "acknowledge": "Acknowledge",
+    "acknowledged": "Acknowledged",
+    "repeated": "Happened {count} times, first {first}, last {last}",
+    "seenOnce": "Happened {when}",
+    "notAlerts": "Only operational notices appear here. The platform deliberately does not alert about how metrics develop.",
+    "report_failed": "The report \"{report}\" could not be sent: {reason}",
+    "report_recipient_without_access": "The report \"{report}\" left out {count, plural, one {one person} other {# people}} who may no longer see the dashboard.",
+    "share_expiring": "The link \"{label}\" expires on {expiresAt}.",
+    "mapping_review": "The mapping \"{requirement}\" no longer matches what Matomo provides. Please check it.",
+    "inactivity_review": "{name} has not signed in for more than {days} days. Is the account still needed?",
+    "not_found": "This notice no longer exists."
+  },
+  "report": {
+    "dashboard_not_in_project": "The dashboard is not part of this project.",
+    "dashboard_not_published": "The dashboard is not published or is archived. Reports always show the published version.",
+    "timezone_unknown": "This time zone is unknown. Use a name such as \"Europe/Berlin\".",
+    "pptx_not_released": "PowerPoint reports are not yet released for scheduled delivery. Choose PDF or Excel.",
+    "recipient_without_access": "At least one person may not see this dashboard and cannot receive the report.",
+    "not_found": "This report does not exist in this project.",
+    "tenant_inactive": "The customer is suspended; reports are on hold.",
+    "schedule_inactive": "The report is paused or deleted.",
+    "owner_lost_access": "The responsible person no longer has access to the dashboard.",
+    "site_not_assigned": "The dashboard's site is no longer assigned to the project.",
+    "no_recipients": "None of the recipients may see the dashboard any more.",
+    "source_unavailable": "The data source was not reachable.",
+    "mail_failed": "The mail could not be delivered.",
+    "unexpected": "An unexpected error occurred."
+  },
+  "reports": {
+    "title": "Reports",
+    "intro": "Scheduled reports send a dashboard's published version regularly - with a relative period, in a fixed time zone, only to people who may see the dashboard.",
+    "open": "Open reports",
+    "projectCardBody": "Send published dashboards by mail on a schedule.",
+    "backToProject": "Back to {project}",
+    "listTitle": "Scheduled reports",
+    "empty": "No reports are scheduled in this project yet.",
+    "status": {
+      "active": "Active",
+      "paused": "Paused"
+    },
+    "facts": {
+      "dashboard": "Dashboard",
+      "content": "Content",
+      "rhythm": "Rhythm",
+      "nextRun": "Next delivery",
+      "noNextRun": "None scheduled",
+      "recipients": "Recipients",
+      "lastRun": "Last run",
+      "neverRun": "Not run yet"
+    },
+    "withoutAccessTitle": "Not every recipient gets this report",
+    "withoutAccessBody": "{names} may not see the dashboard at the moment and will be left out.",
+    "historyTitle": "History of \"{name}\"",
+    "history": {
+      "planned": "Planned for",
+      "trigger": "Trigger",
+      "status": "Result",
+      "period": "Period",
+      "version": "Version",
+      "delivered": "Delivered",
+      "skipped": "Left out"
+    },
+    "trigger": {
+      "schedule": "Scheduled",
+      "manual": "Manual"
+    },
+    "runStatus": {
+      "queued": "Waiting",
+      "running": "Running",
+      "delivered": "Delivered",
+      "partially_delivered": "Partially delivered",
+      "failed": "Failed",
+      "skipped": "Skipped"
+    },
+    "skipReason": {
+      "no_access": "no access",
+      "inactive": "account inactive"
+    },
+    "period": {
+      "yesterday": "Yesterday",
+      "last_7_days": "Last 7 days",
+      "last_14_days": "Last 14 days",
+      "last_30_days": "Last 30 days",
+      "current_week": "Current week",
+      "previous_week": "Previous week",
+      "current_month": "Current month",
+      "previous_month": "Previous month",
+      "current_quarter": "Current quarter",
+      "previous_quarter": "Previous quarter",
+      "current_year": "Current year",
+      "previous_year": "Previous year"
+    },
+    "comparison": {
+      "none": "No comparison",
+      "previous_period": "Previous period",
+      "prior_year": "Same period last year"
+    },
+    "frequency": {
+      "daily": "Daily",
+      "weekly": "Weekly",
+      "monthly": "Monthly",
+      "quarterly": "Quarterly",
+      "custom": "On selected weekdays"
+    },
+    "weekday": {
+      "1": "Monday",
+      "2": "Tuesday",
+      "3": "Wednesday",
+      "4": "Thursday",
+      "5": "Friday",
+      "6": "Saturday",
+      "7": "Sunday"
+    },
+    "rhythm": {
+      "daily": "Daily at {time}",
+      "weekly": "Every {day} at {time}",
+      "monthly": "Monthly on day {day} at {time}",
+      "monthlyLast": "Monthly on the last day at {time}",
+      "quarterly": "Quarterly on day {day} of the quarter's first month at {time}",
+      "quarterlyLast": "Quarterly on the last day of the quarter's first month at {time}",
+      "custom": "{days} at {time}"
+    },
+    "deliveryMode": {
+      "attachment": "File attached",
+      "link": "Link to the dashboard"
+    },
+    "deliveryModeHint": {
+      "attachment": "The file is created when the report is sent and attached; it is not stored.",
+      "link": "The mail only contains a link. Recipients sign in and see the dashboard with their own rights."
+    },
+    "form": {
+      "title": "Schedule a new report",
+      "editTitle": "Edit \"{name}\"",
+      "dashboard": "Dashboard",
+      "dashboardHint": "Published dashboards only. The report always shows the latest published version.",
+      "name": "Name",
+      "period": "Period",
+      "periodHint": "Relative to when the report is sent, in the site's calendar.",
+      "comparison": "Comparison",
+      "rhythm": "When",
+      "frequency": "Rhythm",
+      "time": "Time",
+      "weekday": "Weekday",
+      "weekdays": "Weekdays",
+      "dayOfMonth": "Day of the month",
+      "dayOfQuarter": "Day of the quarter's first month",
+      "dayNumber": "{day}",
+      "lastDay": "Last day",
+      "timezone": "Time zone",
+      "timezoneHint": "The time is understood in this zone, e.g. Europe/Berlin.",
+      "delivery": "How",
+      "format": "Format",
+      "pptxHeldBack": "PowerPoint follows for scheduled reports once its exporter is released for it.",
+      "deliveryMode": "Delivery",
+      "recipients": "To whom",
+      "recipientsHint": "Only people who may see the dashboard. This is checked again at every delivery.",
+      "loadingRecipients": "Loading people …",
+      "noAccess": "(no access to the dashboard)",
+      "create": "Schedule report",
+      "update": "Save changes",
+      "saving": "Saving …",
+      "failedTitle": "The report could not be saved",
+      "noDashboardsTitle": "No published dashboard yet",
+      "noDashboardsBody": "Reports send published dashboards. Publish one first."
+    },
+    "actions": {
+      "runNow": "Send now",
+      "pause": "Pause",
+      "resume": "Resume",
+      "edit": "Edit",
+      "history": "History",
+      "delete": "Delete",
+      "confirmLabel": "Confirm deletion",
+      "confirmDelete": "Delete for good",
+      "cancel": "Cancel",
+      "queued": "Delivery is queued and runs shortly.",
+      "paused": "Paused. Nothing is sent until you resume.",
+      "resumed": "Resumed.",
+      "deleted": "Deleted.",
+      "failed": "That did not work."
+    }
   }
 }

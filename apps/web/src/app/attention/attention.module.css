@@ -1,0 +1,107 @@
+.heading {
+  margin: 0;
+  font-size: var(--font-size-lg);
+}
+
+.count {
+  color: var(--text-muted);
+  font-weight: var(--font-weight-regular);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  border-left: 4px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  min-width: 0;
+}
+
+.item[data-severity='action_required'] {
+  border-left-color: var(--status-critical);
+}
+
+.item[data-severity='warning'] {
+  border-left-color: var(--status-warning);
+}
+
+.item[data-severity='information'] {
+  border-left-color: var(--status-info);
+}
+
+.itemHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* The severity is always a word; the colour only repeats it (D10). */
+.badge {
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  border-radius: var(--radius-full);
+  background: var(--status-neutral-surface);
+  color: var(--text-primary);
+}
+
+.badge[data-severity='action_required'] {
+  background: var(--status-critical-surface);
+  color: var(--status-critical-text);
+}
+
+.badge[data-severity='warning'] {
+  background: var(--status-warning-surface);
+  color: var(--status-warning-text);
+}
+
+.kind {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
+.acknowledged {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.message {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.meta {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.fix {
+  color: var(--text-link);
+  font-weight: var(--font-weight-semibold);
+}
+
+.note {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+}

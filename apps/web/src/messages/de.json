@@ -16,7 +16,8 @@
     "help": "Hilfe",
     "profile": "Profil",
     "tenantSwitcher": "Kunde wechseln",
-    "projectSwitcher": "Projekt wechseln"
+    "projectSwitcher": "Projekt wechseln",
+    "attentionWithCount": "Aufmerksamkeit, {count} offen"
   },
   "home": {
     "title": "Willkommen",
@@ -1453,6 +1454,9 @@
     "semantic": {
       "read": "Semantischen Katalog lesen",
       "manage": "Semantischen Katalog pflegen"
+    },
+    "report": {
+      "manage": "Berichte planen und verwalten"
     }
   },
   "auditAction": {
@@ -1549,6 +1553,19 @@
     },
     "export": {
       "created": "Export erstellt"
+    },
+    "report_schedule": {
+      "created": "Bericht geplant",
+      "updated": "Bericht geändert",
+      "paused": "Bericht pausiert",
+      "resumed": "Bericht fortgesetzt",
+      "deleted": "Bericht gelöscht"
+    },
+    "report": {
+      "run_finished": "Bericht gelaufen"
+    },
+    "attention": {
+      "acknowledged": "Hinweis zur Kenntnis genommen"
     }
   },
   "solution": {
@@ -2000,5 +2017,211 @@
     "unlock": "Dashboard öffnen",
     "unlocking": "Wird geprüft …",
     "unlockFailed": "Das hat nicht geklappt"
+  },
+  "attention": {
+    "title": "Aufmerksamkeit",
+    "intro": "Was im Betrieb Ihre Aufmerksamkeit braucht: fehlgeschlagene Berichte, ablaufende Links, zu prüfende Zuordnungen, ungenutzte Konten. Wiederholungen desselben Problems erscheinen als ein Eintrag.",
+    "emptyTitle": "Alles in Ordnung",
+    "emptyBody": "Gerade gibt es nichts, um das Sie sich kümmern müssten.",
+    "severity": {
+      "action_required": "Handlung erforderlich",
+      "warning": "Warnung",
+      "information": "Information"
+    },
+    "kind": {
+      "report_failed": "Bericht nicht versendet",
+      "report_recipient_without_access": "Empfänger:innen ohne Zugriff",
+      "share_expiring": "Link läuft ab",
+      "mapping_review": "Zuordnung prüfen",
+      "inactivity_review": "Ungenutztes Konto"
+    },
+    "fix": {
+      "report_failed": "Zum Bericht",
+      "report_recipient_without_access": "Empfänger:innen prüfen",
+      "share_expiring": "Link verwalten",
+      "mapping_review": "Zuordnungen öffnen",
+      "inactivity_review": "Konto ansehen"
+    },
+    "acknowledge": "Zur Kenntnis genommen",
+    "acknowledged": "Zur Kenntnis genommen",
+    "repeated": "{count}-mal aufgetreten, zuerst {first}, zuletzt {last}",
+    "seenOnce": "Aufgetreten {when}",
+    "notAlerts": "Hier erscheinen nur betriebliche Hinweise. Über Kennzahlen-Entwicklungen informiert die Plattform bewusst nicht.",
+    "report_failed": "Der Bericht „{report}“ konnte nicht versendet werden: {reason}",
+    "report_recipient_without_access": "Beim Bericht „{report}“ wurden {count, plural, one {eine Person} other {# Personen}} ausgelassen, die das Dashboard nicht mehr sehen dürfen.",
+    "share_expiring": "Der Link „{label}“ läuft am {expiresAt} ab.",
+    "mapping_review": "Die Zuordnung „{requirement}“ passt nicht mehr zu dem, was Matomo liefert. Bitte prüfen Sie sie.",
+    "inactivity_review": "{name} hat sich seit mehr als {days} Tagen nicht angemeldet. Wird das Konto noch gebraucht?",
+    "not_found": "Diesen Hinweis gibt es nicht mehr."
+  },
+  "report": {
+    "dashboard_not_in_project": "Das Dashboard gehört nicht zu diesem Projekt.",
+    "dashboard_not_published": "Das Dashboard ist nicht veröffentlicht oder archiviert. Berichte zeigen immer die veröffentlichte Fassung.",
+    "timezone_unknown": "Diese Zeitzone ist unbekannt. Verwenden Sie einen Namen wie „Europe/Berlin“.",
+    "pptx_not_released": "PowerPoint-Berichte sind noch nicht für den geplanten Versand freigegeben. Wählen Sie PDF oder Excel.",
+    "recipient_without_access": "Mindestens eine Person darf dieses Dashboard nicht sehen und kann den Bericht nicht erhalten.",
+    "not_found": "Diesen Bericht gibt es in diesem Projekt nicht.",
+    "tenant_inactive": "Der Kunde ist gesperrt; Berichte ruhen.",
+    "schedule_inactive": "Der Bericht ist pausiert oder gelöscht.",
+    "owner_lost_access": "Die verantwortliche Person hat keinen Zugriff mehr auf das Dashboard.",
+    "site_not_assigned": "Die Site des Dashboards ist dem Projekt nicht mehr zugeordnet.",
+    "no_recipients": "Keine der eingetragenen Personen darf das Dashboard noch sehen.",
+    "source_unavailable": "Die Datenquelle war nicht erreichbar.",
+    "mail_failed": "Die Mail konnte nicht zugestellt werden.",
+    "unexpected": "Ein unerwarteter Fehler ist aufgetreten."
+  },
+  "reports": {
+    "title": "Reports",
+    "intro": "Geplante Berichte verschicken die veröffentlichte Fassung eines Dashboards regelmäßig – mit einem relativen Zeitraum, in einer festen Zeitzone, nur an Personen, die das Dashboard sehen dürfen.",
+    "open": "Reports öffnen",
+    "projectCardBody": "Veröffentlichte Dashboards regelmäßig per Mail verschicken.",
+    "backToProject": "Zurück zu {project}",
+    "listTitle": "Geplante Berichte",
+    "empty": "In diesem Projekt sind noch keine Berichte geplant.",
+    "status": {
+      "active": "Aktiv",
+      "paused": "Pausiert"
+    },
+    "facts": {
+      "dashboard": "Dashboard",
+      "content": "Inhalt",
+      "rhythm": "Rhythmus",
+      "nextRun": "Nächster Versand",
+      "noNextRun": "Keiner geplant",
+      "recipients": "Empfänger:innen",
+      "lastRun": "Letzter Lauf",
+      "neverRun": "Noch nicht gelaufen"
+    },
+    "withoutAccessTitle": "Nicht alle Empfänger:innen erhalten diesen Bericht",
+    "withoutAccessBody": "{names} dürfen das Dashboard derzeit nicht sehen und werden beim Versand ausgelassen.",
+    "historyTitle": "Verlauf von „{name}“",
+    "history": {
+      "planned": "Geplant für",
+      "trigger": "Auslöser",
+      "status": "Ergebnis",
+      "period": "Zeitraum",
+      "version": "Version",
+      "delivered": "Zugestellt",
+      "skipped": "Ausgelassen"
+    },
+    "trigger": {
+      "schedule": "Planmäßig",
+      "manual": "Manuell"
+    },
+    "runStatus": {
+      "queued": "Wartet",
+      "running": "Läuft",
+      "delivered": "Zugestellt",
+      "partially_delivered": "Teilweise zugestellt",
+      "failed": "Fehlgeschlagen",
+      "skipped": "Ausgelassen"
+    },
+    "skipReason": {
+      "no_access": "kein Zugriff",
+      "inactive": "Konto inaktiv"
+    },
+    "period": {
+      "yesterday": "Gestern",
+      "last_7_days": "Letzte 7 Tage",
+      "last_14_days": "Letzte 14 Tage",
+      "last_30_days": "Letzte 30 Tage",
+      "current_week": "Aktuelle Woche",
+      "previous_week": "Vorwoche",
+      "current_month": "Aktueller Monat",
+      "previous_month": "Vormonat",
+      "current_quarter": "Aktuelles Quartal",
+      "previous_quarter": "Vorquartal",
+      "current_year": "Aktuelles Jahr",
+      "previous_year": "Vorjahr"
+    },
+    "comparison": {
+      "none": "Kein Vergleich",
+      "previous_period": "Vorperiode",
+      "prior_year": "Vorjahreszeitraum"
+    },
+    "frequency": {
+      "daily": "Täglich",
+      "weekly": "Wöchentlich",
+      "monthly": "Monatlich",
+      "quarterly": "Quartalsweise",
+      "custom": "An ausgewählten Wochentagen"
+    },
+    "weekday": {
+      "1": "Montag",
+      "2": "Dienstag",
+      "3": "Mittwoch",
+      "4": "Donnerstag",
+      "5": "Freitag",
+      "6": "Samstag",
+      "7": "Sonntag"
+    },
+    "rhythm": {
+      "daily": "Täglich um {time}",
+      "weekly": "Jeden {day} um {time}",
+      "monthly": "Monatlich am {day}. um {time}",
+      "monthlyLast": "Monatlich am letzten Tag um {time}",
+      "quarterly": "Quartalsweise am {day}. des ersten Monats um {time}",
+      "quarterlyLast": "Quartalsweise am letzten Tag des ersten Monats um {time}",
+      "custom": "{days} um {time}"
+    },
+    "deliveryMode": {
+      "attachment": "Datei im Anhang",
+      "link": "Link zum Dashboard"
+    },
+    "deliveryModeHint": {
+      "attachment": "Die Datei wird beim Versand erzeugt und angehängt; gespeichert wird sie nicht.",
+      "link": "Die Mail enthält nur einen Link. Empfänger:innen melden sich an und sehen das Dashboard mit ihren eigenen Rechten."
+    },
+    "form": {
+      "title": "Neuen Bericht planen",
+      "editTitle": "„{name}“ bearbeiten",
+      "dashboard": "Dashboard",
+      "dashboardHint": "Nur veröffentlichte Dashboards. Der Bericht zeigt immer die neueste veröffentlichte Fassung.",
+      "name": "Bezeichnung",
+      "period": "Zeitraum",
+      "periodHint": "Relativ zum Versandzeitpunkt, im Kalender der Site.",
+      "comparison": "Vergleich",
+      "rhythm": "Wann",
+      "frequency": "Rhythmus",
+      "time": "Uhrzeit",
+      "weekday": "Wochentag",
+      "weekdays": "Wochentage",
+      "dayOfMonth": "Tag im Monat",
+      "dayOfQuarter": "Tag im ersten Monat des Quartals",
+      "dayNumber": "{day}.",
+      "lastDay": "Letzter Tag",
+      "timezone": "Zeitzone",
+      "timezoneHint": "In dieser Zeitzone wird die Uhrzeit verstanden, z. B. Europe/Berlin.",
+      "delivery": "Wie",
+      "format": "Format",
+      "pptxHeldBack": "PowerPoint folgt für geplante Berichte, sobald der Export dafür freigegeben ist.",
+      "deliveryMode": "Zustellung",
+      "recipients": "An wen",
+      "recipientsHint": "Nur Personen, die das Dashboard sehen dürfen. Das wird bei jedem Versand erneut geprüft.",
+      "loadingRecipients": "Personen werden geladen …",
+      "noAccess": "(kein Zugriff auf das Dashboard)",
+      "create": "Bericht planen",
+      "update": "Änderungen speichern",
+      "saving": "Wird gespeichert …",
+      "failedTitle": "Der Bericht konnte nicht gespeichert werden",
+      "noDashboardsTitle": "Noch kein veröffentlichtes Dashboard",
+      "noDashboardsBody": "Berichte verschicken veröffentlichte Dashboards. Veröffentlichen Sie zuerst eines."
+    },
+    "actions": {
+      "runNow": "Jetzt senden",
+      "pause": "Pausieren",
+      "resume": "Fortsetzen",
+      "edit": "Bearbeiten",
+      "history": "Verlauf",
+      "delete": "Löschen",
+      "confirmLabel": "Löschen bestätigen",
+      "confirmDelete": "Endgültig löschen",
+      "cancel": "Abbrechen",
+      "queued": "Der Versand ist eingeplant und läuft in Kürze.",
+      "paused": "Pausiert. Es wird nichts versendet, bis Sie fortsetzen.",
+      "resumed": "Fortgesetzt.",
+      "deleted": "Gelöscht.",
+      "failed": "Das hat nicht geklappt."
+    }
   }
 }

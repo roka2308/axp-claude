@@ -2,6 +2,7 @@ import type { Route } from 'next';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import type { VersionResponse } from '@axp/contracts';
+import { getAttention } from '@/lib/reporting';
 import styles from './AppShell.module.css';
 
 /**
@@ -35,7 +36,7 @@ const NAV_ENTRIES: readonly NavEntry[] = [
 ];
 
 export interface AppShellProps {
-  readonly activeKey: NavEntry['key'] | 'search' | 'profile';
+  readonly activeKey: NavEntry['key'] | 'search' | 'profile' | 'attention';
   readonly version: VersionResponse | null;
   readonly headerEnd?: React.ReactNode;
   readonly children: React.ReactNode;
@@ -79,6 +80,7 @@ export async function AppShell({ activeKey, version, headerEnd, children }: AppS
           />
         </form>
         <div className={styles.topbarEnd}>
+          <AttentionLink active={activeKey === 'attention'} />
           <Link
             href="/profile"
             className={styles.profileLink}
@@ -145,5 +147,36 @@ export async function AppShell({ activeKey, version, headerEnd, children }: AppS
         </footer>
       </main>
     </div>
+  );
+}
+
+/**
+ * The Attention Center in the top bar (D1), with the number of open items.
+ *
+ * The count is text, not a coloured dot (D10). A failure to load it hides the
+ * number, never the link: the inbox stays reachable when the count is not.
+ */
+async function AttentionLink({ active }: { readonly active: boolean }) {
+  const t = await getTranslations('nav');
+  const overview = await getAttention().catch(() => null);
+  const open = overview
+    ? overview.counts.action_required + overview.counts.warning + overview.counts.information
+    : 0;
+  const urgent = overview?.counts.action_required ?? 0;
+
+  return (
+    <Link
+      href="/attention"
+      className={styles.profileLink}
+      aria-current={active ? 'page' : undefined}
+      aria-label={open > 0 ? t('attentionWithCount', { count: open }) : t('attention')}
+    >
+      {t('attention')}
+      {open > 0 ? (
+        <span className={styles.attentionCount} data-urgent={urgent > 0 ? 'true' : 'false'}>
+          {open}
+        </span>
+      ) : null}
+    </Link>
   );
 }
