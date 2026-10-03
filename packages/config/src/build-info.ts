@@ -17,7 +17,7 @@ export const PRODUCT_VERSION = '0.1.0';
  * was already quoting the migration count. A test compares it with the
  * migration journal, so the footer and the database cannot disagree again.
  */
-export const SCHEMA_VERSION = '7';
+export const SCHEMA_VERSION = '8';
 
 export function getBuildInfo(service: string): BuildInfo {
   return {

@@ -37,6 +37,7 @@ export const REDACTED_KEYS: readonly string[] = [
   'sessionId',
   // Share links and their password sessions (Phase 7): a token in a log is
   // the share itself, handed to whoever reads the log.
+  'smtpPassword',
   'x-share-token',
   'x-share-session',
   'shareToken',

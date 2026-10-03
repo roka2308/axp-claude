@@ -29,6 +29,7 @@ describe('product store persistence rules', () => {
     const tables = await listTables();
     expect(tables).toEqual([
       '__drizzle_migrations',
+      'attention_items',
       'audit_events',
       'auth_identities',
       'bootstrap_tokens',
@@ -39,6 +40,7 @@ describe('product store persistence rules', () => {
       'export_artifacts',
       'group_members',
       'groups',
+      'jobs',
       'login_attempts',
       'matomo_capability_snapshots',
       'matomo_connections',
@@ -48,6 +50,8 @@ describe('product store persistence rules', () => {
       'platform_state',
       'project_sites',
       'projects',
+      'report_runs',
+      'report_schedules',
       'role_assignments',
       'semantic_definitions',
       'semantic_versions',
@@ -190,5 +194,18 @@ describe('product store persistence rules', () => {
     for (const content of ['content', 'body', 'data', 'bytes', 'payload', 'values', 'blob']) {
       expect(columns, `export_artifacts.${content}`).not.toContain(content);
     }
+  });
+
+  it('keeps jobs, schedules and runs free of analytics values', async () => {
+    // Phase 8: a job names its work by id, a schedule names a dashboard and a
+    // relative period, a run records status and counts. The numbers a report
+    // shows are fetched from Matomo when it runs and are never written here.
+    for (const table of ['jobs', 'report_schedules', 'report_runs', 'attention_items']) {
+      const columns = await listColumns(table);
+      for (const content of ['values', 'data', 'result', 'results', 'content', 'body', 'file']) {
+        expect(columns, `${table}.${content}`).not.toContain(content);
+      }
+    }
+    expect(await listColumns('report_runs')).toContain('period_from');
   });
 });

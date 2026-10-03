@@ -78,36 +78,15 @@ export class ExportService {
       });
     }
 
-    // Whatever the caller passed, a file never carries internal notes.
     const view: BuildPresentationInput = { ...input.view, audience: 'export' };
-    const locale: Locale = view.locale;
-
-    const { content, fileName } = await this.limited(async () => {
-      const presentation = await this.presentationFor(view, input.format, input.widgetId);
-      const document = buildExportDocument(presentation, {
-        locale,
-        generatedAt: this.deps.clock.now(),
-        audience: input.requester.kind === 'share' ? 'share' : 'internal',
-        ...(input.requester.kind === 'share'
-          ? { shareExpiresAt: input.requester.shareExpiresAt }
-          : {}),
-      });
-
-      switch (input.format) {
-        case 'pdf':
-          return { content: await renderPdf(document), fileName: `${document.fileBase}.pdf` };
-        case 'xlsx':
-          return { content: await renderXlsx(document), fileName: `${document.fileBase}.xlsx` };
-        case 'pptx':
-          return { content: await renderPptx(document), fileName: `${document.fileBase}.pptx` };
-        case 'csv': {
-          const widget = document.widgets[0]!;
-          return {
-            content: renderCsv(document, widget),
-            fileName: `${slug(document.title)}_${slug(widget.title)}_${presentation.timeRange.from}_${presentation.timeRange.to}.csv`,
-          };
-        }
-      }
+    const { content, fileName } = await this.render({
+      view,
+      format: input.format,
+      ...(input.widgetId ? { widgetId: input.widgetId } : {}),
+      audience: input.requester.kind === 'share' ? 'share' : 'internal',
+      ...(input.requester.kind === 'share'
+        ? { shareExpiresAt: input.requester.shareExpiresAt }
+        : {}),
     });
 
     const id = newId();
@@ -161,6 +140,63 @@ export class ExportService {
       createdAt: now.toISOString(),
       expiresAt: expiresAt.toISOString(),
     };
+  }
+
+  /**
+   * Renders a file and hands it back, keeping nothing.
+   *
+   * For callers that deliver the bytes themselves - a scheduled report mails
+   * its attachment and forgets it. Whatever the caller passed, a file never
+   * carries internal notes, and it describes the published dashboard only.
+   */
+  async render(input: {
+    readonly view: BuildPresentationInput;
+    readonly format: ExportFormat;
+    readonly widgetId?: string;
+    readonly audience: 'internal' | 'share';
+    readonly shareExpiresAt?: Date;
+  }): Promise<{ content: Buffer; fileName: string; presentation: DashboardPresentation }> {
+    const view: BuildPresentationInput = { ...input.view, audience: 'export' };
+    const locale: Locale = view.locale;
+
+    return this.limited(async () => {
+      const presentation = await this.presentationFor(view, input.format, input.widgetId);
+      const document = buildExportDocument(presentation, {
+        locale,
+        generatedAt: this.deps.clock.now(),
+        audience: input.audience,
+        ...(input.shareExpiresAt ? { shareExpiresAt: input.shareExpiresAt } : {}),
+      });
+
+      switch (input.format) {
+        case 'pdf':
+          return {
+            content: await renderPdf(document),
+            fileName: `${document.fileBase}.pdf`,
+            presentation,
+          };
+        case 'xlsx':
+          return {
+            content: await renderXlsx(document),
+            fileName: `${document.fileBase}.xlsx`,
+            presentation,
+          };
+        case 'pptx':
+          return {
+            content: await renderPptx(document),
+            fileName: `${document.fileBase}.pptx`,
+            presentation,
+          };
+        case 'csv': {
+          const widget = document.widgets[0]!;
+          return {
+            content: renderCsv(document, widget),
+            fileName: `${slug(document.title)}_${slug(widget.title)}_${presentation.timeRange.from}_${presentation.timeRange.to}.csv`,
+            presentation,
+          };
+        }
+      }
+    });
   }
 
   /**

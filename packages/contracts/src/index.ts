@@ -26,3 +26,6 @@ export * from './project';
 export * from './solution';
 export * from './sharing';
 export * from './export';
+export * from './reporting';
+export * from './attention';
+export * from './jobs';

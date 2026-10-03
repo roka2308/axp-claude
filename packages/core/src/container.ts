@@ -30,6 +30,12 @@ import { PresentationBuilder } from './dashboard/presentation-builder';
 import { ArtifactStore } from './export/artifact-store';
 import { ExportService } from './export/export-service';
 import { ShareService } from './sharing/share-service';
+import { MySqlJobQueue, type JobQueue } from './jobs/job-queue';
+import { createMailTransport, type MailTransport } from './mail/mail-transport';
+import { AttentionService } from './attention/attention-service';
+import { AttentionScans } from './attention/attention-scans';
+import { ReportService } from './reporting/report-service';
+import { ReportRunner } from './reporting/report-runner';
 
 /**
  * Composition root for the domain layer.
@@ -67,6 +73,12 @@ export interface Container {
   readonly solutions: SolutionService;
   readonly exports: ExportService;
   readonly shares: ShareService;
+  readonly jobs: JobQueue;
+  readonly mail: MailTransport;
+  readonly attention: AttentionService;
+  readonly attentionScans: AttentionScans;
+  readonly reports: ReportService;
+  readonly reportRunner: ReportRunner;
   close(): Promise<void>;
 }
 
@@ -76,6 +88,8 @@ export interface CreateContainerOptions {
   readonly clock?: Clock;
   /** Reuse an existing handle (tests share one pool across cases). */
   readonly databaseHandle?: DatabaseHandle;
+  /** Replace the configured mail transport (tests read an in-memory outbox). */
+  readonly mailTransport?: MailTransport;
 }
 
 export function createContainer(options: CreateContainerOptions): Container {
@@ -224,6 +238,47 @@ export function createContainer(options: CreateContainerOptions): Container {
     discardExports: (shareId) => exportsService.discardForShare(shareId),
   });
 
+  const jobQueue = new MySqlJobQueue({ db, clock, leaseSeconds: config.worker.jobLeaseSeconds });
+  const mail = options.mailTransport ?? createMailTransport(config, logger);
+  const attention = new AttentionService({
+    db,
+    clock,
+    audit,
+    authorization,
+    mail,
+    webUrl: config.web.publicUrl,
+  });
+  const attentionScans = new AttentionScans({
+    db,
+    clock,
+    logger,
+    attention,
+    matomo,
+    semantics,
+    shareExpiryWarningDays: config.attention.shareExpiryWarningDays,
+    inactivityDays: config.attention.inactivityDays,
+  });
+  const reports = new ReportService({
+    db,
+    clock,
+    audit,
+    access,
+    jobs: jobQueue,
+    pptxEnabled: config.reports.pptxEnabled,
+  });
+  const reportRunner = new ReportRunner({
+    db,
+    clock,
+    logger,
+    audit,
+    attention,
+    presentation,
+    exports: exportsService,
+    reports,
+    mail,
+    webUrl: config.web.publicUrl,
+  });
+
   return {
     config,
     db,
@@ -253,6 +308,12 @@ export function createContainer(options: CreateContainerOptions): Container {
     solutions,
     exports: exportsService,
     shares,
+    jobs: jobQueue,
+    mail,
+    attention,
+    attentionScans,
+    reports,
+    reportRunner,
     close: async () => {
       await analyticsCache.clear();
       if (ownsHandle) await handle.close();

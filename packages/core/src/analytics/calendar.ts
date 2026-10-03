@@ -65,8 +65,20 @@ export function parseCalendarDate(date: CalendarDate): {
  * daylight-saving days, where a day is 23 or 25 hours long.
  */
 export function startOfDayInstant(date: CalendarDate, timezone: string): Date {
+  return wallClockInstant(date, '00:00', timezone);
+}
+
+/**
+ * The instant a local wall-clock time occurs on a day in a time zone.
+ *
+ * On the night clocks jump forward, a time that does not exist (02:30 in
+ * Berlin) resolves to the hour after the jump; on the night they fall back, the
+ * first of the two occurrences is taken.
+ */
+export function wallClockInstant(date: CalendarDate, time: string, timezone: string): Date {
   const { year, month, day } = parseCalendarDate(date);
-  const wall = Date.UTC(year, month - 1, day);
+  const [hours, minutes] = time.split(':').map(Number);
+  const wall = Date.UTC(year, month - 1, day, hours ?? 0, minutes ?? 0);
   let instant = wall;
   // Two rounds settle the offset even when the guess lands across a switch.
   for (let round = 0; round < 2; round += 1) {

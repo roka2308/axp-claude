@@ -1,7 +1,8 @@
 import { createServer } from 'node:http';
 import { parseArgs } from 'node:util';
 import { ConfigurationError, getBuildInfo, loadConfig } from '@axp/config';
-import { createContainer } from '@axp/core';
+import { hostname } from 'node:os';
+import { createContainer, JobRunner } from '@axp/core';
 import { checkDatabaseHealth } from '@axp/db';
 import { createLogger } from '@axp/observability';
 import { Scheduler } from './scheduler';
@@ -36,11 +37,20 @@ async function main(): Promise<void> {
 
   const container = createContainer({ config, logger });
   const scheduler = new Scheduler(container, MAINTENANCE_TASKS);
+  // Durable work: claimed from the job queue under a lease, retried with backoff.
+  const jobRunner = new JobRunner({
+    queue: container.jobs,
+    logger,
+    handlers: { 'report.deliver': container.reportRunner.asJobHandler() },
+    workerId: `${hostname()}:${process.pid}`,
+    pollMs: config.worker.jobPollMs,
+  });
 
   if (values.once) {
     // One pass over every task, then exit. Used by tests and by operators who
     // want to force housekeeping without restarting the process.
     for (const task of MAINTENANCE_TASKS) await scheduler.runOnce(task);
+    await jobRunner.drain();
     await container.close();
     return;
   }
@@ -92,6 +102,7 @@ async function main(): Promise<void> {
 
   healthServer.listen(healthPort, config.api.host);
   scheduler.start();
+  jobRunner.start();
 
   logger.info(
     {
@@ -110,6 +121,7 @@ async function main(): Promise<void> {
     shuttingDown = true;
     logger.info({ signal }, 'Shutting down worker');
     await scheduler.stop();
+    await jobRunner.stop();
     healthServer.close();
     await container.close();
     process.exit(0);

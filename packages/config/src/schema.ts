@@ -116,11 +116,37 @@ export const configSchema = z.object({
     artifactTtlMinutes: positiveInt.max(120).default(15),
   }),
 
+  reports: z.object({
+    /**
+     * PPTX by schedule stays off until the exporter has passed its stability
+     * gate (Master Spec §15, DEV-008). Manual PPTX exports are unaffected.
+     */
+    pptxEnabled: booleanish.default(false),
+  }),
+
+  worker: z.object({
+    /** How often the worker looks for queued jobs. */
+    jobPollMs: positiveInt.min(200).max(60_000).default(2000),
+    /** How long a claimed job may run before another worker may take it over. */
+    jobLeaseSeconds: positiveInt.min(30).max(3600).default(300),
+  }),
+
+  attention: z.object({
+    /** A link this close to its expiry is mentioned to its owner. */
+    shareExpiryWarningDays: positiveInt.max(30).default(3),
+    /** Accounts unused this long are suggested for review. */
+    inactivityDays: positiveInt.max(730).default(90),
+  }),
+
   mail: z.object({
     transport: z.enum(['console', 'smtp']).default('console'),
     from: z.string().min(1).default('Analytics Experience <no-reply@example.invalid>'),
     smtpHost: z.string().optional(),
     smtpPort: port.optional(),
+    /** Implicit TLS (port 465). Otherwise STARTTLS is used when offered. */
+    smtpSecure: booleanish.default(false),
+    smtpUser: z.string().optional(),
+    smtpPassword: z.string().optional(),
   }),
 
   features: z.object({

@@ -34,6 +34,8 @@ export const CAPABILITIES = [
   // Distribution (Phase 7): an external link, and a file of the current view
   'dashboard.share',
   'dashboard.export',
+  // Scheduled reporting (Phase 8)
+  'report.manage',
   // Semantic catalog
   'semantic.read',
   'semantic.manage',
@@ -57,6 +59,7 @@ export const CAPABILITIES_BY_ROLE: Readonly<Record<SystemRole, readonly Capabili
     'dashboard.publish',
     'dashboard.share',
     'dashboard.export',
+    'report.manage',
     'semantic.read',
   ],
   semantic_catalog_manager: ['project.read', 'semantic.read', 'semantic.manage'],

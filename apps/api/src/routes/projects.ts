@@ -30,6 +30,7 @@ const PROJECT_SURFACE_CAPABILITIES: readonly Capability[] = [
   'dashboard.publish',
   'semantic.read',
   'semantic.manage',
+  'report.manage',
 ];
 
 /**

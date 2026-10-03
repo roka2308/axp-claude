@@ -63,6 +63,12 @@ export interface BuildPresentationInput {
    * them (Master Spec §15). Defaults to `internal`.
    */
   readonly audience?: PresentationAudience;
+  /**
+   * The moment a relative period is relative to. Defaults to now; a scheduled
+   * report passes the time it was due, so a retry an hour later still covers
+   * the period it was meant to (Master Spec §15).
+   */
+  readonly at?: Date;
 }
 
 export interface BuildDetailInput extends BuildPresentationInput {
@@ -90,7 +96,7 @@ export class PresentationBuilder {
     const timeRange = resolveTimeRange({
       preset: input.timeRangePreset,
       timezone: input.site.timezone,
-      now: this.deps.clock.now(),
+      now: input.at ?? this.deps.clock.now(),
       from: input.from,
       to: input.to,
     });
@@ -139,7 +145,7 @@ export class PresentationBuilder {
     const timeRange = resolveTimeRange({
       preset: input.timeRangePreset,
       timezone: input.site.timezone,
-      now: this.deps.clock.now(),
+      now: input.at ?? this.deps.clock.now(),
       from: input.from,
       to: input.to,
     });
@@ -183,7 +189,7 @@ export class PresentationBuilder {
     const timeRange = resolveTimeRange({
       preset: input.timeRangePreset,
       timezone: input.site.timezone,
-      now: this.deps.clock.now(),
+      now: input.at ?? this.deps.clock.now(),
       from: input.from,
       to: input.to,
     });
@@ -218,7 +224,7 @@ export class PresentationBuilder {
     const timeRange = resolveTimeRange({
       preset: input.timeRangePreset,
       timezone: input.site.timezone,
-      now: this.deps.clock.now(),
+      now: input.at ?? this.deps.clock.now(),
       from: input.from,
       to: input.to,
     });
@@ -286,9 +292,7 @@ export class PresentationBuilder {
       projectId: input.projectId,
       siteId: input.site.id,
       semanticVersionIds: widget.data.semanticVersionIds,
-      timeRangePreset: input.timeRangePreset,
-      ...(input.from ? { from: input.from } : {}),
-      ...(input.to ? { to: input.to } : {}),
+      ...this.engineRange(input),
       comparisonMode: widget.presentation.showComparison ? input.comparisonMode : 'none',
       fixedFilters: [...input.snapshot.fixedFilters, ...widget.data.fixedFilters],
       permissionContextId: input.permissionContextId,
@@ -340,9 +344,7 @@ export class PresentationBuilder {
       projectId: input.projectId,
       siteId: input.site.id,
       semanticVersionIds: leafIds,
-      timeRangePreset: input.timeRangePreset,
-      ...(input.from ? { from: input.from } : {}),
-      ...(input.to ? { to: input.to } : {}),
+      ...this.engineRange(input),
       comparisonMode: 'none',
       fixedFilters: [...input.snapshot.fixedFilters, ...widget.data.fixedFilters],
       permissionContextId: input.permissionContextId,
@@ -439,6 +441,32 @@ export class PresentationBuilder {
     ];
   }
 
+  /**
+   * The period as the engine should read it. Pinned to explicit dates when the
+   * input names its reference moment, so the engine's own clock cannot move it.
+   */
+  private engineRange(input: BuildPresentationInput): {
+    timeRangePreset: TimeRangePreset;
+    from?: string;
+    to?: string;
+  } {
+    if (!input.at) {
+      return {
+        timeRangePreset: input.timeRangePreset,
+        ...(input.from ? { from: input.from } : {}),
+        ...(input.to ? { to: input.to } : {}),
+      };
+    }
+    const range = resolveTimeRange({
+      preset: input.timeRangePreset,
+      timezone: input.site.timezone,
+      now: input.at,
+      from: input.from,
+      to: input.to,
+    });
+    return { timeRangePreset: 'custom', from: range.from, to: range.to };
+  }
+
   private dataScope(input: BuildPresentationInput): DataScopePresentation {
     return {
       siteName: input.site.name,
@@ -514,9 +542,7 @@ export class PresentationBuilder {
       semanticVersionIds: widget.data.semanticVersionIds,
       dimensions: widget.data.dimension ? [widget.data.dimension] : [],
       limit: widget.data.topN,
-      timeRangePreset: input.timeRangePreset,
-      from: input.from,
-      to: input.to,
+      ...this.engineRange(input),
       comparisonMode: widget.presentation.showComparison ? comparisonMode : 'none',
       fixedFilters: [...input.snapshot.fixedFilters, ...widget.data.fixedFilters],
       permissionContextId: input.permissionContextId,

@@ -5,7 +5,7 @@ import type { RowDataPacket } from 'mysql2';
 import { type AppConfig, loadConfig } from '@axp/config';
 import { createDatabase, type DatabaseHandle, projects } from '@axp/db';
 import { createLogger, type Logger } from '@axp/observability';
-import { type Container, createContainer, fixedClock } from '@axp/core';
+import { type Container, createContainer, fixedClock, type MailTransport } from '@axp/core';
 
 /**
  * Integration test harness.
@@ -59,7 +59,9 @@ export async function setupDatabase(): Promise<DatabaseHandle> {
   return sharedHandle;
 }
 
-export async function createTestContext(): Promise<TestContext> {
+export async function createTestContext(
+  options: { mailTransport?: MailTransport } = {},
+): Promise<TestContext> {
   const config = testConfig();
   const handle = await setupDatabase();
   const clock = fixedClock(TEST_NOW);
@@ -71,7 +73,13 @@ export async function createTestContext(): Promise<TestContext> {
     appEnv: 'test',
   });
 
-  const container = createContainer({ config, logger, clock, databaseHandle: handle });
+  const container = createContainer({
+    config,
+    logger,
+    clock,
+    databaseHandle: handle,
+    ...(options.mailTransport ? { mailTransport: options.mailTransport } : {}),
+  });
   return { container, config, logger, clock, handle };
 }
 

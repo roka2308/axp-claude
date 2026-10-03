@@ -70,6 +70,14 @@ export const AUDIT_ACTIONS = [
   'share.created',
   'share.revoked',
   'export.created',
+  // Scheduled reporting and attention (Phase 8)
+  'report_schedule.created',
+  'report_schedule.updated',
+  'report_schedule.paused',
+  'report_schedule.resumed',
+  'report_schedule.deleted',
+  'report.run_finished',
+  'attention.acknowledged',
 ] as const;
 
 export const auditActionSchema = z.enum(AUDIT_ACTIONS);

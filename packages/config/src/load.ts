@@ -81,12 +81,24 @@ function raw(env: NodeJS.ProcessEnv) {
       from: env.MAIL_FROM,
       smtpHost: env.SMTP_HOST,
       smtpPort: env.SMTP_PORT,
+      smtpSecure: env.SMTP_SECURE,
+      smtpUser: env.SMTP_USER,
+      smtpPassword: env.SMTP_PASSWORD,
     },
     exports: {
       artifactDir:
         env.EXPORT_ARTIFACT_DIR ??
         path.join(findRepoRoot(path.dirname(fileURLToPath(import.meta.url))), '.local', 'exports'),
       artifactTtlMinutes: env.EXPORT_ARTIFACT_TTL_MINUTES,
+    },
+    reports: { pptxEnabled: env.REPORTS_PPTX_ENABLED },
+    worker: {
+      jobPollMs: env.WORKER_JOB_POLL_MS,
+      jobLeaseSeconds: env.WORKER_JOB_LEASE_SECONDS,
+    },
+    attention: {
+      shareExpiryWarningDays: env.ATTENTION_SHARE_EXPIRY_DAYS,
+      inactivityDays: env.ATTENTION_INACTIVITY_DAYS,
     },
     features: { demoFixtures: env.ENABLE_DEMO_FIXTURES },
   };
