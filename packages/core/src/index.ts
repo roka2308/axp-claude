@@ -18,6 +18,7 @@ export * from './access/effective-access-service';
 export * from './access/group-service';
 export * from './access/role-assignment-service';
 export * from './identity/user-admin-service';
+export * from './identity/account-mail-service';
 export * from './tenancy/tenant-admin-service';
 export * from './audit/audit-query';
 export * from './identity/auth-service';

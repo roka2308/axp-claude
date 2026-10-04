@@ -1,3 +1,4 @@
+import { SCHEMA_VERSION } from '@axp/config';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import type { FastifyInstance } from 'fastify';
 import { eq } from 'drizzle-orm';
@@ -345,8 +346,11 @@ describe('themes, entitlements and diagnostics', () => {
   describe('diagnostics', () => {
     it('describes the release and the installation', async () => {
       const system = (await get('/admin/platform/system', platform)).json();
-      expect(system.release).toMatchObject({ schemaVersion: '9', supportStatus: 'current' });
-      expect(system.release.appliedMigrations).toBeGreaterThanOrEqual(9);
+      expect(system.release).toMatchObject({
+        schemaVersion: SCHEMA_VERSION,
+        supportStatus: 'current',
+      });
+      expect(system.release.appliedMigrations).toBe(Number(SCHEMA_VERSION));
       expect(system.compatibility.matomoSupportModel).toBe('capability_based');
       expect(system.compatibility.matomoConnections).toHaveLength(1);
       expect((await get('/admin/platform/system', tenantAdmin)).statusCode).toBe(403);
@@ -361,7 +365,7 @@ describe('themes, entitlements and diagnostics', () => {
       const bundle = JSON.parse(text);
       expect(bundle).toMatchObject({
         kind: 'axp-diagnostic-bundle',
-        release: { schemaVersion: '9' },
+        release: { schemaVersion: SCHEMA_VERSION },
       });
 
       for (const secret of [

@@ -39,7 +39,8 @@
     "submit": "Anmelden",
     "submitting": "Anmeldung läuft …",
     "failed": "Anmeldung nicht möglich",
-    "signOut": "Abmelden"
+    "signOut": "Abmelden",
+    "forgotPassword": "Passwort vergessen?"
   },
   "setup": {
     "title": "Plattform einrichten",
@@ -132,6 +133,14 @@
     "actionFailed": "Aktion nicht möglich",
     "rate_limited": {
       "too_many_requests": "Zu viele Anfragen in kurzer Zeit. Bitte versuchen Sie es in {retryAfterSeconds} Sekunden erneut."
+    },
+    "profile": {
+      "email_managed": "Diese E-Mail-Adresse wird nicht hier verwaltet und lässt sich hier nicht ändern.",
+      "email_unchanged": "Das ist bereits Ihre aktuelle Adresse.",
+      "email_link_invalid": "Dieser Bestätigungslink ist nicht mehr gültig. Fordern Sie die Änderung unter „Mein Profil“ erneut an."
+    },
+    "recovery": {
+      "link_invalid": "Dieser Link ist nicht mehr gültig. Fordern Sie auf der Anmeldeseite unter „Passwort vergessen?“ einen neuen an."
     }
   },
   "roles": {
@@ -1114,7 +1123,7 @@
       "firstName": "Vorname",
       "lastName": "Nachname",
       "email": "E-Mail-Adresse",
-      "emailNotEditable": "Die E-Mail-Adresse lässt sich noch nicht ändern, weil die Bestätigungsmail einen Mailversand braucht, den es erst mit Phase 8 gibt.",
+      "emailNotEditable": "Die Adresse ändert die Person selbst unter „Mein Profil“; übernommen wird sie erst nach Bestätigung über die neue Adresse.",
       "locale": "Sprache",
       "managedByProvider": "Wird vom Identity Provider verwaltet und hier nicht geändert.",
       "save": "Speichern",
@@ -1154,7 +1163,7 @@
       "doneExisting": "Diese Person hat bereits ein Konto und gehört jetzt auch zu diesem Kunden. Sie meldet sich wie gewohnt an.",
       "openPerson": "Zur Person",
       "linkLabel": "Einladungslink",
-      "linkHint": "Es gibt noch keinen Mailversand (DEV-005). Geben Sie den Link auf einem vertrauenswürdigen Weg weiter."
+      "linkHint": "Die Einladung ist per Mail an die Person unterwegs. Falls sie nicht ankommt, geben Sie diesen Link auf einem vertrauenswürdigen Weg weiter."
     },
     "groups": {
       "principle": "Gruppen bündeln Rollen und Freigaben. Wer Mitglied ist, erhält alles, was die Gruppe hat - zusätzlich zu den eigenen Rechten. Nichts wird dadurch entzogen.",
@@ -1551,7 +1560,9 @@
         "revoked": "Sitzung beendet"
       },
       "password": {
-        "changed": "Passwort geändert"
+        "changed": "Passwort geändert",
+        "reset_requested": "Passwort-Link angefordert",
+        "reset": "Passwort per Link zurückgesetzt"
       },
       "reauthenticated": "Passwort erneut bestätigt"
     },
@@ -1574,7 +1585,12 @@
       },
       "activated": "Konto aktiviert",
       "deactivated": "Konto deaktiviert",
-      "updated": "Profil geändert"
+      "updated": "Profil geändert",
+      "email": {
+        "change_requested": "Adressänderung angefordert",
+        "changed": "E-Mail-Adresse geändert",
+        "change_cancelled": "Adressänderung abgebrochen"
+      }
     },
     "role_assignment": {
       "created": "Rolle zugewiesen",
@@ -2479,5 +2495,51 @@
   "diagnostics": {
     "not_found": "Dieses Diagnosepaket gibt es nicht mehr.",
     "unsafe": "Das Diagnosepaket wurde nicht erstellt, weil es schützenswerte Angaben enthalten hätte."
+  },
+  "recovery": {
+    "title": "Passwort vergessen",
+    "explain": "Geben Sie die E-Mail-Adresse Ihres Kontos ein. Wenn es dazu ein Konto mit Passwort gibt, schicken wir einen Link, mit dem Sie ein neues Passwort wählen.",
+    "email": "E-Mail-Adresse",
+    "submit": "Link anfordern",
+    "sending": "Wird angefordert …",
+    "sentTitle": "Anfrage angenommen",
+    "sentBody": "Wenn es zu dieser Adresse ein Konto gibt, ist ein Link unterwegs. Er gilt eine Stunde und funktioniert einmal. Kommt keine Mail an, prüfen Sie die Adresse oder wenden Sie sich an Ihre Administration.",
+    "backToLogin": "Zurück zur Anmeldung",
+    "resetTitle": "Neues Passwort wählen",
+    "newPassword": "Neues Passwort",
+    "repeat": "Neues Passwort wiederholen",
+    "hint": "Mindestens 12 Zeichen. Ein früheres Passwort ist nicht erlaubt.",
+    "mismatch": "Die beiden Eingaben stimmen nicht überein.",
+    "signsOut": "Mit dem neuen Passwort werden Sie auf allen Geräten abgemeldet.",
+    "save": "Passwort speichern",
+    "saving": "Wird gespeichert …",
+    "doneTitle": "Passwort geändert",
+    "doneBody": "Melden Sie sich jetzt mit dem neuen Passwort an.",
+    "signIn": "Zur Anmeldung",
+    "invalidTitle": "Link nicht mehr gültig",
+    "invalidBody": "Dieser Link wurde schon verwendet oder ist abgelaufen. Ein neuer Link lässt sich jederzeit anfordern.",
+    "requestNew": "Neuen Link anfordern"
+  },
+  "profile": {
+    "emailChange": {
+      "title": "E-Mail-Adresse ändern",
+      "explain": "Sie melden sich mit {email} an. Eine neue Adresse wird erst verwendet, wenn Sie sie über den Link bestätigt haben, den wir an sie schicken. Die bisherige Adresse erfährt von der Änderung.",
+      "newEmail": "Neue E-Mail-Adresse",
+      "currentPassword": "Aktuelles Passwort",
+      "submit": "Bestätigungslink senden",
+      "sending": "Wird gesendet …",
+      "sent": "Ein Bestätigungslink ist an {email} unterwegs.",
+      "pendingTitle": "Bestätigung ausstehend",
+      "pendingBody": "Die Änderung auf {email} wartet auf ihre Bestätigung (bis {until}). Bis dahin gilt die bisherige Adresse.",
+      "cancel": "Änderung abbrechen",
+      "cancelled": "Die Änderung wurde abgebrochen. Der Link funktioniert nicht mehr.",
+      "confirmTitle": "Neue E-Mail-Adresse bestätigen",
+      "confirmExplain": "Mit der Bestätigung meldet sich dieses Konto künftig mit der neuen Adresse an.",
+      "confirm": "Adresse bestätigen",
+      "confirmedTitle": "Adresse geändert",
+      "confirmedBody": "Ihr Konto verwendet jetzt {email}. Melden Sie sich künftig mit dieser Adresse an.",
+      "toProfile": "Zu „Mein Profil“",
+      "invalidTitle": "Link unvollständig"
+    }
   }
 }

@@ -11,9 +11,9 @@ import { requireAuth } from '../plugins/authentication';
  *
  * A person edits the fields they own. Fields an identity provider owns are
  * shown as "Durch Identity Provider verwaltet" and refused on write. Changing
- * the e-mail address of a local account needs a verification mail, which the
- * product cannot send yet (DEV-005) - so it is shown, explained, and not
- * offered.
+ * the e-mail address of a local account needs the current password and a
+ * confirmation from the new mailbox; the old address is told (Master Spec
+ * §12). "Passwort vergessen" answers the same whether or not an account exists.
  */
 export function registerSelfServiceRoutes(app: FastifyInstance, container: Container): void {
   const guard = { onRequest: [app.authenticate] };
@@ -65,6 +65,7 @@ export function registerSelfServiceRoutes(app: FastifyInstance, container: Conta
         ),
         emailVerified: user.emailVerifiedAt !== null,
       },
+      pendingEmailChange: await container.accountMail.pendingEmailChange(auth.userId),
       recentlyAuthenticated: request.recentlyAuthenticated ?? false,
     };
   });
@@ -117,6 +118,34 @@ export function registerSelfServiceRoutes(app: FastifyInstance, container: Conta
     },
   );
 
+  /** Starts a verified address change: password now, the new mailbox confirms. */
+  app.post(
+    '/me/email',
+    { ...guard, config: { rateLimit: { max: 5, timeWindow: '1 minute' } } },
+    async (request) => {
+      const auth = requireAuth(request);
+      const input = z
+        .object({
+          newEmail: z.string().trim().email().max(320),
+          currentPassword: z.string().min(1).max(1024),
+        })
+        .strict()
+        .parse(request.body);
+      return {
+        pendingEmailChange: await container.accountMail.requestEmailChange({
+          userId: auth.userId,
+          ...input,
+        }),
+      };
+    },
+  );
+
+  app.delete('/me/email', guard, async (request) => {
+    const auth = requireAuth(request);
+    await container.accountMail.cancelEmailChange(auth.userId);
+    return { ok: true };
+  });
+
   /** "Was darf ich, wo, und warum?" - the caller's own effective access, per tenant. */
   app.get('/me/access', guard, async (request) => {
     const auth = requireAuth(request);
@@ -136,13 +165,67 @@ export function registerSelfServiceRoutes(app: FastifyInstance, container: Conta
     return { tenants: result };
   });
 
-  // --- invitations (public) ------------------------------------------------
+  // --- links from mails (public) ----------------------------------------------
+  // Tokens travel in the body, never in a URL the server would log.
 
-  app.get(
-    '/invitations/:token',
+  /**
+   * "Passwort vergessen". The answer is the same for every address and is
+   * given before any lookup happens, so neither its content nor its timing
+   * tells whether an account exists.
+   */
+  app.post(
+    '/auth/password-reset',
+    { config: { rateLimit: { max: 5, timeWindow: '1 minute' } } },
+    async (request, reply) => {
+      const { email } = z.object({ email: z.string().trim().min(1).max(320) }).parse(request.body);
+      void container.accountMail
+        .requestPasswordReset(email)
+        .catch((error: unknown) =>
+          request.log.error({ err: error }, 'Password reset request failed'),
+        );
+      void reply.status(202);
+      return { ok: true };
+    },
+  );
+
+  app.post(
+    '/auth/password-reset/inspect',
     { config: { rateLimit: { max: 30, timeWindow: '1 minute' } } },
     async (request) => {
-      const { token } = z.object({ token: z.string().min(10).max(200) }).parse(request.params);
+      const { token } = z.object({ token: z.string().min(10).max(200) }).parse(request.body);
+      return { valid: await container.accountMail.inspectPasswordReset(token) };
+    },
+  );
+
+  app.post(
+    '/auth/password-reset/complete',
+    { config: { rateLimit: { max: 10, timeWindow: '1 minute' } } },
+    async (request) => {
+      const input = z
+        .object({ token: z.string().min(10).max(200), newPassword: z.string().min(1).max(1024) })
+        .parse(request.body);
+      await container.accountMail.completePasswordReset(input);
+      return { ok: true };
+    },
+  );
+
+  /** Confirms a new address from its link; no session needed, the mailbox is the proof. */
+  app.post(
+    '/auth/email-change/confirm',
+    { config: { rateLimit: { max: 10, timeWindow: '1 minute' } } },
+    async (request) => {
+      const { token } = z.object({ token: z.string().min(10).max(200) }).parse(request.body);
+      return container.accountMail.confirmEmailChange(token);
+    },
+  );
+
+  // --- invitations (public) ------------------------------------------------
+
+  app.post(
+    '/invitations/inspect',
+    { config: { rateLimit: { max: 30, timeWindow: '1 minute' } } },
+    async (request) => {
+      const { token } = z.object({ token: z.string().min(10).max(200) }).parse(request.body);
       const invitation = await container.userAdmin.inspectInvitation(token);
       if (!invitation) {
         throw new AppError('not_found', {

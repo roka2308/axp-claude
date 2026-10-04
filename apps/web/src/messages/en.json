@@ -39,7 +39,8 @@
     "submit": "Sign in",
     "submitting": "Signing in …",
     "failed": "Sign-in failed",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "forgotPassword": "Forgot your password?"
   },
   "setup": {
     "title": "Set up the platform",
@@ -132,6 +133,14 @@
     "actionFailed": "Action failed",
     "rate_limited": {
       "too_many_requests": "Too many requests in a short time. Please try again in {retryAfterSeconds} seconds."
+    },
+    "profile": {
+      "email_managed": "This e-mail address is not managed here and cannot be changed here.",
+      "email_unchanged": "That is already your current address.",
+      "email_link_invalid": "This confirmation link is no longer valid. Request the change again under \"My profile\"."
+    },
+    "recovery": {
+      "link_invalid": "This link is no longer valid. Request a new one on the sign-in page under \"Forgot your password?\"."
     }
   },
   "roles": {
@@ -1114,7 +1123,7 @@
       "firstName": "First name",
       "lastName": "Last name",
       "email": "Email address",
-      "emailNotEditable": "The email address cannot be changed yet: the confirmation email needs a mail transport, which arrives with phase 8.",
+      "emailNotEditable": "The person changes the address themselves under \"My profile\"; it takes effect only once confirmed through the new address.",
       "locale": "Language",
       "managedByProvider": "Managed by the identity provider and not changed here.",
       "save": "Save",
@@ -1154,7 +1163,7 @@
       "doneExisting": "This person already has an account and now also belongs to this customer. They sign in as usual.",
       "openPerson": "Open person",
       "linkLabel": "Invitation link",
-      "linkHint": "There is no mail transport yet (DEV-005). Pass the link on through a trusted channel."
+      "linkHint": "The invitation is on its way to the person by mail. If it does not arrive, pass this link on through a trusted channel."
     },
     "groups": {
       "principle": "Groups bundle roles and grants. Members receive everything the group has - in addition to their own rights. Nothing is taken away by it.",
@@ -1551,7 +1560,9 @@
         "revoked": "Session ended"
       },
       "password": {
-        "changed": "Password changed"
+        "changed": "Password changed",
+        "reset_requested": "Password link requested",
+        "reset": "Password reset by link"
       },
       "reauthenticated": "Password confirmed again"
     },
@@ -1574,7 +1585,12 @@
       },
       "activated": "Account activated",
       "deactivated": "Account deactivated",
-      "updated": "Profile changed"
+      "updated": "Profile changed",
+      "email": {
+        "change_requested": "Address change requested",
+        "changed": "E-mail address changed",
+        "change_cancelled": "Address change cancelled"
+      }
     },
     "role_assignment": {
       "created": "Role assigned",
@@ -2479,5 +2495,51 @@
   "diagnostics": {
     "not_found": "This diagnostic bundle no longer exists.",
     "unsafe": "The diagnostic bundle was not created because it would have contained protected information."
+  },
+  "recovery": {
+    "title": "Forgot your password",
+    "explain": "Enter the e-mail address of your account. If there is an account with a password for it, we send a link to choose a new password.",
+    "email": "E-mail address",
+    "submit": "Request link",
+    "sending": "Requesting …",
+    "sentTitle": "Request received",
+    "sentBody": "If there is an account for this address, a link is on its way. It is valid for one hour and works once. If no mail arrives, check the address or contact your administrator.",
+    "backToLogin": "Back to sign-in",
+    "resetTitle": "Choose a new password",
+    "newPassword": "New password",
+    "repeat": "Repeat new password",
+    "hint": "At least 12 characters. A previous password is not allowed.",
+    "mismatch": "The two entries do not match.",
+    "signsOut": "The new password signs you out on every device.",
+    "save": "Save password",
+    "saving": "Saving …",
+    "doneTitle": "Password changed",
+    "doneBody": "Sign in with the new password now.",
+    "signIn": "To sign-in",
+    "invalidTitle": "Link no longer valid",
+    "invalidBody": "This link was already used or has expired. You can request a new link at any time.",
+    "requestNew": "Request a new link"
+  },
+  "profile": {
+    "emailChange": {
+      "title": "Change e-mail address",
+      "explain": "You sign in with {email}. A new address is used only once you confirm it through the link we send to it. The current address is told about the change.",
+      "newEmail": "New e-mail address",
+      "currentPassword": "Current password",
+      "submit": "Send confirmation link",
+      "sending": "Sending …",
+      "sent": "A confirmation link is on its way to {email}.",
+      "pendingTitle": "Confirmation pending",
+      "pendingBody": "The change to {email} is waiting for its confirmation (until {until}). Until then the current address applies.",
+      "cancel": "Cancel change",
+      "cancelled": "The change was cancelled. The link no longer works.",
+      "confirmTitle": "Confirm new e-mail address",
+      "confirmExplain": "Once confirmed, this account signs in with the new address.",
+      "confirm": "Confirm address",
+      "confirmedTitle": "Address changed",
+      "confirmedBody": "Your account now uses {email}. Sign in with this address from now on.",
+      "toProfile": "To \"My profile\"",
+      "invalidTitle": "Incomplete link"
+    }
   }
 }

@@ -164,6 +164,11 @@ export const userInvitations = mysqlTable(
     /** The tenant the invitation was issued for; memberships follow from it. */
     tenantId: char('tenant_id', { length: 36 }),
     tokenHash: char('token_hash', { length: 64 }).notNull().unique(),
+    /**
+     * The link's token, encrypted and bound to this row, only until the
+     * invitation mail is sent (Phase 10). Null afterwards.
+     */
+    sealedToken: text('sealed_token'),
     expiresAt: utcTimestamp().notNull(),
     usedAt: utcTimestamp(),
     createdByUserId: char('created_by_user_id', { length: 36 }).references(() => users.id, {
@@ -172,4 +177,31 @@ export const userInvitations = mysqlTable(
     createdAt: createdAt(),
   },
   (table) => [index('idx_user_invitations_user').on(table.userId)],
+);
+
+/**
+ * Single-use links sent to a person's own mailbox (Master Spec §6, §12):
+ * "Passwort vergessen" and the verification of a new e-mail address.
+ *
+ * Like invitations, only the token's hash identifies a link. The token itself
+ * is kept encrypted until the mail is sent and then removed, so the job queue
+ * carries ids only and nothing in the database opens an account afterwards.
+ */
+export const accountTokens = mysqlTable(
+  'account_tokens',
+  {
+    id: idColumn().primaryKey(),
+    userId: char('user_id', { length: 36 })
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    purpose: mysqlEnum(['password_reset', 'email_change']).notNull(),
+    tokenHash: char('token_hash', { length: 64 }).notNull().unique(),
+    /** For an address change: the address being verified. */
+    newEmail: varchar('new_email', { length: 320 }),
+    sealedToken: text('sealed_token'),
+    expiresAt: utcTimestamp().notNull(),
+    usedAt: utcTimestamp(),
+    createdAt: createdAt(),
+  },
+  (table) => [index('idx_account_tokens_user_purpose').on(table.userId, table.purpose)],
 );

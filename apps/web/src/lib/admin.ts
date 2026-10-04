@@ -192,6 +192,7 @@ export interface MyProfile {
     readonly managedAttributes: readonly ProfileField[];
     readonly emailVerified: boolean;
   };
+  readonly pendingEmailChange: { readonly newEmail: string; readonly expiresAt: string } | null;
   readonly recentlyAuthenticated: boolean;
 }
 
@@ -213,10 +214,26 @@ export async function inspectInvitation(
   token: string,
 ): Promise<{ email: string; firstName: string } | null> {
   try {
-    return await apiRequest<{ email: string; firstName: string }>(
-      `/invitations/${encodeURIComponent(token)}`,
-    );
+    // The token travels in the body, never in a URL a server would log.
+    return await apiRequest<{ email: string; firstName: string }>('/invitations/inspect', {
+      method: 'POST',
+      body: { token },
+    });
   } catch {
     return null;
+  }
+}
+
+/** Whether a password reset link can still be used. */
+export async function inspectPasswordReset(token: string): Promise<boolean> {
+  try {
+    return (
+      await apiRequest<{ valid: boolean }>('/auth/password-reset/inspect', {
+        method: 'POST',
+        body: { token },
+      })
+    ).valid;
+  } catch {
+    return false;
   }
 }

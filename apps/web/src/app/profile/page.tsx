@@ -4,6 +4,7 @@ import { Button, Card } from '@axp/ui';
 import { AppShell } from '@/components/AppShell';
 import { EffectiveAccessPanel } from '@/components/admin/EffectiveAccessPanel';
 import { PasswordChangeForm } from '@/components/admin/SelfServiceForms';
+import { EmailChangeForm } from '@/components/account/AccountForms';
 import { ProfileEditForm } from '@/components/admin/UserForms';
 import { updateMyProfileAction } from '@/app/admin/actions';
 import { getMyAccess, getMyProfile } from '@/lib/admin';
@@ -23,7 +24,10 @@ export default async function ProfilePage() {
   const [user, version] = await Promise.all([getCurrentUser(), getApiVersion()]);
   if (!user) redirect('/login');
 
-  const [{ profile }, access] = await Promise.all([getMyProfile(), getMyAccess()]);
+  const [{ profile, pendingEmailChange }, access] = await Promise.all([
+    getMyProfile(),
+    getMyAccess(),
+  ]);
   const name = `${profile.firstName} ${profile.lastName}`.trim();
 
   return (
@@ -60,6 +64,12 @@ export default async function ProfilePage() {
             save={updateMyProfileAction}
           />
         </Card>
+
+        {profile.provider === 'local' && !profile.managedAttributes.includes('email') ? (
+          <Card title={t('profile.emailChange.title')}>
+            <EmailChangeForm currentEmail={profile.email} pending={pendingEmailChange} />
+          </Card>
+        ) : null}
 
         {profile.provider === 'local' ? (
           <Card title={t('administration.self.password.title')}>

@@ -5,7 +5,13 @@ import type { RowDataPacket } from 'mysql2';
 import { type AppConfig, loadConfig } from '@axp/config';
 import { createDatabase, type DatabaseHandle, projects } from '@axp/db';
 import { createLogger, type Logger } from '@axp/observability';
-import { type Container, createContainer, fixedClock, type MailTransport } from '@axp/core';
+import {
+  type Container,
+  createContainer,
+  fixedClock,
+  type MailTransport,
+  type MatomoConnector,
+} from '@axp/core';
 
 /**
  * Integration test harness.
@@ -60,13 +66,20 @@ export async function setupDatabase(): Promise<DatabaseHandle> {
 }
 
 export async function createTestContext(
-  options: { mailTransport?: MailTransport } = {},
+  options: {
+    mailTransport?: MailTransport;
+    logDestination?: { write(line: string): void };
+    configure?: (config: AppConfig) => AppConfig;
+    wrapConnector?: (connector: MatomoConnector) => MatomoConnector;
+  } = {},
 ): Promise<TestContext> {
-  const config = testConfig();
+  const config = options.configure ? options.configure(testConfig()) : testConfig();
   const handle = await setupDatabase();
   const clock = fixedClock(TEST_NOW);
   const logger = createLogger({
-    level: 'silent' as never,
+    // A test that reviews log content needs every record; the rest need none.
+    level: options.logDestination ? 'trace' : ('silent' as never),
+    ...(options.logDestination ? { destination: options.logDestination } : {}),
     format: 'json',
     service: 'integration-test',
     version: '0.0.0-test',
@@ -79,6 +92,7 @@ export async function createTestContext(
     clock,
     databaseHandle: handle,
     ...(options.mailTransport ? { mailTransport: options.mailTransport } : {}),
+    ...(options.wrapConnector ? { wrapConnector: options.wrapConnector } : {}),
   });
   return { container, config, logger, clock, handle };
 }

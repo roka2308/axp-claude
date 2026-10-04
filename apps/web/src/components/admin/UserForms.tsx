@@ -329,8 +329,8 @@ export function InviteForm({ tenantId }: { readonly tenantId: string }) {
 }
 
 /**
- * An invitation link, shown once with the reason it is shown at all: there is
- * no mail transport yet (DEV-005), so the administrator passes it on.
+ * An invitation link, shown once. The invited person gets it by mail; this is
+ * the fallback for when a mail does not arrive.
  */
 export function InvitationLink({ link }: { readonly link: string }) {
   const t = useTranslations('administration.invite');

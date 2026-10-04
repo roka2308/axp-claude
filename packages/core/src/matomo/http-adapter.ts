@@ -478,6 +478,7 @@ export class HttpMatomoAdapter implements MatomoConnector {
         signal: controller.signal,
       });
     } catch (error) {
+      clearTimeout(timeout);
       this.options.logger.warn(
         { err: error, matomoMethod: params.method },
         'Matomo request failed',
@@ -488,10 +489,22 @@ export class HttpMatomoAdapter implements MatomoConnector {
         internalMessage: `Matomo call ${String(params.method)} failed.`,
         cause: error,
       });
+    }
+
+    // The deadline covers the body too: a server that sends its headers and
+    // then stalls is cut off like one that never answers.
+    try {
+      return await this.readPayload<T>(response, controller.signal, params);
     } finally {
       clearTimeout(timeout);
     }
+  }
 
+  private async readPayload<T>(
+    response: Response,
+    signal: AbortSignal,
+    params: Record<string, string | number>,
+  ): Promise<T> {
     if (response.status === 401 || response.status === 403) {
       throw new AppError('source_unavailable', {
         code: 'matomo_auth_failed',
@@ -507,7 +520,17 @@ export class HttpMatomoAdapter implements MatomoConnector {
       });
     }
 
-    const payload: unknown = await response.json().catch(() => null);
+    const payload: unknown = await response.json().catch((error: unknown) => {
+      if (signal.aborted) {
+        throw new AppError('source_unavailable', {
+          code: 'matomo_unreachable',
+          messageKey: 'matomo.unreachable',
+          internalMessage: `Matomo call ${String(params.method)} timed out while reading the answer.`,
+          cause: error,
+        });
+      }
+      return null;
+    });
 
     // Matomo answers errors with HTTP 200 and a result envelope.
     if (payload && typeof payload === 'object' && 'result' in payload) {

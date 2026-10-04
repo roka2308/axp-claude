@@ -41,7 +41,10 @@ async function main(): Promise<void> {
   const jobRunner = new JobRunner({
     queue: container.jobs,
     logger,
-    handlers: { 'report.deliver': container.reportRunner.asJobHandler() },
+    handlers: {
+      'report.deliver': container.reportRunner.asJobHandler(),
+      'account.mail': container.accountMail.asJobHandler(),
+    },
     workerId: `${hostname()}:${process.pid}`,
     pollMs: config.worker.jobPollMs,
   });

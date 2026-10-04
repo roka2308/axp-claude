@@ -413,7 +413,9 @@ describe('administration and effective access', () => {
       const token = invited.json().invitation.token as string;
 
       expect(
-        (await app.inject({ method: 'GET', url: `/invitations/${token}` })).json(),
+        (
+          await app.inject({ method: 'POST', url: '/invitations/inspect', payload: { token } })
+        ).json(),
       ).toMatchObject({
         email: 'neu@example.invalid',
       });

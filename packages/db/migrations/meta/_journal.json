@@ -64,6 +64,13 @@
       "when": 1791115639620,
       "tag": "0008_themes_entitlements_diagnostics",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "5",
+      "when": 1791125603289,
+      "tag": "0009_account_mail_and_recovery",
+      "breakpoints": true
     }
   ]
 }

@@ -45,6 +45,7 @@ export function LoginForm() {
       <Button type="submit" variant="primary" fullWidth busy={pending} busyLabel={t('submitting')}>
         {t('submit')}
       </Button>
+      <a href="/forgot-password">{t('forgotPassword')}</a>
     </form>
   );
 }

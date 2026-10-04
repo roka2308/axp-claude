@@ -28,6 +28,12 @@ export interface BuildServerOptions {
   readonly config: AppConfig;
   readonly container: Container;
   readonly logger: Logger;
+  /**
+   * Told about every route as it is registered. The tenant isolation suite
+   * uses it to try each one with another tenant's ids, so a new route is
+   * covered without anyone remembering to add it.
+   */
+  readonly onRoute?: (route: { readonly method: string; readonly url: string }) => void;
 }
 
 /**
@@ -70,6 +76,13 @@ export async function buildServer(options: BuildServerOptions): Promise<FastifyI
         internalMessage: `Rate limit of ${context.max} per ${context.after} reached.`,
       }),
   });
+
+  if (options.onRoute) {
+    const report = options.onRoute;
+    app.addHook('onRoute', (route) => {
+      for (const method of [route.method].flat()) report({ method, url: route.url });
+    });
+  }
 
   registerRequestContext(app);
   registerErrorHandler(app);

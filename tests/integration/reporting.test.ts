@@ -162,11 +162,12 @@ describe('scheduled reporting and the attention center', () => {
         password: STRONG_TEST_PASSWORD,
         status: 'active',
       });
-      for (const [patch, field] of [
+      const cases: [Parameters<typeof scheduleBody>[0], string][] = [
         [{ recipientUserIds: [outsider.userId] }, 'recipientUserIds'],
         [{ format: 'pptx' }, 'format'],
         [{ timezone: 'Mars/Olympus' }, 'timezone'],
-      ] as const) {
+      ];
+      for (const [patch, field] of cases) {
         const response = await post(`/projects/${projectId}/reports`, editor, scheduleBody(patch));
         expect(response.statusCode, field).toBe(422);
         expect(response.json().error.fieldErrors[field], field).toBeTruthy();

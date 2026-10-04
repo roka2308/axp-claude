@@ -18,6 +18,7 @@ import type { Clock } from '../clock';
 import type { AuditService } from '../audit/audit-service';
 import { generateSecretToken, hashToken, normalizeEmail } from '../crypto';
 import type { UserService } from './user-service';
+import type { AccountMailService } from './account-mail-service';
 
 export interface UserAdminServiceDeps {
   readonly db: Database;
@@ -27,6 +28,8 @@ export interface UserAdminServiceDeps {
   readonly revokeAllSessions: (userId: string, reason: string) => Promise<number>;
   /** How long an invitation link stays usable. */
   readonly invitationTtlHours: number;
+  /** Sends the invitation link to the invited person (Phase 10). */
+  readonly accountMail?: AccountMailService;
 }
 
 /**
@@ -268,7 +271,10 @@ export class UserAdminService {
     lastName: string;
     locale?: Locale;
     actorUserId: string;
-  }): Promise<{ userId: string; invitation: { token: string; expiresAt: string } | null }> {
+  }): Promise<{
+    userId: string;
+    invitation: { token: string; expiresAt: string; mailed: boolean } | null;
+  }> {
     const existing = await this.deps.users.findByEmail(input.email);
 
     if (existing) {
@@ -452,6 +458,7 @@ export class UserAdminService {
       this.deps.clock.now().getTime() + this.deps.invitationTtlHours * 3_600_000,
     );
 
+    const invitationId = newId();
     await this.deps.db.transaction(async (tx) => {
       // One live invitation per person: a new link retires the old one.
       await tx
@@ -459,7 +466,7 @@ export class UserAdminService {
         .set({ usedAt: this.deps.clock.now() })
         .where(and(eq(userInvitations.userId, userId), isNull(userInvitations.usedAt)));
       await tx.insert(userInvitations).values({
-        id: newId(),
+        id: invitationId,
         userId,
         tenantId,
         tokenHash: hashToken(token),
@@ -475,8 +482,11 @@ export class UserAdminService {
       targetId: userId,
       metadata: { invitation: 'issued' },
     });
+    // The invited person gets the link by mail; the administrator still sees
+    // it once, for when a mail does not arrive.
+    await this.deps.accountMail?.queueInvitation(invitationId, token, tenantId);
 
-    return { token, expiresAt: expiresAt.toISOString() };
+    return { token, expiresAt: expiresAt.toISOString(), mailed: Boolean(this.deps.accountMail) };
   }
 
   private async findUsableInvitation(token: string) {

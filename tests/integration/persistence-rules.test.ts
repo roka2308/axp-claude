@@ -29,6 +29,7 @@ describe('product store persistence rules', () => {
     const tables = await listTables();
     expect(tables).toEqual([
       '__drizzle_migrations',
+      'account_tokens',
       'attention_items',
       'audit_events',
       'auth_identities',

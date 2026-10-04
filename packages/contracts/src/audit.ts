@@ -20,6 +20,12 @@ export const AUDIT_ACTIONS = [
   'auth.session.revoked',
   'auth.password.changed',
   'auth.reauthenticated',
+  // Self-service recovery and verified address change (Phase 10)
+  'auth.password.reset_requested',
+  'auth.password.reset',
+  'user.email.change_requested',
+  'user.email.changed',
+  'user.email.change_cancelled',
   // Tenant lifecycle (Phase 0 model, Phase 5 UI)
   'tenant.created',
   'tenant.lifecycle.changed',

@@ -10,6 +10,7 @@ import { GroupService } from './access/group-service';
 import { RoleAssignmentService } from './access/role-assignment-service';
 import { EffectiveAccessService } from './access/effective-access-service';
 import { UserAdminService } from './identity/user-admin-service';
+import { AccountMailService } from './identity/account-mail-service';
 import { TenantAdminService } from './tenancy/tenant-admin-service';
 import { AuditQueryService } from './audit/audit-query';
 import { AuthService } from './identity/auth-service';
@@ -60,6 +61,7 @@ export interface Container {
   readonly roles: RoleAssignmentService;
   readonly effectiveAccess: EffectiveAccessService;
   readonly userAdmin: UserAdminService;
+  readonly accountMail: AccountMailService;
   readonly tenantAdmin: TenantAdminService;
   readonly auditLog: AuditQueryService;
   readonly auth: AuthService;
@@ -96,6 +98,11 @@ export interface CreateContainerOptions {
   readonly databaseHandle?: DatabaseHandle;
   /** Replace the configured mail transport (tests read an in-memory outbox). */
   readonly mailTransport?: MailTransport;
+  /**
+   * Wraps the Matomo connector (tests make one source slow or count calls, to
+   * show that a slow widget fails alone and parallelism stays bounded).
+   */
+  readonly wrapConnector?: (connector: MatomoConnector) => MatomoConnector;
 }
 
 export function createContainer(options: CreateContainerOptions): Container {
@@ -138,6 +145,22 @@ export function createContainer(options: CreateContainerOptions): Container {
   const groupService = new GroupService({ db, audit });
   const roles = new RoleAssignmentService({ db, audit });
   const effectiveAccess = new EffectiveAccessService({ db });
+  const jobQueue = new MySqlJobQueue({ db, clock, leaseSeconds: config.worker.jobLeaseSeconds });
+  const mail = options.mailTransport ?? createMailTransport(config, logger);
+  const accountMail = new AccountMailService({
+    db,
+    clock,
+    logger,
+    audit,
+    jobs: jobQueue,
+    mail,
+    secretBox,
+    users,
+    revokeAllSessions,
+    webUrl: config.web.publicUrl,
+    passwordResetTtlMinutes: 60,
+    emailChangeTtlHours: 24,
+  });
   const userAdmin = new UserAdminService({
     db,
     clock,
@@ -145,6 +168,7 @@ export function createContainer(options: CreateContainerOptions): Container {
     users,
     revokeAllSessions,
     invitationTtlHours: 72,
+    accountMail,
   });
   const tenantAdmin = new TenantAdminService({
     db,
@@ -183,8 +207,11 @@ export function createContainer(options: CreateContainerOptions): Container {
    * one can coexist in the same instance. `MATOMO_ADAPTER` decides which kind
    * the setup flow offers by default, not how a stored connection behaves.
    */
+  const wrap = options.wrapConnector ?? ((connector: MatomoConnector) => connector);
+  const mockConnector = wrap(mockAdapter);
+  const httpConnector = wrap(httpAdapter);
   const connectorFor = (baseUrl: string): MatomoConnector =>
-    isMockConnection(baseUrl) ? mockAdapter : httpAdapter;
+    isMockConnection(baseUrl) ? mockConnector : httpConnector;
 
   const matomo = new MatomoConnectionService({
     db,
@@ -265,8 +292,6 @@ export function createContainer(options: CreateContainerOptions): Container {
     store: artifactStore,
     ttlMinutes: config.diagnostics.bundleTtlMinutes,
   });
-  const jobQueue = new MySqlJobQueue({ db, clock, leaseSeconds: config.worker.jobLeaseSeconds });
-  const mail = options.mailTransport ?? createMailTransport(config, logger);
   const attention = new AttentionService({
     db,
     clock,
@@ -315,6 +340,7 @@ export function createContainer(options: CreateContainerOptions): Container {
     secretBox,
     audit,
     authorization,
+    accountMail,
     access,
     groups: groupService,
     roles,
