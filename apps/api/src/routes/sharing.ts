@@ -62,7 +62,13 @@ export function registerSharingRoutes(app: FastifyInstance, container: Container
       max: addDays(today, SHARE_MAX_LIFETIME_DAYS),
       suggested: addDays(today, SHARE_SUGGESTED_LIFETIME_DAYS),
     };
-    return { shares: await container.shares.list(scope.tenantId, dashboardId), expiry };
+    // Listing and revoking stay possible without the module: links already
+    // handed out must remain controllable. Only creating needs it.
+    const entitled = await container.entitlements.hasEntitlement(
+      { tenantId: scope.tenantId },
+      'sharing.external',
+    );
+    return { shares: await container.shares.list(scope.tenantId, dashboardId), expiry, entitled };
   });
 
   app.post(
@@ -73,6 +79,7 @@ export function registerSharingRoutes(app: FastifyInstance, container: Container
       const { dashboardId } = z.object({ dashboardId: z.string() }).parse(request.params);
       const body = shareCreateRequestSchema.parse(request.body);
       const scope = await scopeForDashboard(container, auth, dashboardId, 'dashboard.share');
+      await container.entitlements.require({ tenantId: scope.tenantId }, 'sharing.external');
 
       const created = await container.shares.create({
         tenantId: scope.tenantId,

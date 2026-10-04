@@ -103,8 +103,9 @@
   --surface-disabled: #f1f3f6;
 
   --border-subtle: #e4e7ec;
-  --border-default: #d0d5dd;
-  --border-strong: #98a2b3;
+  /* Control boundaries meet WCAG 1.4.11 (>= 3:1 on cards and the page). */
+  --border-default: #868e9c;
+  --border-strong: #667085;
 
   /* --- Text / foreground ------------------------------------------------ */
   --text-primary: #101828;
@@ -284,8 +285,8 @@
     --surface-disabled: #23272c;
 
     --border-subtle: #2a2f36;
-    --border-default: #3a4049;
-    --border-strong: #59616c;
+    --border-default: #6b7480;
+    --border-strong: #8a93a3;
 
     --text-primary: #f2f4f7;
     --text-secondary: #c3c9d2;
@@ -350,8 +351,8 @@
   --surface-disabled: #23272c;
 
   --border-subtle: #2a2f36;
-  --border-default: #3a4049;
-  --border-strong: #59616c;
+  --border-default: #6b7480;
+  --border-strong: #8a93a3;
 
   --text-primary: #f2f4f7;
   --text-secondary: #c3c9d2;

@@ -91,6 +91,7 @@ function raw(env: NodeJS.ProcessEnv) {
         path.join(findRepoRoot(path.dirname(fileURLToPath(import.meta.url))), '.local', 'exports'),
       artifactTtlMinutes: env.EXPORT_ARTIFACT_TTL_MINUTES,
     },
+    diagnostics: { bundleTtlMinutes: env.DIAGNOSTICS_BUNDLE_TTL_MINUTES },
     reports: { pptxEnabled: env.REPORTS_PPTX_ENABLED },
     worker: {
       jobPollMs: env.WORKER_JOB_POLL_MS,

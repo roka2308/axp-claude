@@ -168,6 +168,65 @@
       "central_multi_tenant": "Zentrale Multi-Tenant-Plattform",
       "dedicated_single_customer": "Dedizierte Kundeninstanz",
       "customer_hosted": "Customer-hosted"
+    },
+    "title": "System",
+    "intro": "Version, Kompatibilität und Zustand dieser Installation – und das Diagnosepaket für den Support.",
+    "notAllowed": "Diese Seite ist der Plattform-Administration vorbehalten.",
+    "open": "System öffnen",
+    "tenantDiagnostics": "Diagnose betrifft die ganze Installation. Das Diagnosepaket enthält keine Kundendaten, keine Zugangsdaten und keine Analysewerte.",
+    "release": {
+      "title": "Release",
+      "productVersion": "Produktversion",
+      "schemaVersion": "Schemaversion",
+      "migrations": "Migrationen",
+      "migrationsValue": "{count} angewendet, zuletzt {last}",
+      "commit": "Commit",
+      "builtAt": "Gebaut",
+      "supportStatus": "Supportstatus",
+      "deploymentProfile": "Betriebsprofil",
+      "appEnv": "Umgebung",
+      "nodeVersion": "Node.js"
+    },
+    "support": {
+      "current": "Aktuell",
+      "maintenance": "Wartung",
+      "end_of_support": "Supportende"
+    },
+    "compatibility": {
+      "title": "Kompatibilität",
+      "model": "Matomo wird anhand seiner Fähigkeiten unterstützt; eine Versionsmatrix folgt nach Tests mit realen Installationen.",
+      "packages": "Lösungspakete: Schemaversion {versions}",
+      "none": "Noch keine Matomo-Verbindungen.",
+      "tenant": "Kunde",
+      "state": "Einstufung",
+      "version": "Matomo-Version",
+      "checked": "Zuletzt geprüft",
+      "limitations": "Einschränkungen"
+    },
+    "runtime": {
+      "title": "Laufzeit",
+      "health": {
+        "up": "erreichbar",
+        "down": "nicht erreichbar"
+      },
+      "jobs": "Jobs",
+      "providers": "Komponenten",
+      "flags": "Feature-Flags",
+      "on": "an",
+      "off": "aus"
+    },
+    "diagnostics": {
+      "title": "Diagnosepaket",
+      "explain": "Das Paket enthält Versionen, Zustände, Fehlercodes und Korrelations-IDs – keine Zugangsdaten, keine Analysewerte, keine Adressen oder Personendaten. Es ist verschlüsselt, nur für Sie abrufbar und wird nach Ablauf gelöscht.",
+      "reauthExplain": "Bitte bestätigen Sie Ihr Passwort, um das Paket zu erstellen.",
+      "password": "Passwort",
+      "reauthFailed": "Das Passwort konnte nicht bestätigt werden.",
+      "generate": "Diagnosepaket erstellen",
+      "generating": "Wird erstellt …",
+      "readyTitle": "Diagnosepaket bereit",
+      "download": "{file} herunterladen",
+      "validUntil": "Abrufbar bis {time} Uhr.",
+      "line": "{file} · erstellt von {by} · gelöscht {expires}"
     }
   },
   "projects": {
@@ -1001,7 +1060,9 @@
       "groups": "Gruppen",
       "access": "Rollen & Rechte",
       "audit": "Audit",
-      "tenants": "Kunden"
+      "tenants": "Kunden",
+      "themes": "Themes",
+      "system": "System"
     },
     "status": {
       "invited": "Eingeladen",
@@ -1415,6 +1476,12 @@
       },
       "diagnostics": {
         "read": "Plattform-Diagnose einsehen"
+      },
+      "theme": {
+        "manage": "Plattform-Theme verwalten"
+      },
+      "entitlement": {
+        "manage": "Module von Kunden freischalten"
       }
     },
     "tenant": {
@@ -1434,6 +1501,9 @@
       },
       "audit": {
         "read": "Audit-Log einsehen"
+      },
+      "theme": {
+        "manage": "Kunden- und Projekt-Themes verwalten"
       }
     },
     "project": {
@@ -1566,6 +1636,16 @@
     },
     "attention": {
       "acknowledged": "Hinweis zur Kenntnis genommen"
+    },
+    "theme": {
+      "published": "Theme veröffentlicht",
+      "rolled_back": "Theme zurückgesetzt"
+    },
+    "entitlement": {
+      "changed": "Modul geändert"
+    },
+    "diagnostics": {
+      "bundle_generated": "Diagnosepaket erstellt"
     }
   },
   "solution": {
@@ -1926,7 +2006,9 @@
       "promiseExpiry": "Jeder Link hat ein Ablaufdatum (höchstens 90 Tage) und kann jederzeit widerrufen werden.",
       "promiseCreator": "Ein Link funktioniert nur, solange Sie selbst Zugriff auf das Dashboard haben und es veröffentlicht ist.",
       "notPublishedTitle": "Noch nicht veröffentlicht",
-      "notPublishedBody": "Ein Link kann erst erstellt werden, wenn das Dashboard veröffentlicht ist."
+      "notPublishedBody": "Ein Link kann erst erstellt werden, wenn das Dashboard veröffentlicht ist.",
+      "notEntitledTitle": "Externe Links sind nicht freigeschaltet",
+      "notEntitledBody": "Für Ihren Vertrag ist das Modul „Externe Links“ nicht freigeschaltet. Bestehende Links stehen unten und lassen sich weiterhin widerrufen."
     },
     "create": {
       "title": "Neuen Link erstellen",
@@ -1965,7 +2047,8 @@
     "unavailableReason": {
       "dashboard_not_published": "Das Dashboard ist archiviert oder im Papierkorb. Wird es wiederhergestellt, funktioniert der Link wieder.",
       "tenant_inactive": "Der Kunde ist gesperrt. Solange das so ist, funktioniert kein Link.",
-      "creator_lost_access": "Die Person, die den Link erstellt hat, hat keinen Zugriff mehr auf das Dashboard. Erstellen Sie bei Bedarf einen neuen Link."
+      "creator_lost_access": "Die Person, die den Link erstellt hat, hat keinen Zugriff mehr auf das Dashboard. Erstellen Sie bei Bedarf einen neuen Link.",
+      "entitlement_missing": "Externe Links sind für den Vertrag dieses Kunden nicht freigeschaltet. Der Link bleibt gespeichert und funktioniert wieder, sobald das Modul freigeschaltet ist."
     },
     "list": {
       "title": "Bestehende Links",
@@ -2068,7 +2151,8 @@
     "no_recipients": "Keine der eingetragenen Personen darf das Dashboard noch sehen.",
     "source_unavailable": "Die Datenquelle war nicht erreichbar.",
     "mail_failed": "Die Mail konnte nicht zugestellt werden.",
-    "unexpected": "Ein unerwarteter Fehler ist aufgetreten."
+    "unexpected": "Ein unerwarteter Fehler ist aufgetreten.",
+    "entitlement_missing": "Geplante Berichte sind für den Vertrag nicht freigeschaltet."
   },
   "reports": {
     "title": "Reports",
@@ -2223,5 +2307,177 @@
       "deleted": "Gelöscht.",
       "failed": "Das hat nicht geklappt."
     }
+  },
+  "themes": {
+    "title": "Themes",
+    "intro": "Ein Theme legt Farben für erlaubte Gestaltungs-Tokens fest – kein CSS, kein Script. Es gilt für die Plattform, für einen Kunden darüber und optional für ein Projekt. Veröffentlicht wird nur, was alle Kontrastprüfungen besteht.",
+    "levels": "Ebenen",
+    "scope": {
+      "platform": "Plattform",
+      "tenant": "Kunde",
+      "project": "Projekt"
+    },
+    "scopeTenant": "Kunde: {name}",
+    "scopeProject": "Projekt: {name}",
+    "editing": "Theme bearbeiten: {title}",
+    "notAllowedTitle": "Kein Theme zur Bearbeitung",
+    "notAllowedBody": "Wählen Sie einen Kunden, dessen Themes Sie verwalten.",
+    "notEntitledTitle": "Eigene Themes sind nicht freigeschaltet",
+    "notEntitledBody": "Für diesen Kunden ist das Modul „Eigene Themes“ nicht freigeschaltet. Gespeicherte Themes bleiben erhalten, werden aber nicht angewendet.",
+    "publishedVersion": "Veröffentlicht: Version {version}",
+    "nothingPublished": "Noch nichts veröffentlicht – es gilt das geerbte Theme",
+    "draftExists": "Entwurf vorhanden",
+    "noDraft": "Kein Entwurf",
+    "unsaved": "Ungespeicherte Änderungen",
+    "name": "Name des Themes",
+    "presets": "Vorlage übernehmen",
+    "mode": "Modus",
+    "modes": {
+      "light": "Hell (Referenz)",
+      "dark": "Dunkel (vorbereitet)"
+    },
+    "darkHint": "Der dunkle Modus ist vorbereitet, aber noch nicht die Referenz. Werte hier gelten nur im dunklen Modus und werden ebenso geprüft.",
+    "groups": {
+      "accent": "Akzent und Schaltflächen",
+      "text": "Text und Links",
+      "surfaces": "Flächen",
+      "borders": "Rahmen und Fokus",
+      "charts": "Diagramme",
+      "evaluation": "Bewertungsstufen"
+    },
+    "token": {
+      "accent_default": "Akzent",
+      "accent_hover": "Akzent (Hover)",
+      "accent_active": "Akzent (aktiv)",
+      "accent_subtle": "Akzent, dezent",
+      "accent_muted": "Akzent, gedämpft",
+      "accent_contrast": "Schrift auf Akzent",
+      "text_primary": "Haupttext",
+      "text_secondary": "Nebentext",
+      "text_muted": "Zurückhaltender Text",
+      "text_link": "Links",
+      "surface_page": "Seitenhintergrund",
+      "surface_card": "Kartenhintergrund",
+      "surface_sunken": "Vertiefte Fläche",
+      "surface_selected": "Ausgewählt",
+      "border_subtle": "Rahmen, dezent",
+      "border_default": "Rahmen von Bedienelementen",
+      "border_strong": "Rahmen, kräftig",
+      "focus_ring_color": "Fokusmarkierung",
+      "chart_series_1": "Diagrammreihe 1",
+      "chart_series_2": "Diagrammreihe 2",
+      "chart_series_3": "Diagrammreihe 3",
+      "chart_series_4": "Diagrammreihe 4",
+      "chart_comparison": "Vergleichsreihe",
+      "evaluation_band_1": "Bewertungsstufe 1",
+      "evaluation_band_2": "Bewertungsstufe 2",
+      "evaluation_band_3": "Bewertungsstufe 3",
+      "evaluation_band_4": "Bewertungsstufe 4",
+      "evaluation_band_5": "Bewertungsstufe 5"
+    },
+    "pick": "Farbe wählen: {token}",
+    "invalidHex": "Bitte eine Farbe im Format #rrggbb angeben.",
+    "overridden": "Eigener Wert",
+    "inherits": "Geerbt: {value}",
+    "saveDraft": "Entwurf speichern",
+    "validate": "Prüfen",
+    "publish": "Veröffentlichen",
+    "discard": "Entwurf verwerfen",
+    "saveBeforeValidate": "Speichern Sie den Entwurf, bevor Sie ihn prüfen und veröffentlichen.",
+    "saved": "Entwurf gespeichert.",
+    "published": "Theme veröffentlicht.",
+    "discarded": "Entwurf verworfen.",
+    "rolledBack": "Ältere Version erneut veröffentlicht.",
+    "failed": "Das hat nicht geklappt.",
+    "preview": "Vorschau",
+    "sample": {
+      "heading": "Mitarbeiterportal",
+      "body": "So sieht Fließtext auf einer Karte aus.",
+      "muted": "Zurückhaltender Hinweistext",
+      "link": "Ein Link",
+      "button": "Schaltfläche",
+      "input": "Eingabefeld",
+      "focus": "Fokus",
+      "band": "Stufe {band}"
+    },
+    "validation": {
+      "ok": "Alle Prüfungen bestanden – das Theme kann veröffentlicht werden.",
+      "notOk": "Nicht veröffentlichbar – mindestens eine Prüfung ist nicht bestanden.",
+      "caption": "Kontrastprüfung",
+      "pair": "Kombination",
+      "mode": "Modus",
+      "ratio": "Kontrast",
+      "required": "Mindestens",
+      "result": "Ergebnis",
+      "pass": "Bestanden",
+      "fail": "Nicht bestanden",
+      "dependentsTitle": "Darauf aufbauende Themes würden ihre Prüfung nicht mehr bestehen",
+      "dependent": "{scope} „{name}“: {failing, plural, one {eine Prüfung} other {# Prüfungen}} nicht bestanden"
+    },
+    "reason": {
+      "body_text": "Text auf Fläche",
+      "button_label": "Schrift auf Schaltfläche",
+      "link_text": "Link auf Karte",
+      "focus_indicator": "Fokusmarkierung",
+      "control_boundary": "Rahmen von Bedienelementen"
+    },
+    "versions": "Versionen",
+    "versionLine": "Version {version} · {by}",
+    "rolledBackFrom": "aus Version {version} wiederhergestellt",
+    "current": "aktuell",
+    "rollback": "Diese Version erneut veröffentlichen",
+    "tenantSummary": "Eigenes Theme „{name}“, Version {version}.",
+    "tenantNone": "Kein eigenes Theme – es gilt das Plattform-Theme.",
+    "open": "Themes öffnen"
+  },
+  "theme": {
+    "tokens_refused": "Diese Werte sind nicht erlaubt: {tokens}. Ein Theme darf nur Farben, Längen, Schatten und Schriftlisten für freigegebene Tokens enthalten.",
+    "contrast_failed": "Nicht veröffentlicht: {failing, plural, one {eine Kontrastprüfung ist} other {# Kontrastprüfungen sind}} nicht bestanden.",
+    "dependents_fail": "Nicht veröffentlicht: Darauf aufbauende Themes würden ihre Kontrastprüfung nicht mehr bestehen ({dependents}).",
+    "no_draft": "Es gibt keinen Entwurf. Speichern Sie zuerst Ihre Änderungen.",
+    "version_not_found": "Diese Version gibt es nicht.",
+    "scope_unknown": "Diese Theme-Ebene gibt es nicht."
+  },
+  "entitlement": {
+    "missing": {
+      "reporting_scheduled": "Geplante Berichte sind für Ihren Vertrag nicht freigeschaltet. Bestehende Berichte bleiben erhalten.",
+      "sharing_external": "Externe Links sind für Ihren Vertrag nicht freigeschaltet. Bestehende Links bleiben erhalten.",
+      "solutions_packages": "Lösungspakete sind für Ihren Vertrag nicht freigeschaltet.",
+      "theming_custom": "Eigene Themes sind für Ihren Vertrag nicht freigeschaltet. Gespeicherte Themes bleiben erhalten."
+    }
+  },
+  "entitlements": {
+    "intro": "Welche Module dieser Kunde hat. Das ist keine Berechtigung einzelner Personen und kein technischer Schalter der Installation.",
+    "module": {
+      "reporting_scheduled": "Geplante Berichte",
+      "sharing_external": "Externe Links",
+      "solutions_packages": "Lösungspakete",
+      "theming_custom": "Eigene Themes"
+    },
+    "explain": {
+      "reporting_scheduled": "Berichte nach Zeitplan per Mail versenden.",
+      "sharing_external": "Dashboards über ablaufende Links nach außen geben.",
+      "solutions_packages": "Lösungen wie Pulse installieren, aktualisieren und exportieren.",
+      "theming_custom": "Ein eigenes Kunden- und Projekt-Theme über dem Plattform-Theme."
+    },
+    "enabled": "Freigeschaltet",
+    "disabled": "Nicht freigeschaltet",
+    "enable": "Freischalten",
+    "disable": "Abschalten",
+    "default": "Standard dieser Installation",
+    "changed": "Geändert {when} von {by}",
+    "keepsConfiguration": "Abschalten löscht nichts: Berichte, Links und Themes bleiben gespeichert und funktionieren wieder, sobald das Modul freigeschaltet ist.",
+    "flagsTitle": "Technische Schalter dieser Installation",
+    "flagsIntro": "Feature-Flags gelten für die ganze Installation und werden in der Konfiguration gesetzt, nicht pro Kunde.",
+    "flag": {
+      "reports_pptx": "PowerPoint für geplante Berichte"
+    },
+    "flagSetting": "Einstellung {setting}",
+    "flagOn": "Eingeschaltet",
+    "flagOff": "Ausgeschaltet"
+  },
+  "diagnostics": {
+    "not_found": "Dieses Diagnosepaket gibt es nicht mehr.",
+    "unsafe": "Das Diagnosepaket wurde nicht erstellt, weil es schützenswerte Angaben enthalten hätte."
   }
 }

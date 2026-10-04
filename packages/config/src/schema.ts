@@ -116,6 +116,11 @@ export const configSchema = z.object({
     artifactTtlMinutes: positiveInt.max(120).default(15),
   }),
 
+  diagnostics: z.object({
+    /** How long a generated diagnostic bundle can be downloaded. */
+    bundleTtlMinutes: positiveInt.max(1440).default(60),
+  }),
+
   reports: z.object({
     /**
      * PPTX by schedule stays off until the exporter has passed its stability

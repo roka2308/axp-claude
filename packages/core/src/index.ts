@@ -63,3 +63,7 @@ export * from './attention/attention-scans';
 export * from './reporting/rhythm';
 export * from './reporting/report-service';
 export * from './reporting/report-runner';
+export * from './entitlements/entitlement-service';
+export * from './theming/theme-service';
+export * from './diagnostics/diagnostics-service';
+export * from './export/palette';

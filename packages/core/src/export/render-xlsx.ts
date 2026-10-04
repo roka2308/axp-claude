@@ -1,6 +1,6 @@
 import ExcelJS from 'exceljs';
 import type { ExportCell, ExportDocument, ExportTable, ExportWidget } from './document';
-import { EXPORT_PALETTE } from './palette';
+import type { ExportPalette } from './palette';
 
 /**
  * A dashboard as a workbook (Master Spec §15).
@@ -21,6 +21,7 @@ export async function renderXlsx(document: ExportDocument): Promise<Buffer> {
   workbook.modified = document.generatedAt;
 
   const labels = document.labels;
+  const palette = document.palette;
   const names = new Set<string>();
 
   // --- Overview ------------------------------------------------------------
@@ -50,11 +51,11 @@ export async function renderXlsx(document: ExportDocument): Promise<Buffer> {
       labels.columns.widget,
       ...first.columns.map((column) => column.label),
     ]);
-    styleHeader(header);
+    styleHeader(header, palette);
     for (const card of cards) {
       for (const row of card.table!.rows) {
         const added = sheet.addRow([card.title, ...row.map(cellValue)]);
-        row.forEach((cell, index) => styleCell(added.getCell(index + 2), cell));
+        row.forEach((cell, index) => styleCell(added.getCell(index + 2), cell, palette));
       }
     }
     sheet.columns = [
@@ -95,7 +96,7 @@ export async function renderXlsx(document: ExportDocument): Promise<Buffer> {
         hyperlink: `#'${target.replace(/'/g, "''")}'!A1`,
       };
       added.getCell(1).font = {
-        color: { argb: argb(EXPORT_PALETTE.accentDefault) },
+        color: { argb: argb(palette.accentDefault) },
         underline: true,
       };
     }
@@ -116,10 +117,10 @@ function writeTableSheet(
   sheet.addRow([document.periodText]);
   const notes = [widget.message, ...widget.dataQuality, widget.context].filter(Boolean).join(' · ');
   sheet.addRow([notes]);
-  styleHeader(sheet.addRow(table.columns.map((column) => column.label)));
+  styleHeader(sheet.addRow(table.columns.map((column) => column.label)), document.palette);
   for (const row of table.rows) {
     const added = sheet.addRow(row.map(cellValue));
-    row.forEach((cell, index) => styleCell(added.getCell(index + 1), cell));
+    row.forEach((cell, index) => styleCell(added.getCell(index + 1), cell, document.palette));
   }
   sheet.columns = table.columns.map((column, index) => ({
     width: index === 0 ? 34 : Math.max(14, Math.min(40, column.label.length + 4)),
@@ -131,7 +132,7 @@ function cellValue(cell: ExportCell): string | number {
   return cell.number ?? cell.text;
 }
 
-function styleCell(target: ExcelJS.Cell, cell: ExportCell): void {
+function styleCell(target: ExcelJS.Cell, cell: ExportCell, palette: ExportPalette): void {
   if (cell.number !== undefined) {
     const decimals = cell.decimals ?? 0;
     target.numFmt = decimals > 0 ? `#,##0.${'0'.repeat(decimals)}` : '#,##0';
@@ -140,20 +141,20 @@ function styleCell(target: ExcelJS.Cell, cell: ExportCell): void {
   }
   if (cell.state && cell.state !== 'ready') {
     // A state, not a value: said in words and set apart, never a blank.
-    target.font = { italic: true, color: { argb: argb(EXPORT_PALETTE.textMuted) } };
+    target.font = { italic: true, color: { argb: argb(palette.textMuted) } };
   }
 }
 
-function styleHeader(row: ExcelJS.Row): void {
+function styleHeader(row: ExcelJS.Row, palette: ExportPalette): void {
   row.font = { bold: true };
   row.eachCell((cell) => {
     cell.fill = {
       type: 'pattern',
       pattern: 'solid',
-      fgColor: { argb: argb(EXPORT_PALETTE.surfaceSunken) },
+      fgColor: { argb: argb(palette.surfaceSunken) },
     };
     cell.border = {
-      bottom: { style: 'thin', color: { argb: argb(EXPORT_PALETTE.borderDefault) } },
+      bottom: { style: 'thin', color: { argb: argb(palette.borderDefault) } },
     };
   });
 }

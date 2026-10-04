@@ -4,6 +4,7 @@ import { getTranslations } from 'next-intl/server';
 import type { SemanticUsage, SemanticVersionRef } from '@axp/contracts';
 import { Button, Callout } from '@axp/ui';
 import { AppShell } from '@/components/AppShell';
+import { ThemeStyle } from '@/components/ThemeStyle';
 import { SemanticLibrary } from '@/components/semantics/SemanticLibrary';
 import { SourceMappings } from '@/components/semantics/SourceMappings';
 import { getProject } from '@/lib/analytics';
@@ -74,6 +75,7 @@ export default async function SemanticsPage({ params }: SemanticsPageProps) {
         </form>
       }
     >
+      <ThemeStyle projectId={projectId} />
       <div className="stack stack--loose">
         <header className="stack stack--tight">
           <Link href={`/projects/${projectId}`} className={styles.back}>

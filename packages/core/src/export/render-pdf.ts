@@ -3,7 +3,7 @@ import { chartGeometry } from './chart';
 import type { ExportChart, ExportDocument, ExportTable, ExportWidget } from './document';
 import { fill } from './labels';
 import { exportFonts } from './fonts';
-import { EXPORT_PALETTE } from './palette';
+import { EXPORT_PALETTE, type ExportPalette } from './palette';
 
 /**
  * A dashboard as PDF (Master Spec §15).
@@ -19,6 +19,10 @@ const PAGE = { margin: 40, footer: 28 } as const;
 
 type Doc = InstanceType<typeof PDFDocument>;
 type StructElement = ReturnType<Doc['struct']>;
+
+/** Each document is drawn in its own customer's colours - also when two render at once. */
+const PALETTES = new WeakMap<Doc, ExportPalette>();
+const paletteOf = (doc: Doc): ExportPalette => PALETTES.get(doc) ?? EXPORT_PALETTE;
 
 export async function renderPdf(document: ExportDocument): Promise<Buffer> {
   const fonts = exportFonts();
@@ -53,6 +57,7 @@ export async function renderPdf(document: ExportDocument): Promise<Buffer> {
     doc.on('error', reject);
   });
 
+  PALETTES.set(doc, document.palette);
   doc.registerFont('Regular', fonts.regular);
   doc.registerFont('Bold', fonts.bold);
 
@@ -63,7 +68,7 @@ export async function renderPdf(document: ExportDocument): Promise<Buffer> {
   // --- Title and what the file describes ----------------------------------
   text(doc, root, 'H1', document.title, { font: 'Bold', size: 20 });
   if (document.description) {
-    text(doc, root, 'P', document.description, { size: 10, colour: EXPORT_PALETTE.textSecondary });
+    text(doc, root, 'P', document.description, { size: 10, colour: paletteOf(doc).textSecondary });
   }
   doc.moveDown(0.5);
   table(
@@ -99,7 +104,7 @@ export async function renderPdf(document: ExportDocument): Promise<Buffer> {
     doc
       .font('Regular')
       .fontSize(8)
-      .fillColor(EXPORT_PALETTE.textMuted)
+      .fillColor(paletteOf(doc).textMuted)
       .text(
         `${fill(document.labels.footer, { period: document.periodText })} · ${document.generatedAtText}`,
         PAGE.margin,
@@ -141,7 +146,7 @@ function renderWidget(
     if (line)
       text(doc, section, 'P', line, {
         size: 9,
-        colour: EXPORT_PALETTE.textSecondary,
+        colour: paletteOf(doc).textSecondary,
       });
   }
 
@@ -149,7 +154,7 @@ function renderWidget(
     case 'metrics':
       for (const metric of widget.metrics ?? []) {
         ensureSpace(doc, 60);
-        text(doc, section, 'P', metric.label, { size: 9, colour: EXPORT_PALETTE.textSecondary });
+        text(doc, section, 'P', metric.label, { size: 9, colour: paletteOf(doc).textSecondary });
         // The value is its state in words when it has no number (D10).
         text(doc, section, 'P', metric.value.text, {
           font: 'Bold',
@@ -162,7 +167,7 @@ function renderWidget(
           doc
             .rect(PAGE.margin, y, 8, 8)
             .fill(
-              EXPORT_PALETTE.evaluationBand[metric.evaluation.band - 1] ?? EXPORT_PALETTE.textMuted,
+              paletteOf(doc).evaluationBand[metric.evaluation.band - 1] ?? paletteOf(doc).textMuted,
             );
           doc.endMarkedContent();
           doc.x = PAGE.margin + 14;
@@ -184,7 +189,7 @@ function renderWidget(
           ].filter(Boolean);
           text(doc, section, 'P', parts.join(' · '), {
             size: 9,
-            colour: EXPORT_PALETTE.textSecondary,
+            colour: paletteOf(doc).textSecondary,
           });
         }
         doc.moveDown(0.3);
@@ -196,7 +201,7 @@ function renderWidget(
       if (widget.table) {
         text(doc, section, 'P', fill(document.labels.tableCaption, { title: widget.title }), {
           size: 8,
-          colour: EXPORT_PALETTE.textMuted,
+          colour: paletteOf(doc).textMuted,
         });
         table(doc, section, widget.table, width * 0.6);
       }
@@ -221,19 +226,19 @@ function renderWidget(
   if (widget.context && widget.kind !== 'text') {
     text(doc, section, 'P', `${document.labels.context}: ${widget.context}`, {
       size: 8,
-      colour: EXPORT_PALETTE.textSecondary,
+      colour: paletteOf(doc).textSecondary,
     });
   }
   if (widget.definition) {
     text(doc, section, 'P', `${document.labels.definition}: ${widget.definition}`, {
       size: 8,
-      colour: EXPORT_PALETTE.textSecondary,
+      colour: paletteOf(doc).textSecondary,
     });
   }
   for (const note of widget.dataQuality) {
     text(doc, section, 'P', `${document.labels.dataQuality}: ${note}`, {
       size: 8,
-      colour: EXPORT_PALETTE.textSecondary,
+      colour: paletteOf(doc).textSecondary,
     });
   }
 
@@ -267,7 +272,7 @@ function drawChart(
   let legendX = PAGE.margin;
   for (const series of chart.series) {
     const colour =
-      series.role === 'comparison' ? EXPORT_PALETTE.chartComparison : EXPORT_PALETTE.chartSeries1;
+      series.role === 'comparison' ? paletteOf(doc).chartComparison : paletteOf(doc).chartSeries1;
     doc.save().lineWidth(2).strokeColor(colour);
     if (series.role === 'comparison') doc.dash(4, { space: 3 });
     doc
@@ -278,18 +283,18 @@ function drawChart(
     doc
       .font('Regular')
       .fontSize(8)
-      .fillColor(EXPORT_PALETTE.textSecondary)
+      .fillColor(paletteOf(doc).textSecondary)
       .text(series.label, legendX + 22, top + 2, { lineBreak: false });
     legendX += 40 + doc.widthOfString(series.label);
   }
 
   const { plot } = geometry;
-  doc.font('Regular').fontSize(7).fillColor(EXPORT_PALETTE.textMuted);
+  doc.font('Regular').fontSize(7).fillColor(paletteOf(doc).textMuted);
   for (const tick of geometry.yTicks) {
     doc
       .save()
       .lineWidth(0.5)
-      .strokeColor(EXPORT_PALETTE.chartGrid)
+      .strokeColor(paletteOf(doc).chartGrid)
       .moveTo(plot.x, tick.y)
       .lineTo(plot.x + plot.width, tick.y)
       .stroke()
@@ -299,7 +304,7 @@ function drawChart(
   doc
     .save()
     .lineWidth(0.8)
-    .strokeColor(EXPORT_PALETTE.chartAxis)
+    .strokeColor(paletteOf(doc).chartAxis)
     .moveTo(plot.x, plot.y + plot.height)
     .lineTo(plot.x + plot.width, plot.y + plot.height)
     .stroke()
@@ -318,7 +323,7 @@ function drawChart(
   ];
   for (const series of ordered) {
     const colour =
-      series.role === 'comparison' ? EXPORT_PALETTE.chartComparison : EXPORT_PALETTE.chartSeries1;
+      series.role === 'comparison' ? paletteOf(doc).chartComparison : paletteOf(doc).chartSeries1;
     for (const segment of series.segments) {
       doc.save().lineWidth(1.6).strokeColor(colour).fillColor(colour);
       if (series.role === 'comparison') doc.dash(4, { space: 3 });
@@ -354,7 +359,7 @@ function table(
     text: column.label,
     type: 'TH' as const,
     font: { src: 'Bold', size: 8 },
-    backgroundColor: EXPORT_PALETTE.surfaceSunken,
+    backgroundColor: paletteOf(doc).surfaceSunken,
     align: { x: column.numeric ? ('right' as const) : ('left' as const), y: 'center' as const },
   }));
   const rows = data.rows.map((row) =>
@@ -362,8 +367,8 @@ function table(
       text: cell.text,
       font: { src: 'Regular', size: 8 },
       ...(cell.number === undefined && cell.state && cell.state !== 'ready'
-        ? { textColor: EXPORT_PALETTE.textSecondary }
-        : { textColor: EXPORT_PALETTE.textPrimary }),
+        ? { textColor: paletteOf(doc).textSecondary }
+        : { textColor: paletteOf(doc).textPrimary }),
       align: {
         x:
           data.columns[index]?.numeric && cell.number !== undefined
@@ -380,7 +385,7 @@ function table(
     ...(columnStyles ? { columnStyles } : {}),
     defaultStyle: {
       border: { top: 0, left: 0, right: 0, bottom: 0.5 },
-      borderColor: EXPORT_PALETTE.borderSubtle,
+      borderColor: paletteOf(doc).borderSubtle,
       padding: [3, 5, 3, 5],
     },
     structParent: parent,
@@ -399,7 +404,7 @@ function text(
   doc
     .font(style.font ?? 'Regular')
     .fontSize(style.size ?? 10)
-    .fillColor(style.colour ?? EXPORT_PALETTE.textPrimary)
+    .fillColor(style.colour ?? paletteOf(doc).textPrimary)
     .text(value, { structParent: parent, structType: type } as PDFKit.Mixins.TextOptions);
 }
 

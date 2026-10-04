@@ -36,6 +36,9 @@ import { AttentionService } from './attention/attention-service';
 import { AttentionScans } from './attention/attention-scans';
 import { ReportService } from './reporting/report-service';
 import { ReportRunner } from './reporting/report-runner';
+import { EntitlementService } from './entitlements/entitlement-service';
+import { ThemeService } from './theming/theme-service';
+import { DiagnosticsService } from './diagnostics/diagnostics-service';
 
 /**
  * Composition root for the domain layer.
@@ -79,6 +82,9 @@ export interface Container {
   readonly attentionScans: AttentionScans;
   readonly reports: ReportService;
   readonly reportRunner: ReportRunner;
+  readonly entitlements: EntitlementService;
+  readonly themes: ThemeService;
+  readonly diagnostics: DiagnosticsService;
   close(): Promise<void>;
 }
 
@@ -102,6 +108,14 @@ export function createContainer(options: CreateContainerOptions): Container {
 
   const secretBox = new SecretBox({ key: config.secrets.credentialEncryptionKey });
   const audit = new AuditService({ db, clock, logger });
+  const entitlements = new EntitlementService({
+    db,
+    clock,
+    audit,
+    featureFlags: {
+      'reports.pptx': { enabled: config.reports.pptxEnabled, setting: 'REPORTS_PPTX_ENABLED' },
+    },
+  });
   const authorization = new AuthorizationService({ db });
   const access = new AccessService({ db, audit, authorization });
   const users = new UserService({ db, clock, audit });
@@ -227,6 +241,7 @@ export function createContainer(options: CreateContainerOptions): Container {
     audit,
     presentation,
     store: new ArtifactStore({ dir: config.exports.artifactDir, secretBox }),
+    themes: (context) => themesService.effective(context),
     ttlMinutes: config.exports.artifactTtlMinutes,
   });
   const shares = new ShareService({
@@ -235,9 +250,21 @@ export function createContainer(options: CreateContainerOptions): Container {
     audit,
     authorization,
     access,
+    entitlements,
     discardExports: (shareId) => exportsService.discardForShare(shareId),
   });
 
+  const themesService = new ThemeService({ db, clock, audit, entitlements });
+  const artifactStore = new ArtifactStore({ dir: config.exports.artifactDir, secretBox });
+  const diagnostics = new DiagnosticsService({
+    db,
+    clock,
+    audit,
+    config,
+    entitlements,
+    store: artifactStore,
+    ttlMinutes: config.diagnostics.bundleTtlMinutes,
+  });
   const jobQueue = new MySqlJobQueue({ db, clock, leaseSeconds: config.worker.jobLeaseSeconds });
   const mail = options.mailTransport ?? createMailTransport(config, logger);
   const attention = new AttentionService({
@@ -276,6 +303,7 @@ export function createContainer(options: CreateContainerOptions): Container {
     exports: exportsService,
     reports,
     mail,
+    entitlements,
     webUrl: config.web.publicUrl,
   });
 
@@ -314,6 +342,9 @@ export function createContainer(options: CreateContainerOptions): Container {
     attentionScans,
     reports,
     reportRunner,
+    entitlements,
+    themes: themesService,
+    diagnostics,
     close: async () => {
       await analyticsCache.clear();
       if (ownsHandle) await handle.close();

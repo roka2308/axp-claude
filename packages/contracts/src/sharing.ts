@@ -62,7 +62,7 @@ export interface ShareSummary {
   readonly status: ShareStatus;
   /** Why an otherwise valid share does not work, for its owners only. */
   readonly unavailableReason?:
-    'dashboard_not_published' | 'tenant_inactive' | 'creator_lost_access';
+    'dashboard_not_published' | 'tenant_inactive' | 'creator_lost_access' | 'entitlement_missing';
   readonly expiresAt: string;
   readonly rights: ShareRights;
   readonly passwordProtected: boolean;

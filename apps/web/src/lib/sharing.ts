@@ -35,8 +35,8 @@ export async function getDashboardPermissions(dashboardId: string): Promise<Dash
 
 export async function listShares(
   dashboardId: string,
-): Promise<{ shares: ShareSummary[]; expiry: ShareExpiryWindow }> {
-  return apiRequest<{ shares: ShareSummary[]; expiry: ShareExpiryWindow }>(
+): Promise<{ shares: ShareSummary[]; expiry: ShareExpiryWindow; entitled: boolean }> {
+  return apiRequest<{ shares: ShareSummary[]; expiry: ShareExpiryWindow; entitled: boolean }>(
     `${dashboard(dashboardId)}/shares`,
     { authenticated: true },
   );

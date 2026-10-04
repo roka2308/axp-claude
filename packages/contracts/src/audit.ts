@@ -78,6 +78,11 @@ export const AUDIT_ACTIONS = [
   'report_schedule.deleted',
   'report.run_finished',
   'attention.acknowledged',
+  // Themes, entitlements and diagnostics (Phase 9)
+  'theme.published',
+  'theme.rolled_back',
+  'entitlement.changed',
+  'diagnostics.bundle_generated',
 ] as const;
 
 export const auditActionSchema = z.enum(AUDIT_ACTIONS);

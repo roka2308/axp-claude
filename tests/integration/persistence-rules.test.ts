@@ -37,6 +37,7 @@ describe('product store persistence rules', () => {
       'dashboard_shares',
       'dashboard_versions',
       'dashboards',
+      'diagnostic_artifacts',
       'export_artifacts',
       'group_members',
       'groups',
@@ -60,8 +61,11 @@ describe('product store persistence rules', () => {
       'solution_installations',
       'source_bindings',
       'templates',
+      'tenant_entitlements',
       'tenant_memberships',
       'tenants',
+      'theme_versions',
+      'themes',
       'user_invitations',
       'users',
     ]);
@@ -207,5 +211,24 @@ describe('product store persistence rules', () => {
       }
     }
     expect(await listColumns('report_runs')).toContain('period_from');
+  });
+
+  it('stores themes as allowlisted token values, and diagnostics by reference', async () => {
+    // Phase 9: a theme is a map of token values - no column for CSS, script
+    // or URLs. A diagnostic bundle is a file that expires; its row is metadata.
+    for (const table of ['themes', 'theme_versions']) {
+      const columns = await listColumns(table);
+      for (const forbidden of ['css', 'script', 'stylesheet', 'url', 'html']) {
+        expect(
+          columns.some((column) => column.includes(forbidden)),
+          `${table}.${forbidden}`,
+        ).toBe(false);
+      }
+    }
+    const diagnostics = await listColumns('diagnostic_artifacts');
+    expect(diagnostics).toContain('storage_key');
+    for (const content of ['content', 'body', 'data', 'payload']) {
+      expect(diagnostics, `diagnostic_artifacts.${content}`).not.toContain(content);
+    }
   });
 });

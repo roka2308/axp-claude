@@ -168,6 +168,65 @@
       "central_multi_tenant": "Central multi-tenant platform",
       "dedicated_single_customer": "Dedicated customer instance",
       "customer_hosted": "Customer-hosted"
+    },
+    "title": "System",
+    "intro": "Version, compatibility and state of this installation - and the diagnostic bundle for support.",
+    "notAllowed": "This page is for platform administrators.",
+    "open": "Open system",
+    "tenantDiagnostics": "Diagnostics concern the whole installation. The diagnostic bundle holds no customer data, no credentials and no analytics values.",
+    "release": {
+      "title": "Release",
+      "productVersion": "Product version",
+      "schemaVersion": "Schema version",
+      "migrations": "Migrations",
+      "migrationsValue": "{count} applied, last {last}",
+      "commit": "Commit",
+      "builtAt": "Built",
+      "supportStatus": "Support status",
+      "deploymentProfile": "Deployment profile",
+      "appEnv": "Environment",
+      "nodeVersion": "Node.js"
+    },
+    "support": {
+      "current": "Current",
+      "maintenance": "Maintenance",
+      "end_of_support": "End of support"
+    },
+    "compatibility": {
+      "title": "Compatibility",
+      "model": "Matomo is supported by its capabilities; a version matrix follows testing with real installations.",
+      "packages": "Solution packages: schema version {versions}",
+      "none": "No Matomo connections yet.",
+      "tenant": "Customer",
+      "state": "Rating",
+      "version": "Matomo version",
+      "checked": "Last checked",
+      "limitations": "Limitations"
+    },
+    "runtime": {
+      "title": "Runtime",
+      "health": {
+        "up": "reachable",
+        "down": "unreachable"
+      },
+      "jobs": "Jobs",
+      "providers": "Components",
+      "flags": "Feature flags",
+      "on": "on",
+      "off": "off"
+    },
+    "diagnostics": {
+      "title": "Diagnostic bundle",
+      "explain": "The bundle holds versions, states, error codes and correlation ids - no credentials, no analytics values, no addresses or personal data. It is encrypted, available to you only and deleted when it expires.",
+      "reauthExplain": "Please confirm your password to create the bundle.",
+      "password": "Password",
+      "reauthFailed": "The password could not be confirmed.",
+      "generate": "Create diagnostic bundle",
+      "generating": "Creating …",
+      "readyTitle": "Diagnostic bundle ready",
+      "download": "Download {file}",
+      "validUntil": "Available until {time}.",
+      "line": "{file} · created by {by} · deleted {expires}"
     }
   },
   "projects": {
@@ -1001,7 +1060,9 @@
       "groups": "Groups",
       "access": "Roles & permissions",
       "audit": "Audit",
-      "tenants": "Customers"
+      "tenants": "Customers",
+      "themes": "Themes",
+      "system": "System"
     },
     "status": {
       "invited": "Invited",
@@ -1415,6 +1476,12 @@
       },
       "diagnostics": {
         "read": "View platform diagnostics"
+      },
+      "theme": {
+        "manage": "Manage the platform theme"
+      },
+      "entitlement": {
+        "manage": "Enable customers' modules"
       }
     },
     "tenant": {
@@ -1434,6 +1501,9 @@
       },
       "audit": {
         "read": "View audit log"
+      },
+      "theme": {
+        "manage": "Manage customer and project themes"
       }
     },
     "project": {
@@ -1566,6 +1636,16 @@
     },
     "attention": {
       "acknowledged": "Notice acknowledged"
+    },
+    "theme": {
+      "published": "Theme published",
+      "rolled_back": "Theme rolled back"
+    },
+    "entitlement": {
+      "changed": "Module changed"
+    },
+    "diagnostics": {
+      "bundle_generated": "Diagnostic bundle created"
     }
   },
   "solution": {
@@ -1926,7 +2006,9 @@
       "promiseExpiry": "Every link has an expiry date (at most 90 days) and can be revoked at any time.",
       "promiseCreator": "A link works only while you yourself have access to the dashboard and it is published.",
       "notPublishedTitle": "Not published yet",
-      "notPublishedBody": "A link can only be created once the dashboard is published."
+      "notPublishedBody": "A link can only be created once the dashboard is published.",
+      "notEntitledTitle": "External links are not enabled",
+      "notEntitledBody": "The \"External links\" module is not enabled for your contract. Existing links are listed below and can still be revoked."
     },
     "create": {
       "title": "Create a new link",
@@ -1965,7 +2047,8 @@
     "unavailableReason": {
       "dashboard_not_published": "The dashboard is archived or in the trash. Once it is restored, the link works again.",
       "tenant_inactive": "The customer is suspended. While that lasts, no link works.",
-      "creator_lost_access": "The person who created the link no longer has access to the dashboard. Create a new link if needed."
+      "creator_lost_access": "The person who created the link no longer has access to the dashboard. Create a new link if needed.",
+      "entitlement_missing": "External links are not enabled for this customer's contract. The link is kept and works again once the module is enabled."
     },
     "list": {
       "title": "Existing links",
@@ -2068,7 +2151,8 @@
     "no_recipients": "None of the recipients may see the dashboard any more.",
     "source_unavailable": "The data source was not reachable.",
     "mail_failed": "The mail could not be delivered.",
-    "unexpected": "An unexpected error occurred."
+    "unexpected": "An unexpected error occurred.",
+    "entitlement_missing": "Scheduled reports are not enabled for the contract."
   },
   "reports": {
     "title": "Reports",
@@ -2223,5 +2307,177 @@
       "deleted": "Deleted.",
       "failed": "That did not work."
     }
+  },
+  "themes": {
+    "title": "Themes",
+    "intro": "A theme sets colours for allowed design tokens - no CSS, no script. It applies to the platform, to a customer on top, and optionally to a project. Only what passes every contrast check is published.",
+    "levels": "Levels",
+    "scope": {
+      "platform": "Platform",
+      "tenant": "Customer",
+      "project": "Project"
+    },
+    "scopeTenant": "Customer: {name}",
+    "scopeProject": "Project: {name}",
+    "editing": "Edit theme: {title}",
+    "notAllowedTitle": "No theme to edit",
+    "notAllowedBody": "Choose a customer whose themes you manage.",
+    "notEntitledTitle": "Own themes are not enabled",
+    "notEntitledBody": "The \"Own themes\" module is not enabled for this customer. Saved themes are kept but not applied.",
+    "publishedVersion": "Published: version {version}",
+    "nothingPublished": "Nothing published yet - the inherited theme applies",
+    "draftExists": "Draft present",
+    "noDraft": "No draft",
+    "unsaved": "Unsaved changes",
+    "name": "Theme name",
+    "presets": "Start from",
+    "mode": "Mode",
+    "modes": {
+      "light": "Light (reference)",
+      "dark": "Dark (prepared)"
+    },
+    "darkHint": "Dark mode is prepared but not yet the reference. Values here apply in dark mode only and are checked the same way.",
+    "groups": {
+      "accent": "Accent and buttons",
+      "text": "Text and links",
+      "surfaces": "Surfaces",
+      "borders": "Borders and focus",
+      "charts": "Charts",
+      "evaluation": "Evaluation bands"
+    },
+    "token": {
+      "accent_default": "Accent",
+      "accent_hover": "Accent (hover)",
+      "accent_active": "Accent (active)",
+      "accent_subtle": "Accent, subtle",
+      "accent_muted": "Accent, muted",
+      "accent_contrast": "Text on accent",
+      "text_primary": "Main text",
+      "text_secondary": "Secondary text",
+      "text_muted": "Muted text",
+      "text_link": "Links",
+      "surface_page": "Page background",
+      "surface_card": "Card background",
+      "surface_sunken": "Sunken surface",
+      "surface_selected": "Selected",
+      "border_subtle": "Border, subtle",
+      "border_default": "Border of controls",
+      "border_strong": "Border, strong",
+      "focus_ring_color": "Focus indicator",
+      "chart_series_1": "Chart series 1",
+      "chart_series_2": "Chart series 2",
+      "chart_series_3": "Chart series 3",
+      "chart_series_4": "Chart series 4",
+      "chart_comparison": "Comparison series",
+      "evaluation_band_1": "Evaluation band 1",
+      "evaluation_band_2": "Evaluation band 2",
+      "evaluation_band_3": "Evaluation band 3",
+      "evaluation_band_4": "Evaluation band 4",
+      "evaluation_band_5": "Evaluation band 5"
+    },
+    "pick": "Choose colour: {token}",
+    "invalidHex": "Please enter a colour as #rrggbb.",
+    "overridden": "Own value",
+    "inherits": "Inherited: {value}",
+    "saveDraft": "Save draft",
+    "validate": "Check",
+    "publish": "Publish",
+    "discard": "Discard draft",
+    "saveBeforeValidate": "Save the draft before you check and publish it.",
+    "saved": "Draft saved.",
+    "published": "Theme published.",
+    "discarded": "Draft discarded.",
+    "rolledBack": "Older version published again.",
+    "failed": "That did not work.",
+    "preview": "Preview",
+    "sample": {
+      "heading": "Employee portal",
+      "body": "This is what body text looks like on a card.",
+      "muted": "Muted hint text",
+      "link": "A link",
+      "button": "Button",
+      "input": "Input field",
+      "focus": "Focus",
+      "band": "Band {band}"
+    },
+    "validation": {
+      "ok": "All checks passed - the theme can be published.",
+      "notOk": "Not publishable - at least one check failed.",
+      "caption": "Contrast check",
+      "pair": "Combination",
+      "mode": "Mode",
+      "ratio": "Contrast",
+      "required": "At least",
+      "result": "Result",
+      "pass": "Passed",
+      "fail": "Failed",
+      "dependentsTitle": "Themes built on this one would no longer pass their checks",
+      "dependent": "{scope} \"{name}\": {failing, plural, one {one check} other {# checks}} failed"
+    },
+    "reason": {
+      "body_text": "Text on surface",
+      "button_label": "Button label",
+      "link_text": "Link on card",
+      "focus_indicator": "Focus indicator",
+      "control_boundary": "Control border"
+    },
+    "versions": "Versions",
+    "versionLine": "Version {version} · {by}",
+    "rolledBackFrom": "restored from version {version}",
+    "current": "current",
+    "rollback": "Publish this version again",
+    "tenantSummary": "Own theme \"{name}\", version {version}.",
+    "tenantNone": "No own theme - the platform theme applies.",
+    "open": "Open themes"
+  },
+  "theme": {
+    "tokens_refused": "These values are not allowed: {tokens}. A theme may only hold colours, lengths, shadows and font lists for released tokens.",
+    "contrast_failed": "Not published: {failing, plural, one {one contrast check} other {# contrast checks}} failed.",
+    "dependents_fail": "Not published: themes built on this one would no longer pass their contrast checks ({dependents}).",
+    "no_draft": "There is no draft. Save your changes first.",
+    "version_not_found": "This version does not exist.",
+    "scope_unknown": "This theme level does not exist."
+  },
+  "entitlement": {
+    "missing": {
+      "reporting_scheduled": "Scheduled reports are not enabled for your contract. Existing reports are kept.",
+      "sharing_external": "External links are not enabled for your contract. Existing links are kept.",
+      "solutions_packages": "Solution packages are not enabled for your contract.",
+      "theming_custom": "Own themes are not enabled for your contract. Saved themes are kept."
+    }
+  },
+  "entitlements": {
+    "intro": "Which modules this customer has. This is not a person's permission and not a technical switch of the installation.",
+    "module": {
+      "reporting_scheduled": "Scheduled reports",
+      "sharing_external": "External links",
+      "solutions_packages": "Solution packages",
+      "theming_custom": "Own themes"
+    },
+    "explain": {
+      "reporting_scheduled": "Send reports by mail on a schedule.",
+      "sharing_external": "Share dashboards outside through expiring links.",
+      "solutions_packages": "Install, update and export solutions such as Pulse.",
+      "theming_custom": "An own customer and project theme on top of the platform theme."
+    },
+    "enabled": "Enabled",
+    "disabled": "Not enabled",
+    "enable": "Enable",
+    "disable": "Switch off",
+    "default": "Default of this installation",
+    "changed": "Changed {when} by {by}",
+    "keepsConfiguration": "Switching off deletes nothing: reports, links and themes stay saved and work again once the module is enabled.",
+    "flagsTitle": "Technical switches of this installation",
+    "flagsIntro": "Feature flags apply to the whole installation and are set in its configuration, not per customer.",
+    "flag": {
+      "reports_pptx": "PowerPoint for scheduled reports"
+    },
+    "flagSetting": "Setting {setting}",
+    "flagOn": "On",
+    "flagOff": "Off"
+  },
+  "diagnostics": {
+    "not_found": "This diagnostic bundle no longer exists.",
+    "unsafe": "The diagnostic bundle was not created because it would have contained protected information."
   }
 }

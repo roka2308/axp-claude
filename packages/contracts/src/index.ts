@@ -29,3 +29,6 @@ export * from './export';
 export * from './reporting';
 export * from './attention';
 export * from './jobs';
+export * from './theme';
+export * from './entitlements';
+export * from './diagnostics';

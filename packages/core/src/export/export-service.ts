@@ -6,7 +6,7 @@ import {
   type ExportFormat,
   type Locale,
 } from '@axp/contracts';
-import { type Database, exportArtifacts, newId } from '@axp/db';
+import { type Database, diagnosticArtifacts, exportArtifacts, newId } from '@axp/db';
 import type { Logger } from '@axp/observability';
 import type { AuditService } from '../audit/audit-service';
 import type { Clock } from '../clock';
@@ -16,6 +16,7 @@ import type {
 } from '../dashboard/presentation-builder';
 import type { ArtifactStore } from './artifact-store';
 import { buildExportDocument, slug } from './document';
+import { paletteFromTheme } from './palette';
 import { renderCsv } from './render-csv';
 import { renderPdf } from './render-pdf';
 import { renderPptx } from './render-pptx';
@@ -29,6 +30,11 @@ export interface ExportServiceDeps {
   readonly presentation: PresentationBuilder;
   readonly store: ArtifactStore;
   readonly ttlMinutes: number;
+  /** The customer's published theme, light and dark, for the file's colours. */
+  readonly themes?: (context: {
+    tenantId: string;
+    projectId: string;
+  }) => Promise<{ light: Readonly<Record<string, string>> }>;
   /** Renders at once, at most; the rest wait. Rendering is CPU work. */
   readonly maxConcurrentRenders?: number;
 }
@@ -159,10 +165,15 @@ export class ExportService {
     const view: BuildPresentationInput = { ...input.view, audience: 'export' };
     const locale: Locale = view.locale;
 
+    const theme = this.deps.themes
+      ? await this.deps.themes({ tenantId: view.tenantId, projectId: view.projectId })
+      : undefined;
+
     return this.limited(async () => {
       const presentation = await this.presentationFor(view, input.format, input.widgetId);
       const document = buildExportDocument(presentation, {
         locale,
+        ...(theme ? { palette: paletteFromTheme(theme.light) } : {}),
         generatedAt: this.deps.clock.now(),
         audience: input.audience,
         ...(input.shareExpiresAt ? { shareExpiresAt: input.shareExpiresAt } : {}),
@@ -269,9 +280,15 @@ export class ExportService {
       .where(lte(exportArtifacts.expiresAt, now));
     await this.discard(expired);
 
-    const known = await this.deps.db
-      .select({ storageKey: exportArtifacts.storageKey })
-      .from(exportArtifacts);
+    // The store is shared with diagnostic bundles: their files are not orphans.
+    const known = [
+      ...(await this.deps.db
+        .select({ storageKey: exportArtifacts.storageKey })
+        .from(exportArtifacts)),
+      ...(await this.deps.db
+        .select({ storageKey: diagnosticArtifacts.storageKey })
+        .from(diagnosticArtifacts)),
+    ];
     const orphans = await this.deps.store.orphans(
       new Set(known.map((row) => row.storageKey)),
       new Date(now.getTime() - this.deps.ttlMinutes * 60_000),

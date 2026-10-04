@@ -5,6 +5,7 @@ import { getFormatter, getTranslations } from 'next-intl/server';
 import type { ReportRhythm, ReportRunSummary, ReportScheduleSummary } from '@axp/contracts';
 import { Callout, DataTable } from '@axp/ui';
 import { AppShell } from '@/components/AppShell';
+import { ThemeStyle } from '@/components/ThemeStyle';
 import { CauseSurface } from '@/components/viewer/CauseSurface';
 import { ReportScheduleForm } from '@/components/reporting/ReportScheduleForm';
 import { ScheduleActions } from '@/components/reporting/ScheduleActions';
@@ -80,6 +81,7 @@ export default async function ReportsPage({ params, searchParams }: ReportsPageP
 
   return (
     <AppShell activeKey="projects" version={version}>
+      <ThemeStyle projectId={projectId} />
       <div className="stack stack--loose">
         <header className="stack stack--tight">
           <Link href={`/projects/${projectId}` as Route} className={styles.back}>

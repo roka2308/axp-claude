@@ -22,6 +22,7 @@ import { registerSelfServiceRoutes } from './routes/me';
 import { registerExportRoutes } from './routes/exports';
 import { registerSharingRoutes } from './routes/sharing';
 import { registerReportingRoutes } from './routes/reporting';
+import { registerProductizationRoutes } from './routes/productization';
 
 export interface BuildServerOptions {
   readonly config: AppConfig;
@@ -88,6 +89,7 @@ export async function buildServer(options: BuildServerOptions): Promise<FastifyI
   registerExportRoutes(app, container);
   registerSharingRoutes(app, container);
   registerReportingRoutes(app, container);
+  registerProductizationRoutes(app, container);
 
   // No CORS plugin on purpose: the browser never calls this service directly.
   // Requests arrive from the Next.js server, which holds the session cookie.

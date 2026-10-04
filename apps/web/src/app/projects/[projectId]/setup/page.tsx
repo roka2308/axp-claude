@@ -6,6 +6,7 @@ import { getTranslations } from 'next-intl/server';
 import type { SelectOption } from '@axp/ui';
 import { Button, Callout, Card } from '@axp/ui';
 import { AppShell } from '@/components/AppShell';
+import { ThemeStyle } from '@/components/ThemeStyle';
 import { CompatibilityReport } from '@/components/setup/CompatibilityReport';
 import { ContextProfileForm } from '@/components/setup/ContextProfileForm';
 import { StepRelevanceToggle } from '@/components/setup/StepRelevanceToggle';
@@ -109,6 +110,7 @@ export default async function ProjectSetupPage({ params }: SetupPageProps) {
         </form>
       }
     >
+      <ThemeStyle projectId={projectId} />
       <div className="stack stack--loose">
         <header className="stack stack--tight">
           <Link href={`/projects/${projectId}`} className={styles.back}>

@@ -19,3 +19,4 @@ export * from './audit';
 export * from './solution';
 export * from './sharing';
 export * from './reporting';
+export * from './productization';

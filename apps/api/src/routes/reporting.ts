@@ -22,6 +22,7 @@ export function registerReportingRoutes(app: FastifyInstance, container: Contain
     const auth = requireAuth(request);
     const { projectId } = project.parse(request.params);
     const scope = await requireProjectScope(container, auth, projectId, 'report.manage');
+    await container.entitlements.require({ tenantId: scope.tenantId }, 'reporting.scheduled');
     const [schedules, options] = await Promise.all([
       container.reports.list(scope.tenantId, scope.projectId),
       container.reports.options(scope.tenantId, scope.projectId, scope.timezone),
@@ -37,6 +38,7 @@ export function registerReportingRoutes(app: FastifyInstance, container: Contain
       const { projectId } = project.parse(request.params);
       const { dashboardId } = z.object({ dashboardId: z.string().min(1) }).parse(request.query);
       const scope = await requireProjectScope(container, auth, projectId, 'report.manage');
+      await container.entitlements.require({ tenantId: scope.tenantId }, 'reporting.scheduled');
       await container.access.assertDashboard(auth, dashboardId, 'view');
       return { recipients: await container.reports.recipientsFor(scope.tenantId, dashboardId) };
     },
@@ -50,6 +52,7 @@ export function registerReportingRoutes(app: FastifyInstance, container: Contain
       const { projectId } = project.parse(request.params);
       const body = reportScheduleInputSchema.parse(request.body);
       const scope = await requireProjectScope(container, auth, projectId, 'report.manage');
+      await container.entitlements.require({ tenantId: scope.tenantId }, 'reporting.scheduled');
       await container.access.assertDashboard(auth, body.dashboardId, 'view');
       const created = await container.reports.create({
         tenantId: scope.tenantId,
@@ -70,6 +73,7 @@ export function registerReportingRoutes(app: FastifyInstance, container: Contain
       const { projectId, scheduleId } = schedule.parse(request.params);
       const body = reportScheduleInputSchema.parse(request.body);
       const scope = await requireProjectScope(container, auth, projectId, 'report.manage');
+      await container.entitlements.require({ tenantId: scope.tenantId }, 'reporting.scheduled');
       await container.access.assertDashboard(auth, body.dashboardId, 'view');
       return container.reports.update({
         tenantId: scope.tenantId,
@@ -89,6 +93,7 @@ export function registerReportingRoutes(app: FastifyInstance, container: Contain
       const { projectId, scheduleId } = schedule.parse(request.params);
       const { paused } = z.object({ paused: z.boolean() }).parse(request.body);
       const scope = await requireProjectScope(container, auth, projectId, 'report.manage');
+      await container.entitlements.require({ tenantId: scope.tenantId }, 'reporting.scheduled');
       return container.reports.setPaused({
         tenantId: scope.tenantId,
         projectId: scope.projectId,
@@ -106,6 +111,7 @@ export function registerReportingRoutes(app: FastifyInstance, container: Contain
       const auth = requireAuth(request);
       const { projectId, scheduleId } = schedule.parse(request.params);
       const scope = await requireProjectScope(container, auth, projectId, 'report.manage');
+      await container.entitlements.require({ tenantId: scope.tenantId }, 'reporting.scheduled');
       await container.reports.remove({
         tenantId: scope.tenantId,
         projectId: scope.projectId,
@@ -127,6 +133,7 @@ export function registerReportingRoutes(app: FastifyInstance, container: Contain
       const auth = requireAuth(request);
       const { projectId, scheduleId } = schedule.parse(request.params);
       const scope = await requireProjectScope(container, auth, projectId, 'report.manage');
+      await container.entitlements.require({ tenantId: scope.tenantId }, 'reporting.scheduled');
       const run = await container.reports.runNow({
         tenantId: scope.tenantId,
         projectId: scope.projectId,
@@ -144,6 +151,7 @@ export function registerReportingRoutes(app: FastifyInstance, container: Contain
       const auth = requireAuth(request);
       const { projectId, scheduleId } = schedule.parse(request.params);
       const scope = await requireProjectScope(container, auth, projectId, 'report.manage');
+      await container.entitlements.require({ tenantId: scope.tenantId }, 'reporting.scheduled');
       return { runs: await container.reports.runs(scope.tenantId, scheduleId) };
     },
   );

@@ -1,7 +1,7 @@
 import type { Locale } from '@axp/contracts';
 import type { ExportChart } from './document';
 import { formatNumber } from './document';
-import { EXPORT_PALETTE } from './palette';
+import { EXPORT_PALETTE, type ExportPalette } from './palette';
 
 /**
  * Line chart geometry for export files.
@@ -118,8 +118,15 @@ const escapeXml = (value: string) =>
  */
 export function chartSvg(
   chart: ExportChart,
-  options: { width: number; height: number; locale: Locale; title: string },
+  options: {
+    width: number;
+    height: number;
+    locale: Locale;
+    title: string;
+    palette?: ExportPalette;
+  },
 ): string {
+  const palette = options.palette ?? EXPORT_PALETTE;
   const legendHeight = 26;
   const geometry = chartGeometry(
     chart,
@@ -142,16 +149,16 @@ export function chartSvg(
 
   for (const tick of geometry.yTicks) {
     parts.push(
-      `<line x1="${plot.x}" y1="${tick.y}" x2="${plot.x + plot.width}" y2="${tick.y}" stroke="${EXPORT_PALETTE.chartGrid}" stroke-width="1"/>`,
-      `<text x="${plot.x - 6}" y="${tick.y + 4}" text-anchor="end" fill="${EXPORT_PALETTE.textMuted}" ${font}>${escapeXml(tick.label)}</text>`,
+      `<line x1="${plot.x}" y1="${tick.y}" x2="${plot.x + plot.width}" y2="${tick.y}" stroke="${palette.chartGrid}" stroke-width="1"/>`,
+      `<text x="${plot.x - 6}" y="${tick.y + 4}" text-anchor="end" fill="${palette.textMuted}" ${font}>${escapeXml(tick.label)}</text>`,
     );
   }
   parts.push(
-    `<line x1="${plot.x}" y1="${plot.y + plot.height}" x2="${plot.x + plot.width}" y2="${plot.y + plot.height}" stroke="${EXPORT_PALETTE.chartAxis}" stroke-width="1"/>`,
+    `<line x1="${plot.x}" y1="${plot.y + plot.height}" x2="${plot.x + plot.width}" y2="${plot.y + plot.height}" stroke="${palette.chartAxis}" stroke-width="1"/>`,
   );
   for (const label of geometry.xLabels) {
     parts.push(
-      `<text x="${label.x}" y="${plot.y + plot.height + 18}" text-anchor="middle" fill="${EXPORT_PALETTE.textMuted}" ${font}>${escapeXml(label.label)}</text>`,
+      `<text x="${label.x}" y="${plot.y + plot.height + 18}" text-anchor="middle" fill="${palette.textMuted}" ${font}>${escapeXml(label.label)}</text>`,
     );
   }
 
@@ -161,8 +168,7 @@ export function chartSvg(
     ...geometry.series.filter((series) => series.role !== 'comparison'),
   ];
   for (const series of ordered) {
-    const colour =
-      series.role === 'comparison' ? EXPORT_PALETTE.chartComparison : EXPORT_PALETTE.chartSeries1;
+    const colour = series.role === 'comparison' ? palette.chartComparison : palette.chartSeries1;
     const dash = series.role === 'comparison' ? ` stroke-dasharray="6 4"` : '';
     for (const segment of series.segments) {
       if (segment.length === 1) {
@@ -181,12 +187,11 @@ export function chartSvg(
   // Legend: a sample of each line and its name.
   let legendX = 12;
   for (const series of chart.series) {
-    const colour =
-      series.role === 'comparison' ? EXPORT_PALETTE.chartComparison : EXPORT_PALETTE.chartSeries1;
+    const colour = series.role === 'comparison' ? palette.chartComparison : palette.chartSeries1;
     const dash = series.role === 'comparison' ? ` stroke-dasharray="6 4"` : '';
     parts.push(
       `<line x1="${legendX}" y1="14" x2="${legendX + 24}" y2="14" stroke="${colour}" stroke-width="2.5"${dash}/>`,
-      `<text x="${legendX + 30}" y="18" fill="${EXPORT_PALETTE.textSecondary}" ${font}>${escapeXml(series.label)}</text>`,
+      `<text x="${legendX + 30}" y="18" fill="${palette.textSecondary}" ${font}>${escapeXml(series.label)}</text>`,
     );
     legendX += 40 + series.label.length * 7.5;
   }

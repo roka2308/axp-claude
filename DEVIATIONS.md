@@ -244,7 +244,7 @@ editor. Record it for the cross-track comparison of package schemas.
 
 ## DEV-007 — Export files use the default theme, not the tenant's
 
-- Status: `track_specific`
+- Status: `resolved`
 - Milestone: F7
 - Specification reference: Master Spec §16 (D9: Themes gelten für Web und
   Exporte), §15 (Export-Formate)
@@ -270,6 +270,14 @@ and screen agree.
 
 In Phase 9, resolve the tenant's published theme for an export (including its
 contrast-checked evaluation band colours) and pass it to the renderers.
+
+### Resolution
+
+Resolved in Phase 9: `ExportService.render()` resolves the theme that applies
+to the dashboard's project (platform, customer, project - as far as the
+customer is entitled to its own) and passes its palette to every renderer
+(`paletteFromTheme`). The default palette remains the fallback and is still
+compared with `tokens.css` by a test.
 
 ---
 

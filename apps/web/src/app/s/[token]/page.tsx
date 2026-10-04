@@ -19,6 +19,7 @@ import { WidgetTile, WidgetTileSkeleton } from '@/components/viewer/WidgetTile';
 import { ExportMenu } from '@/components/sharing/ExportMenu';
 import { ShareUnlockForm } from '@/components/sharing/ShareUnlockForm';
 import { sharedExportAction } from '@/app/sharing/actions';
+import { ThemeStyle } from '@/components/ThemeStyle';
 import {
   getShareAccess,
   getSharedDetail,
@@ -119,7 +120,7 @@ export default async function SharedDashboardPage({ params, searchParams }: Shar
   const exportAction = sharedExportAction.bind(null, token, locale);
 
   return (
-    <PublicFrame>
+    <PublicFrame token={token}>
       <div className="stack stack--loose">
         <header className="stack stack--tight">
           <p className={styles.eyebrow}>
@@ -241,10 +242,17 @@ export default async function SharedDashboardPage({ params, searchParams }: Shar
 }
 
 /** The frame around a shared view: the product's name, nothing to navigate. */
-async function PublicFrame({ children }: { readonly children: React.ReactNode }) {
+async function PublicFrame({
+  children,
+  token,
+}: {
+  readonly children: React.ReactNode;
+  readonly token?: string;
+}) {
   const t = await getTranslations();
   return (
     <div className={styles.frame}>
+      {token ? <ThemeStyle shareToken={token} /> : null}
       <header className={styles.bar}>
         <span className={styles.brand}>{t('product.name')}</span>
         <span className={styles.badge}>{t('shared.badge')}</span>

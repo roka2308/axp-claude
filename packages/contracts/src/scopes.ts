@@ -14,6 +14,8 @@ export const CAPABILITIES = [
   'platform.tenant.read',
   'platform.tenant.lifecycle.change',
   'platform.diagnostics.read',
+  'platform.theme.manage',
+  'platform.entitlement.manage',
   // Tenant administration
   'tenant.read',
   'tenant.settings.update',
@@ -22,6 +24,7 @@ export const CAPABILITIES = [
   'tenant.role_assignment.manage',
   'tenant.group.manage',
   'tenant.audit.read',
+  'tenant.theme.manage',
   // Project
   'project.read',
   'project.create',
@@ -71,6 +74,7 @@ export const CAPABILITIES_BY_ROLE: Readonly<Record<SystemRole, readonly Capabili
     'tenant.role_assignment.manage',
     'tenant.group.manage',
     'tenant.audit.read',
+    'tenant.theme.manage',
     'project.read',
     'project.create',
     'project.settings.update',
@@ -80,6 +84,8 @@ export const CAPABILITIES_BY_ROLE: Readonly<Record<SystemRole, readonly Capabili
     'platform.tenant.read',
     'platform.tenant.lifecycle.change',
     'platform.diagnostics.read',
+    'platform.theme.manage',
+    'platform.entitlement.manage',
   ],
 } as const;
 

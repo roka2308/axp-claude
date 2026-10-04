@@ -9,7 +9,8 @@ import { type AdminContext, type AdminTenant, getAdminContext, pickTenant } from
 import { logoutAction } from '@/app/login/actions';
 import styles from './AdminFrame.module.css';
 
-export type AdminSection = 'users' | 'groups' | 'access' | 'audit' | 'tenants';
+export type AdminSection =
+  'users' | 'groups' | 'access' | 'audit' | 'themes' | 'tenants' | 'system';
 
 /**
  * The frame every administration page shares (D1 "Administration", D5).
@@ -42,11 +43,15 @@ export async function AdminFrame({
     { key: 'groups', href: '/admin/groups', shown: tenant !== null },
     { key: 'access', href: '/admin/access', shown: tenant !== null },
     { key: 'audit', href: '/admin/audit', shown: tenant !== null },
+    { key: 'themes', href: '/admin/themes', shown: tenant !== null || context.platformAdmin },
     { key: 'tenants', href: '/admin/tenants', shown: context.platformAdmin },
+    { key: 'system', href: '/admin/system', shown: context.platformAdmin },
   ];
 
   const withTenant = (href: string) =>
-    (tenant && href !== '/admin/tenants' ? `${href}?tenant=${tenant.id}` : href) as Route;
+    (tenant && href !== '/admin/tenants' && href !== '/admin/system'
+      ? `${href}?tenant=${tenant.id}`
+      : href) as Route;
 
   const body =
     context.tenants.length === 0 && !context.platformAdmin ? (

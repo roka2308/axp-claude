@@ -9,6 +9,7 @@ import {
   type WidgetPresentation,
 } from '@axp/contracts';
 import { exportLabels, type ExportLabels, fill } from './labels';
+import { EXPORT_PALETTE, type ExportPalette } from './palette';
 
 /**
  * The export document: one normalised reading of a presentation model.
@@ -101,6 +102,8 @@ export interface ExportDocument {
   readonly widgets: readonly ExportWidget[];
   /** File name without extension, safe on every file system. */
   readonly fileBase: string;
+  /** The customer's colours, or the product defaults. */
+  readonly palette: ExportPalette;
 }
 
 export interface ExportDocumentContext {
@@ -109,6 +112,7 @@ export interface ExportDocumentContext {
   /** `share`: the file was requested through an external link. */
   readonly audience: 'internal' | 'share';
   readonly shareExpiresAt?: Date;
+  readonly palette?: ExportPalette;
 }
 
 export function buildExportDocument(
@@ -208,6 +212,7 @@ export function buildExportDocument(
     generatedAtText,
     widgets: ordered.map((widget) => exportWidget(widget, context.locale, labels)),
     fileBase: `${slug(presentation.dashboard.name)}_${range.from}_${range.to}`,
+    palette: context.palette ?? EXPORT_PALETTE,
   };
 }
 

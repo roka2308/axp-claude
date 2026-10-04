@@ -1,0 +1,51 @@
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+}
+
+.control {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.meta {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+/* The state is a word; the tone only repeats it (D10). */
+.state {
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  border-radius: var(--radius-full);
+  background: var(--status-neutral-surface);
+  color: var(--text-secondary);
+}
+
+.state[data-enabled='true'] {
+  background: var(--status-success-surface);
+  color: var(--status-success-text);
+}
+
+.heading {
+  margin: var(--space-4) 0 0;
+  font-size: var(--font-size-md);
+}

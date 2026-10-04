@@ -35,6 +35,7 @@ import type { ClaimedJob, FailOutcome } from '../jobs/job-queue';
 import type { JobHandler } from '../jobs/job-runner';
 import type { MailTransport } from '../mail/mail-transport';
 import type { ReportService } from './report-service';
+import type { EntitlementService } from '../entitlements/entitlement-service';
 import { nextOccurrence } from './rhythm';
 
 export interface ReportRunnerDeps {
@@ -47,6 +48,7 @@ export interface ReportRunnerDeps {
   readonly exports: ExportService;
   readonly reports: ReportService;
   readonly mail: MailTransport;
+  readonly entitlements: EntitlementService;
   readonly webUrl: string;
 }
 
@@ -100,9 +102,18 @@ export class ReportRunner {
     let skipped = 0;
     for (const { schedule, tenantLifecycle } of due) {
       const plannedFor = schedule.nextRunAt!;
-      if (tenantLifecycle === 'active' || tenantLifecycle === 'provisioning') {
+      const active = tenantLifecycle === 'active' || tenantLifecycle === 'provisioning';
+      const entitled = await this.deps.entitlements.hasEntitlement(
+        { tenantId: schedule.tenantId },
+        'reporting.scheduled',
+      );
+      if (active && entitled) {
         await this.deps.reports.enqueueRun(schedule, plannedFor, 'schedule');
         queued += 1;
+      } else if (active) {
+        // Without the module the schedule is kept and does not run.
+        await this.recordSkippedOccurrence(schedule, plannedFor, 'report.entitlement_missing');
+        skipped += 1;
       } else {
         await this.recordSkippedOccurrence(schedule, plannedFor, 'report.tenant_inactive');
         skipped += 1;
@@ -181,6 +192,15 @@ export class ReportRunner {
       (context.tenantLifecycle !== 'active' && context.tenantLifecycle !== 'provisioning')
     ) {
       await this.finishSkipped(run.id, 'report.tenant_inactive');
+      return 'cancelled';
+    }
+    if (
+      !(await this.deps.entitlements.hasEntitlement(
+        { tenantId: schedule.tenantId },
+        'reporting.scheduled',
+      ))
+    ) {
+      await this.finishSkipped(run.id, 'report.entitlement_missing');
       return 'cancelled';
     }
     if (!context.publishedVersionId || context.dashboardLifecycle !== 'published') {

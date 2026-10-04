@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages, getTranslations } from 'next-intl/server';
+import { ThemeStyle } from '@/components/ThemeStyle';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -24,6 +25,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang={locale}>
       <body>
+        {/* Platform and customer theme; project pages add their own on top. */}
+        <ThemeStyle />
         {/*
           Keyboard users reach the content without traversing the whole shell.
           The link is visually hidden until focused (D10: keyboard operable).

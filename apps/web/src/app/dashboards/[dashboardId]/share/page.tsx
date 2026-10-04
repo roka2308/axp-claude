@@ -100,7 +100,13 @@ export default async function SharePage({ params }: SharePageProps) {
             <li>{t('share.external.promiseCreator')}</li>
           </ul>
 
-          {layout.dashboard.publishedVersion === null ? (
+          {!shares.entitled ? (
+            // Entitlement, not permission: the customer's contract lacks the
+            // module. Existing links stay listed so they can still be revoked.
+            <Callout tone="warning" title={t('share.external.notEntitledTitle')}>
+              {t('share.external.notEntitledBody')}
+            </Callout>
+          ) : layout.dashboard.publishedVersion === null ? (
             <Callout tone="warning" title={t('share.external.notPublishedTitle')}>
               {t('share.external.notPublishedBody')}
             </Callout>

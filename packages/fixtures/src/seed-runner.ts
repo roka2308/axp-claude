@@ -6,6 +6,7 @@ import { DEMO_USER_NAMES, type DemoSeed, loadDemoSeed } from './demo-seed';
 import { seedReferenceDashboard, type SeedDashboardResult } from './seed-dashboard';
 import { seedStateModelDashboard, type SeedStateModelResult } from './seed-state-model';
 import { seedPulseSolution, type SeedPulseResult } from './seed-pulse';
+import { seedThemes } from './seed-themes';
 import { seedAccessDemo } from './seed-access';
 
 export interface SeedOptions {
@@ -235,6 +236,12 @@ export async function seedDemoData(
       ...(pulse?.dashboardIds ?? []),
     ].filter((id): id is string => Boolean(id)),
   });
+
+  // Reference themes: Telekom Default on the platform, a neutral customer theme on top.
+  const tenantAdminUserId = await idOf('tenantAdmin');
+  if (platformAdminUserId && tenantAdminUserId) {
+    await seedThemes(container, { tenantId, platformAdminUserId, tenantAdminUserId });
+  }
 
   await container.projects.refreshSetupState(tenantId, projectId);
 

@@ -30,6 +30,7 @@ import type { Clock } from '../clock';
 import { generateSecretToken, hashPassword, hashToken, verifyPassword } from '../crypto';
 import type { AuthorizationService } from '../access/authorization-service';
 import type { AccessService } from '../access/access-service';
+import type { EntitlementService } from '../entitlements/entitlement-service';
 import { resolveAuthContext } from '../access/auth-context';
 import { addDays, startOfDayInstant, todayIn } from '../analytics/calendar';
 
@@ -39,6 +40,7 @@ export interface ShareServiceDeps {
   readonly audit: AuditService;
   readonly authorization: AuthorizationService;
   readonly access: AccessService;
+  readonly entitlements: EntitlementService;
   /** Deletes a share's export files when it is revoked. */
   readonly discardExports: (shareId: string) => Promise<void>;
 }
@@ -451,6 +453,15 @@ export class ShareService {
     }
     if (!row.publishedVersionId || isHidden(row.dashboardLifecycle)) {
       return { status: 'unavailable', reason: 'dashboard_not_published' };
+    }
+    // The customer lost the module: the link is kept, and stops working.
+    if (
+      !(await this.deps.entitlements.hasEntitlement(
+        { tenantId: share.tenantId },
+        'sharing.external',
+      ))
+    ) {
+      return { status: 'unavailable', reason: 'entitlement_missing' };
     }
     if (!(await this.creatorMayShare(share))) {
       return { status: 'unavailable', reason: 'creator_lost_access' };

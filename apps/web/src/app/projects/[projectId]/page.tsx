@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { Button, Callout, Card } from '@axp/ui';
 import { AppShell } from '@/components/AppShell';
+import { ThemeStyle } from '@/components/ThemeStyle';
 import { CompatibilityReport } from '@/components/setup/CompatibilityReport';
 import { DashboardActions } from '@/components/setup/DashboardActions';
 import { ApiError } from '@/lib/api-client';
@@ -63,6 +64,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         </form>
       }
     >
+      <ThemeStyle projectId={projectId} />
       <div className="stack stack--loose">
         <div className="stack stack--tight">
           <Link href="/projects" className={styles.back}>

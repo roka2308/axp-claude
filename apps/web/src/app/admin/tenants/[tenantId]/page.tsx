@@ -6,6 +6,8 @@ import { Callout, Card } from '@axp/ui';
 import { AdminFrame } from '@/components/admin/AdminFrame';
 import { LifecycleConfirm } from '@/components/admin/TenantForms';
 import { getLifecycleImpact, getTenant } from '@/lib/admin';
+import { getEntitlements, getTheme } from '@/lib/theming';
+import { EntitlementsPanel } from '@/components/theming/EntitlementsPanel';
 import styles from '../../admin.module.css';
 
 const TABS = [
@@ -21,11 +23,7 @@ const TABS = [
 type Tab = (typeof TABS)[number];
 
 /** Tabs whose content belongs to a later milestone of the plan. */
-const LATER: Partial<Record<Tab, number>> = {
-  theme: 9,
-  entitlements: 9,
-  diagnostics: 9,
-};
+const LATER: Partial<Record<Tab, number>> = {};
 
 interface PageProps {
   readonly params: Promise<{ readonly tenantId: string }>;
@@ -162,6 +160,56 @@ export default async function TenantPage({ params, searchParams }: PageProps) {
                   {t('administration.tenants.connectionsSummary', { count: tenant.connections })}
                 </p>
                 <p className="text-muted">{t('administration.tenants.connectionsLater')}</p>
+              </Card>
+            ) : null}
+
+            {tab === 'theme' ? (
+              <Card title={t('administration.tenants.tab.theme')}>
+                {await (async () => {
+                  const theme = await getTheme(`tenants/${tenant.id}`).catch(() => null);
+                  return (
+                    <div className="stack stack--tight">
+                      <p>
+                        {theme?.published
+                          ? t('themes.tenantSummary', {
+                              version: theme.published.version,
+                              name: theme.name,
+                            })
+                          : t('themes.tenantNone')}
+                      </p>
+                      {theme && !theme.applied ? (
+                        <p className="text-muted">{t('themes.notEntitledBody')}</p>
+                      ) : null}
+                      <Link href={`/admin/themes?tenant=${tenant.id}&scope=tenant` as Route}>
+                        {t('themes.open')}
+                      </Link>
+                    </div>
+                  );
+                })()}
+              </Card>
+            ) : null}
+
+            {tab === 'entitlements' ? (
+              <Card title={t('administration.tenants.tab.entitlements')}>
+                {await (async () => {
+                  const data = await getEntitlements(tenant.id);
+                  return (
+                    <EntitlementsPanel
+                      tenantId={tenant.id}
+                      initial={data.entitlements}
+                      featureFlags={data.featureFlags}
+                    />
+                  );
+                })()}
+              </Card>
+            ) : null}
+
+            {tab === 'diagnostics' ? (
+              <Card title={t('administration.tenants.tab.diagnostics')}>
+                <div className="stack stack--tight">
+                  <p>{t('system.tenantDiagnostics')}</p>
+                  <Link href="/admin/system">{t('system.open')}</Link>
+                </div>
               </Card>
             ) : null}
 

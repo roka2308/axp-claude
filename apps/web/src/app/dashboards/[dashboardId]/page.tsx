@@ -18,10 +18,12 @@ import { DetailOverlay } from '@/components/viewer/DetailOverlay';
 import { WidgetDetail } from '@/components/viewer/WidgetDetail';
 import { WidgetTile, WidgetTileSkeleton } from '@/components/viewer/WidgetTile';
 import { getApiVersion, getCurrentUser } from '@/lib/platform';
+import { getThemeCss } from '@/lib/theming';
 import { getDashboardLayout, getWidgetDetail } from '@/lib/analytics';
 import { getDashboardPermissions } from '@/lib/sharing';
 import { ExportMenu } from '@/components/sharing/ExportMenu';
 import { exportDashboardAction } from '@/app/sharing/actions';
+import { ThemeStyleSheet } from '@/components/ThemeStyle';
 import { logoutAction } from '@/app/login/actions';
 import styles from './dashboard.module.css';
 
@@ -52,6 +54,9 @@ export default async function DashboardPage({ params, searchParams }: DashboardP
   if (!user) redirect('/login');
 
   const source = search.source === 'draft' ? 'draft' : 'published';
+  // Fetched alongside the layout and awaited before rendering: the tiles
+  // stream behind their loading state, and nothing may delay that first flush.
+  const themeCss = getThemeCss({ dashboardId });
 
   /*
    * The layout first, and only the layout: it comes from the stored snapshot
@@ -96,8 +101,10 @@ export default async function DashboardPage({ params, searchParams }: DashboardP
    * for the published dashboard: an export or a link always shows what was
    * published, never a draft preview (Master Spec §15).
    */
-  const permissions =
-    source === 'published' ? await getDashboardPermissions(dashboardId).catch(() => null) : null;
+  const [permissions, css] = await Promise.all([
+    source === 'published' ? getDashboardPermissions(dashboardId).catch(() => null) : null,
+    themeCss,
+  ]);
   const stateLabel = `${t(`viewer.presets.${timeRange}`)} · ${t(`viewer.comparisons.${comparison}`)}`;
   const exportAction = exportDashboardAction.bind(null, dashboardId);
 
@@ -129,6 +136,7 @@ export default async function DashboardPage({ params, searchParams }: DashboardP
         </form>
       }
     >
+      <ThemeStyleSheet css={css} />
       <div className="stack stack--loose">
         <header className="stack stack--tight">
           <h1>{presentation.dashboard.name}</h1>

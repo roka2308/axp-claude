@@ -68,6 +68,7 @@ export function registerSolutionRoutes(app: FastifyInstance, container: Containe
     const { projectId } = projectParams.parse(request.params);
     const { source } = z.object({ source: sourceSchema }).strict().parse(request.body);
     const scope = await requireProjectScope(container, auth, projectId, 'semantic.manage');
+    await container.entitlements.require({ tenantId: scope.tenantId }, 'solutions.packages');
     return container.solutions.analyze(scope.tenantId, scope.projectId, source as PackageSource);
   });
 
@@ -79,6 +80,7 @@ export function registerSolutionRoutes(app: FastifyInstance, container: Containe
       .strict()
       .parse(request.body);
     const scope = await requireProjectScope(container, auth, projectId, 'semantic.manage');
+    await container.entitlements.require({ tenantId: scope.tenantId }, 'solutions.packages');
 
     const result = await container.solutions.install({
       tenantId: scope.tenantId,
@@ -196,6 +198,7 @@ export function registerSolutionRoutes(app: FastifyInstance, container: Containe
       .strict()
       .parse(request.body);
     const scope = await requireProjectScope(container, auth, projectId, 'semantic.manage');
+    await container.entitlements.require({ tenantId: scope.tenantId }, 'solutions.packages');
 
     const owned = await container.dashboards.listForProject(scope.tenantId, scope.projectId);
     for (const dashboardId of input.dashboardIds) {

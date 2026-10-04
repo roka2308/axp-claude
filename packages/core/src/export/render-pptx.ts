@@ -4,7 +4,7 @@ import { chartSvg } from './chart';
 import type { ExportDocument, ExportMetric, ExportTable, ExportWidget } from './document';
 import { fill } from './labels';
 import { exportFonts } from './fonts';
-import { EXPORT_PALETTE } from './palette';
+import { EXPORT_PALETTE, type ExportPalette } from './palette';
 
 /**
  * A dashboard as a presentation - hybrid (Master Spec §15).
@@ -24,8 +24,18 @@ const CARDS_PER_SLIDE = 6;
 
 type Slide = ReturnType<PptxGenJS['addSlide']>;
 
+/** Each deck is drawn in its own customer's colours - also when two render at once. */
+const PALETTES = new WeakMap<Slide, ExportPalette>();
+const paletteOf = (slide: Slide): ExportPalette => PALETTES.get(slide) ?? EXPORT_PALETTE;
+
 export async function renderPptx(document: ExportDocument): Promise<Buffer> {
   const pptx = new PptxGenJS();
+  const palette = document.palette;
+  const addSlide = () => {
+    const slide = pptx.addSlide();
+    PALETTES.set(slide, palette);
+    return slide;
+  };
   pptx.layout = 'LAYOUT_WIDE';
   pptx.author = 'Analytics Experience';
   pptx.company = document.tenantName;
@@ -37,7 +47,7 @@ export async function renderPptx(document: ExportDocument): Promise<Buffer> {
   const hasCharts = document.widgets.some((widget) => widget.kind === 'series');
 
   // --- Title slide: what the deck describes ---------------------------------
-  const title = pptx.addSlide();
+  const title = addSlide();
   title.addText(document.title, {
     x: SLIDE.margin,
     y: 0.5,
@@ -46,7 +56,7 @@ export async function renderPptx(document: ExportDocument): Promise<Buffer> {
     fontFace: FONT,
     fontSize: 30,
     bold: true,
-    color: hex(EXPORT_PALETTE.textPrimary),
+    color: hex(palette.textPrimary),
   });
   if (document.description) {
     title.addText(document.description, {
@@ -56,13 +66,13 @@ export async function renderPptx(document: ExportDocument): Promise<Buffer> {
       h: 0.6,
       fontFace: FONT,
       fontSize: 14,
-      color: hex(EXPORT_PALETTE.textSecondary),
+      color: hex(palette.textSecondary),
     });
   }
   title.addTable(
     document.meta.map((row) => [
-      { text: row.label, options: { bold: true, color: hex(EXPORT_PALETTE.textSecondary) } },
-      { text: row.value, options: { color: hex(EXPORT_PALETTE.textPrimary) } },
+      { text: row.label, options: { bold: true, color: hex(palette.textSecondary) } },
+      { text: row.value, options: { color: hex(palette.textPrimary) } },
     ]),
     {
       x: SLIDE.margin,
@@ -71,7 +81,7 @@ export async function renderPptx(document: ExportDocument): Promise<Buffer> {
       colW: [2.6, SLIDE.width - 3.6],
       fontFace: FONT,
       fontSize: 12,
-      border: { type: 'solid', pt: 0.5, color: hex(EXPORT_PALETTE.borderSubtle) },
+      border: { type: 'solid', pt: 0.5, color: hex(palette.borderSubtle) },
     },
   );
   if (hasCharts) {
@@ -83,7 +93,7 @@ export async function renderPptx(document: ExportDocument): Promise<Buffer> {
       fontFace: FONT,
       fontSize: 10,
       italic: true,
-      color: hex(EXPORT_PALETTE.textMuted),
+      color: hex(palette.textMuted),
     });
   }
 
@@ -93,7 +103,7 @@ export async function renderPptx(document: ExportDocument): Promise<Buffer> {
     (widget.metrics ?? []).map((metric) => ({ widget, metric })),
   );
   for (let start = 0; start < cardEntries.length; start += CARDS_PER_SLIDE) {
-    const slide = pptx.addSlide();
+    const slide = addSlide();
     heading(
       slide,
       start === 0 ? labels.metricsSheet : fill(labels.continued, { title: labels.metricsSheet }),
@@ -114,7 +124,7 @@ export async function renderPptx(document: ExportDocument): Promise<Buffer> {
     if (widget.kind === 'metrics') continue;
 
     if (widget.kind === 'series' && widget.chart) {
-      const slide = pptx.addSlide();
+      const slide = addSlide();
       heading(slide, widget.title);
       const svg = chartSvg(widget.chart, {
         width: 1200,
@@ -152,7 +162,7 @@ export async function renderPptx(document: ExportDocument): Promise<Buffer> {
     if ((widget.kind === 'table' || widget.kind === 'annotations') && widget.table) {
       const pages = Math.max(1, Math.ceil(widget.table.rows.length / TABLE_ROWS_PER_SLIDE));
       for (let page = 0; page < pages; page += 1) {
-        const slide = pptx.addSlide();
+        const slide = addSlide();
         heading(slide, page === 0 ? widget.title : fill(labels.continued, { title: widget.title }));
         if (widget.table.rows.length === 0) {
           body(slide, widget.kind === 'annotations' ? labels.noAnnotations : widget.stateLabel);
@@ -165,7 +175,7 @@ export async function renderPptx(document: ExportDocument): Promise<Buffer> {
     }
 
     // Text, and widgets without values: said in words on their own slide.
-    const slide = pptx.addSlide();
+    const slide = addSlide();
     heading(slide, widget.title);
     body(
       slide,
@@ -194,7 +204,7 @@ function card(
     w,
     h: 2.5,
     fill: { color: 'FFFFFF' },
-    line: { color: hex(EXPORT_PALETTE.borderDefault), width: 0.75 },
+    line: { color: hex(paletteOf(slide).borderDefault), width: 0.75 },
   });
   slide.addText(widget.metrics!.length > 1 ? `${widget.title} – ${metric.label}` : widget.title, {
     x: at.x + 0.15,
@@ -203,7 +213,7 @@ function card(
     h: 0.45,
     fontFace: FONT,
     fontSize: 12,
-    color: hex(EXPORT_PALETTE.textSecondary),
+    color: hex(paletteOf(slide).textSecondary),
   });
   slide.addText(metric.value.text, {
     x: at.x + 0.15,
@@ -213,7 +223,7 @@ function card(
     fontFace: FONT,
     fontSize: metric.value.number === undefined ? 16 : 32,
     bold: true,
-    color: hex(EXPORT_PALETTE.textPrimary),
+    color: hex(paletteOf(slide).textPrimary),
   });
   let y = at.y + 1.4;
   if (metric.evaluation) {
@@ -225,7 +235,7 @@ function card(
       h: 0.16,
       fill: {
         color: hex(
-          EXPORT_PALETTE.evaluationBand[metric.evaluation.band - 1] ?? EXPORT_PALETTE.textMuted,
+          paletteOf(slide).evaluationBand[metric.evaluation.band - 1] ?? paletteOf(slide).textMuted,
         ),
       },
       line: { color: 'FFFFFF', width: 0 },
@@ -237,7 +247,7 @@ function card(
       h: 0.36,
       fontFace: FONT,
       fontSize: 12,
-      color: hex(EXPORT_PALETTE.textPrimary),
+      color: hex(paletteOf(slide).textPrimary),
     });
     y += 0.4;
   }
@@ -258,7 +268,7 @@ function card(
         h: 0.6,
         fontFace: FONT,
         fontSize: 10,
-        color: hex(EXPORT_PALETTE.textSecondary),
+        color: hex(paletteOf(slide).textSecondary),
       },
     );
   }
@@ -275,7 +285,7 @@ function nativeTable(slide: Slide, table: ExportTable, offset: number): void {
         text: column.label,
         options: {
           bold: true,
-          fill: { color: hex(EXPORT_PALETTE.surfaceSunken) },
+          fill: { color: hex(paletteOf(slide).surfaceSunken) },
           align: column.numeric ? ('right' as const) : ('left' as const),
         },
       })),
@@ -288,8 +298,8 @@ function nativeTable(slide: Slide, table: ExportTable, offset: number): void {
                 ? ('right' as const)
                 : ('left' as const),
             ...(cell.number === undefined && cell.state && cell.state !== 'ready'
-              ? { italic: true, color: hex(EXPORT_PALETTE.textSecondary) }
-              : { color: hex(EXPORT_PALETTE.textPrimary) }),
+              ? { italic: true, color: hex(paletteOf(slide).textSecondary) }
+              : { color: hex(paletteOf(slide).textPrimary) }),
           },
         })),
       ),
@@ -301,7 +311,7 @@ function nativeTable(slide: Slide, table: ExportTable, offset: number): void {
       colW: table.columns.length > 1 ? [first, ...table.columns.slice(1).map(() => rest)] : [width],
       fontFace: FONT,
       fontSize: 11,
-      border: { type: 'solid', pt: 0.5, color: hex(EXPORT_PALETTE.borderSubtle) },
+      border: { type: 'solid', pt: 0.5, color: hex(paletteOf(slide).borderSubtle) },
     },
   );
 }
@@ -325,7 +335,7 @@ function heading(slide: Slide, text: string): void {
     fontFace: FONT,
     fontSize: 24,
     bold: true,
-    color: hex(EXPORT_PALETTE.textPrimary),
+    color: hex(paletteOf(slide).textPrimary),
   });
 }
 
@@ -338,7 +348,7 @@ function body(slide: Slide, text: string): void {
     fontFace: FONT,
     fontSize: 16,
     valign: 'top',
-    color: hex(EXPORT_PALETTE.textPrimary),
+    color: hex(paletteOf(slide).textPrimary),
   });
 }
 
@@ -352,7 +362,7 @@ function footer(slide: Slide, document: ExportDocument): void {
       h: 0.3,
       fontFace: FONT,
       fontSize: 9,
-      color: hex(EXPORT_PALETTE.textMuted),
+      color: hex(paletteOf(slide).textMuted),
     },
   );
   slide.slideNumber = {
@@ -360,7 +370,7 @@ function footer(slide: Slide, document: ExportDocument): void {
     y: SLIDE.height - 0.45,
     fontFace: FONT,
     fontSize: 9,
-    color: hex(EXPORT_PALETTE.textMuted),
+    color: hex(paletteOf(slide).textMuted),
   };
 }
 

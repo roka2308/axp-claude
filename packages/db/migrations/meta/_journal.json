@@ -57,6 +57,13 @@
       "when": 1791051901259,
       "tag": "0007_reporting_and_attention",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1791115639620,
+      "tag": "0008_themes_entitlements_diagnostics",
+      "breakpoints": true
     }
   ]
 }
