@@ -197,6 +197,8 @@ export function createContainer(options: CreateContainerOptions): Container {
       // A local Matomo is a normal development target; in every other
       // environment a private address is an SSRF attempt.
       allowPrivateNetwork: config.appEnv === 'development' || config.appEnv === 'test',
+      // Internal Matomo servers the operator named explicitly.
+      allowedPrivateHosts: config.matomo.allowedPrivateHosts,
     },
   });
 

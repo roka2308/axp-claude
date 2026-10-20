@@ -76,7 +76,7 @@ function raw(env: NodeJS.ProcessEnv) {
       queryTimeoutMs: env.ANALYTICS_QUERY_TIMEOUT_MS,
       maxParallelQueries: env.ANALYTICS_MAX_PARALLEL_QUERIES,
     },
-    matomo: { adapter: env.MATOMO_ADAPTER },
+    matomo: { adapter: env.MATOMO_ADAPTER, allowedPrivateHosts: env.MATOMO_ALLOWED_PRIVATE_HOSTS },
     editor: {
       leaseTtlSeconds: env.EDITOR_LEASE_TTL_SECONDS,
       leaseHeartbeatSeconds: env.EDITOR_LEASE_HEARTBEAT_SECONDS,

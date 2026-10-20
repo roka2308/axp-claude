@@ -164,7 +164,9 @@ describe('performance and robustness', () => {
 
   it('keeps requests to Matomo within the configured parallelism', async () => {
     await start({ queryTimeoutMs: 10_000, maxParallelQueries: 2 });
-    probe.holdMs = 120;
+    // Long enough that requests overlap even on a busy machine, so the limit
+    // is actually reached rather than never tested.
+    probe.holdMs = 400;
     const periods = ['last_7_days', 'last_14_days', 'last_30_days', 'previous_month'];
     const responses = await Promise.all(
       periods.flatMap((period) =>
@@ -175,6 +177,8 @@ describe('performance and robustness', () => {
     );
     for (const response of responses) expect(response.statusCode).toBe(200);
     expect(probe.calls).toBeGreaterThan(4);
+    // Never more than the limit - and the limit was reached.
+    expect(probe.maxActive).toBeLessThanOrEqual(2);
     expect(probe.maxActive).toBe(2);
   });
 

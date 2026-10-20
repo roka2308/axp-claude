@@ -427,7 +427,7 @@
       "credentials_in_url": "The address must not contain credentials.",
       "blocked_host": "This host is not allowed.",
       "blocked_address": "This address is not allowed.",
-      "private_address": "Addresses on the internal network are not allowed."
+      "private_address": "This address is on an internal network. An internal Matomo has to be allowed explicitly by whoever operates the platform; contact your platform administration."
     },
     "source_unavailable": "This report is not answering right now. The other reports are not affected.",
     "value_unreadable": "The source returned a value that cannot be read as a number.",

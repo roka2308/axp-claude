@@ -1,5 +1,14 @@
+import { isIP } from 'node:net';
 import { z } from 'zod';
 import { deploymentProfileSchema } from '@axp/contracts';
+
+const HOST_NAME =
+  /^(?=.{1,253}$)([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)(\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*$/;
+
+/** A host name or an IP address literal - nothing that could match more than one host. */
+function isPlainHost(host: string): boolean {
+  return isIP(host) !== 0 || HOST_NAME.test(host);
+}
 
 const booleanish = z
   .union([z.boolean(), z.enum(['true', 'false', '1', '0', 'yes', 'no'])])
@@ -104,6 +113,33 @@ export const configSchema = z.object({
 
   matomo: z.object({
     adapter: z.enum(['mock', 'http']).default('mock'),
+    /**
+     * Internal Matomo servers the operator allows by name
+     * (`MATOMO_ALLOWED_PRIVATE_HOSTS`, comma-separated). Outside development a
+     * Matomo address in a private network is refused; a host named here may
+     * resolve into the company's internal ranges. Exact names or address
+     * literals only - no wildcards, ranges, schemes or ports - so nobody opens
+     * the whole network by accident.
+     */
+    allowedPrivateHosts: z
+      .string()
+      .default('')
+      .transform((value) =>
+        value
+          .split(',')
+          .map((entry) => entry.trim().toLowerCase().replace(/\.$/, ''))
+          .filter(Boolean),
+      )
+      .superRefine((hosts, context) => {
+        for (const host of hosts) {
+          if (!isPlainHost(host)) {
+            context.addIssue({
+              code: 'custom',
+              message: `"${host}" is not a plain host name or address (no wildcards, ranges, schemes or ports).`,
+            });
+          }
+        }
+      }),
   }),
 
   editor: z.object({

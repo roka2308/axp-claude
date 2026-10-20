@@ -8,7 +8,7 @@ import {
 } from '@axp/contracts';
 import { fixedClock } from '../clock';
 import { SecretBox } from '../secret-box';
-import { isPrivateAddress, assertSafeOutboundUrl } from './url-guard';
+import { isInternalNetworkAddress, isPrivateAddress, assertSafeOutboundUrl } from './url-guard';
 import { MockMatomoAdapter, scenarioFromUrl } from './mock-adapter';
 import type { ResolvedQuery } from './connector';
 
@@ -204,6 +204,106 @@ describe('SSRF guard', () => {
     await expect(
       assertSafeOutboundUrl('http://127.0.0.1:8080', { allowPrivateNetwork: true }),
     ).resolves.toBeInstanceOf(URL);
+  });
+});
+
+describe('SSRF guard: internal Matomo servers named by the operator', () => {
+  const dns: Record<string, string[]> = {
+    'matomo.intern.example': ['10.20.30.40'],
+    'analytics.intern.example': ['10.20.30.41'],
+    'matomo-v6.intern.example': ['fd12:3456::10'],
+    'loop.intern.example': ['127.0.0.1'],
+    'linklocal.intern.example': ['169.254.10.10'],
+    'metadata.intern.example': ['169.254.169.254'],
+    'public.example': ['93.184.216.34'],
+  };
+  const named = (hosts: string[]) => ({
+    allowPrivateNetwork: false,
+    allowedPrivateHosts: hosts,
+    resolve: async (hostname: string) => dns[hostname] ?? [],
+  });
+
+  it('lets a named host reach the company network', async () => {
+    const options = named(['matomo.intern.example', 'matomo-v6.intern.example']);
+    await expect(
+      assertSafeOutboundUrl('https://matomo.intern.example/', options),
+    ).resolves.toBeInstanceOf(URL);
+    await expect(
+      assertSafeOutboundUrl('https://MATOMO.Intern.Example:8443/', options),
+    ).resolves.toBeInstanceOf(URL);
+    await expect(
+      assertSafeOutboundUrl('https://matomo-v6.intern.example/', options),
+    ).resolves.toBeInstanceOf(URL);
+  });
+
+  it('keeps every host that was not named refused', async () => {
+    const options = named(['matomo.intern.example']);
+    await expect(
+      assertSafeOutboundUrl('https://analytics.intern.example/', options),
+    ).rejects.toMatchObject({ code: 'private_address' });
+    await expect(assertSafeOutboundUrl('http://10.20.30.40/', options)).rejects.toMatchObject({
+      code: 'private_address',
+    });
+  });
+
+  it('accepts an address literal only when that literal is named', async () => {
+    const options = named(['10.20.30.40']);
+    await expect(assertSafeOutboundUrl('http://10.20.30.40/', options)).resolves.toBeInstanceOf(
+      URL,
+    );
+    await expect(assertSafeOutboundUrl('http://10.20.30.41/', options)).rejects.toMatchObject({
+      code: 'private_address',
+    });
+  });
+
+  it('never lets a named host point at this machine, link-local or a metadata service', async () => {
+    const options = named([
+      'loop.intern.example',
+      'linklocal.intern.example',
+      'metadata.intern.example',
+    ]);
+    await expect(
+      assertSafeOutboundUrl('https://loop.intern.example/', options),
+    ).rejects.toMatchObject({ code: 'private_address' });
+    await expect(
+      assertSafeOutboundUrl('https://linklocal.intern.example/', options),
+    ).rejects.toMatchObject({ code: 'private_address' });
+    await expect(
+      assertSafeOutboundUrl('https://metadata.intern.example/', options),
+    ).rejects.toMatchObject({ code: 'blocked_address' });
+    await expect(
+      assertSafeOutboundUrl('https://localhost/', named(['localhost'])),
+    ).rejects.toMatchObject({ code: 'blocked_host' });
+  });
+
+  it('changes nothing for public hosts', async () => {
+    await expect(
+      assertSafeOutboundUrl('https://public.example/', named([])),
+    ).resolves.toBeInstanceOf(URL);
+  });
+
+  it('separates internal network ranges from the rest of the private ones', () => {
+    for (const address of [
+      '10.0.0.1',
+      '172.20.1.1',
+      '192.168.5.5',
+      '100.64.1.1',
+      'fd00::1',
+      '::ffff:10.1.1.1',
+    ]) {
+      expect(isInternalNetworkAddress(address), address).toBe(true);
+    }
+    for (const address of [
+      '127.0.0.1',
+      '169.254.1.1',
+      '0.0.0.0',
+      '224.0.0.1',
+      '::1',
+      'fe80::1',
+      '8.8.8.8',
+    ]) {
+      expect(isInternalNetworkAddress(address), address).toBe(false);
+    }
   });
 });
 

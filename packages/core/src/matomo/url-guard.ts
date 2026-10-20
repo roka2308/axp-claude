@@ -20,6 +20,16 @@ export interface UrlGuardOptions {
    * normal thing to develop against. Never enable outside development.
    */
   readonly allowPrivateNetwork: boolean;
+  /**
+   * Hosts the operator has named as internal Matomo servers
+   * (`MATOMO_ALLOWED_PRIVATE_HOSTS`). Such a host - matched exactly, by name
+   * or address literal - may resolve into the internal ranges (RFC 1918,
+   * carrier-grade NAT, IPv6 unique local). Loopback, link-local, metadata
+   * services and every host not named stay refused.
+   */
+  readonly allowedPrivateHosts?: readonly string[];
+  /** Resolves a hostname to its addresses; replaceable in tests. */
+  readonly resolve?: (hostname: string) => Promise<string[]>;
 }
 
 const BLOCKED_HOSTNAMES = new Set([
@@ -58,13 +68,20 @@ export async function assertSafeOutboundUrl(
     throw refuse('blocked_host', `Refused hostname ${hostname}`);
   }
 
-  const addresses = await resolveAddresses(hostname);
+  const namedInternal = (options.allowedPrivateHosts ?? []).includes(hostname);
+  // An address literal is its own answer; only names go to the resolver.
+  const addresses =
+    net.isIP(hostname) !== 0 ? [hostname] : await (options.resolve ?? resolveAddresses)(hostname);
   for (const address of addresses) {
     if (BLOCKED_ADDRESSES.has(address)) {
       throw refuse('blocked_address', `Refused metadata address ${address}`);
     }
     if (!options.allowPrivateNetwork && isPrivateAddress(address)) {
-      throw refuse('private_address', `Refused private address ${address} for ${hostname}`);
+      // A host the operator named may live in the company network - never on
+      // this machine, a link-local segment or a metadata service.
+      if (!(namedInternal && isInternalNetworkAddress(address))) {
+        throw refuse('private_address', `Refused private address ${address} for ${hostname}`);
+      }
     }
   }
 
@@ -109,6 +126,32 @@ export function isPrivateAddress(address: string): boolean {
     // IPv4-mapped: check the embedded address.
     const mapped = /^::ffff:(\d+\.\d+\.\d+\.\d+)$/.exec(normalized);
     if (mapped?.[1]) return isPrivateAddress(mapped[1]);
+    return false;
+  }
+  return false;
+}
+
+/**
+ * The ranges a company network uses for its servers: RFC 1918, carrier-grade
+ * NAT and IPv6 unique local addresses. Deliberately narrower than
+ * `isPrivateAddress`: loopback, link-local, unspecified and multicast are not
+ * where an internal Matomo lives.
+ */
+export function isInternalNetworkAddress(address: string): boolean {
+  const version = net.isIP(address);
+  if (version === 4) {
+    const [a = 0, b = 0] = address.split('.').map(Number);
+    if (a === 10) return true;
+    if (a === 172 && b >= 16 && b <= 31) return true;
+    if (a === 192 && b === 168) return true;
+    if (a === 100 && b >= 64 && b <= 127) return true;
+    return false;
+  }
+  if (version === 6) {
+    const normalized = address.toLowerCase();
+    if (/^f[cd]/.test(normalized)) return true;
+    const mapped = /^::ffff:(\d+\.\d+\.\d+\.\d+)$/.exec(normalized);
+    if (mapped?.[1]) return isInternalNetworkAddress(mapped[1]);
     return false;
   }
   return false;

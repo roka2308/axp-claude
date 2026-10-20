@@ -258,6 +258,8 @@ export class DiagnosticsService {
       sessionIdleMinutes: config.session.idleTimeoutMinutes,
       analyticsCacheTtlSeconds: config.analytics.cacheTtlSeconds,
       analyticsQueryTimeoutMs: config.analytics.queryTimeoutMs,
+      // How many, not which: host names describe the internal network.
+      matomoAllowedPrivateHosts: config.matomo.allowedPrivateHosts.length,
       exportTtlMinutes: config.exports.artifactTtlMinutes,
       secretsConfigured: {
         sessionSecret: config.secrets.sessionSecret.length > 0,

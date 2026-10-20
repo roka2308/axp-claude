@@ -427,7 +427,7 @@
       "credentials_in_url": "Die Adresse darf keine Zugangsdaten enthalten.",
       "blocked_host": "Dieser Host ist nicht zulässig.",
       "blocked_address": "Diese Adresse ist nicht zulässig.",
-      "private_address": "Adressen im internen Netz sind nicht zulässig."
+      "private_address": "Diese Adresse liegt in einem internen Netz. Ein internes Matomo muss der Betrieb der Plattform ausdrücklich freigeben; wenden Sie sich an Ihre Plattform-Administration."
     },
     "source_unavailable": "Dieser Bericht antwortet zurzeit nicht. Die übrigen Auswertungen sind davon nicht betroffen.",
     "value_unreadable": "Die Quelle hat einen Wert geliefert, der sich nicht als Zahl lesen lässt.",

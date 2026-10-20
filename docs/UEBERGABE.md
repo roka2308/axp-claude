@@ -34,7 +34,7 @@ Wichtige Dokumente im Repository:
 | `README.md`                             | Entwicklungsumgebung, Befehle, Architektur                         |
 | `docs/acceptance/mvp-acceptance.md`     | Abnahme je Checklistenpunkt mit Nachweis; Liste der offenen Punkte |
 | `docs/gates/F0.md` … `F10.md`           | Gate-Protokolle mit Belegen                                        |
-| `docs/adr/`                             | Architekturentscheidungen (0001–0012)                              |
+| `docs/adr/`                             | Architekturentscheidungen (0001–0013)                              |
 | `DEVIATIONS.md`                         | Abweichungen von der Spezifikation und ihr Status                  |
 | `docs/operations/backup-and-restore.md` | Backup/Restore-Runbook (im Gate F10 geprobt)                       |
 | `docs/operations/upgrade.md`            | Upgrade-Runbook (im Gate F10 von v0.9 aus geprobt)                 |
@@ -58,14 +58,14 @@ Browser ─▶ Web (Next.js, Port WEB_PORT) ─▶ API (Fastify, Port API_PORT) 
 
 ## 4. Voraussetzungen
 
-| Komponente        | Anforderung                                                                                                                 |
-| ----------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| Node.js           | ≥ 22.12 (entwickelt und getestet mit 24)                                                                                    |
-| MySQL             | 8.4, Zeichensatz `utf8mb4`, Kollation `utf8mb4_0900_ai_ci`, eigener Benutzer nur für die Datenbank                          |
-| SMTP              | Ein Relay für Einladungen, Passwort-Links, Adressbestätigungen und Berichte                                                 |
-| Reverse Proxy     | TLS-Terminierung vor dem Web-Server; muss `X-Forwarded-For` setzen                                                          |
-| Matomo            | Erreichbar per HTTPS vom API-Server; ein Token mit Lesezugriff je Verbindung                                                |
-| Build-/Admin-Host | Vollständiger Checkout mit `npm ci` (inkl. Dev-Abhängigkeiten): Migrationen, Erst-Admin und Notfallzugang laufen über `tsx` |
+| Komponente        | Anforderung                                                                                                                                         |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Node.js           | ≥ 22.12 (entwickelt und getestet mit 24)                                                                                                            |
+| MySQL             | 8.4, Zeichensatz `utf8mb4`, Kollation `utf8mb4_0900_ai_ci`, eigener Benutzer nur für die Datenbank                                                  |
+| SMTP              | Ein Relay für Einladungen, Passwort-Links, Adressbestätigungen und Berichte                                                                         |
+| Reverse Proxy     | TLS-Terminierung vor dem Web-Server; muss `X-Forwarded-For` setzen                                                                                  |
+| Matomo            | Erreichbar per HTTPS vom API-Server; ein Token mit Lesezugriff je Verbindung. Liegt es im internen Netz: Hostname in `MATOMO_ALLOWED_PRIVATE_HOSTS` |
+| Build-/Admin-Host | Vollständiger Checkout mit `npm ci` (inkl. Dev-Abhängigkeiten): Migrationen, Erst-Admin und Notfallzugang laufen über `tsx`                         |
 
 ## 5. Bereitstellung Schritt für Schritt
 
@@ -84,22 +84,23 @@ Browser ─▶ Web (Next.js, Port WEB_PORT) ─▶ API (Fastify, Port API_PORT) 
    eingebauten Schutzregeln verletzt ist (Demo-Daten an, kein JSON-Log, keine
    HTTPS-URLs, Entwickler-Zugangsdaten in `DATABASE_URL`).
 
-   | Variable                     | Produktivwert / Hinweis                                                                         |
-   | ---------------------------- | ----------------------------------------------------------------------------------------------- |
-   | `NODE_ENV`, `APP_ENV`        | `production`                                                                                    |
-   | `DEPLOYMENT_PROFILE`         | `central_multi_tenant`, `dedicated_single_customer` oder `customer_hosted`                      |
-   | `LOG_FORMAT`, `LOG_LEVEL`    | `json`, `info`                                                                                  |
-   | `API_HOST`, `API_PORT`       | Bind-Adresse und Port der API                                                                   |
-   | `API_PUBLIC_URL`             | HTTPS-URL, unter der der Web-Server die API erreicht                                            |
-   | `WEB_PORT`, `WEB_PUBLIC_URL` | Port des Web-Servers; öffentliche HTTPS-URL (Links in Mails zeigen dorthin)                     |
-   | `API_TRUSTED_PROXIES`        | Adresse(n) des Web-Servers, kommagetrennt (ADR 0012)                                            |
-   | `DATABASE_URL`               | `mysql://<benutzer>:<passwort>@<host>:<port>/<datenbank>`                                       |
-   | `SESSION_SECRET`             | 32 Byte, Base64 – im Secret Store                                                               |
-   | `CREDENTIAL_ENCRYPTION_KEY`  | 32 Byte, Base64 – im Secret Store, **separat sichern** (verschlüsselt Matomo-Token, Exporte)    |
-   | `MAIL_TRANSPORT`             | `smtp`, dazu `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASSWORD`, `MAIL_FROM` |
-   | `ENABLE_DEMO_FIXTURES`       | `false`                                                                                         |
-   | `EXPORT_ARTIFACT_DIR`        | Privates, beschreibbares Verzeichnis für kurzlebige, verschlüsselte Exporte                     |
-   | `REPORTS_PPTX_ENABLED`       | `false` (PowerPoint für geplante Berichte wartet auf sein Stabilitäts-Gate)                     |
+   | Variable                       | Produktivwert / Hinweis                                                                                                                                                                                  |
+   | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+   | `NODE_ENV`, `APP_ENV`          | `production`                                                                                                                                                                                             |
+   | `DEPLOYMENT_PROFILE`           | `central_multi_tenant`, `dedicated_single_customer` oder `customer_hosted`                                                                                                                               |
+   | `LOG_FORMAT`, `LOG_LEVEL`      | `json`, `info`                                                                                                                                                                                           |
+   | `API_HOST`, `API_PORT`         | Bind-Adresse und Port der API                                                                                                                                                                            |
+   | `API_PUBLIC_URL`               | HTTPS-URL, unter der der Web-Server die API erreicht                                                                                                                                                     |
+   | `WEB_PORT`, `WEB_PUBLIC_URL`   | Port des Web-Servers; öffentliche HTTPS-URL (Links in Mails zeigen dorthin)                                                                                                                              |
+   | `API_TRUSTED_PROXIES`          | Adresse(n) des Web-Servers, kommagetrennt (ADR 0012)                                                                                                                                                     |
+   | `DATABASE_URL`                 | `mysql://<benutzer>:<passwort>@<host>:<port>/<datenbank>`                                                                                                                                                |
+   | `SESSION_SECRET`               | 32 Byte, Base64 – im Secret Store                                                                                                                                                                        |
+   | `CREDENTIAL_ENCRYPTION_KEY`    | 32 Byte, Base64 – im Secret Store, **separat sichern** (verschlüsselt Matomo-Token, Exporte)                                                                                                             |
+   | `MAIL_TRANSPORT`               | `smtp`, dazu `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASSWORD`, `MAIL_FROM`                                                                                                          |
+   | `ENABLE_DEMO_FIXTURES`         | `false`                                                                                                                                                                                                  |
+   | `EXPORT_ARTIFACT_DIR`          | Privates, beschreibbares Verzeichnis für kurzlebige, verschlüsselte Exporte                                                                                                                              |
+   | `REPORTS_PPTX_ENABLED`         | `false` (PowerPoint für geplante Berichte wartet auf sein Stabilitäts-Gate)                                                                                                                              |
+   | `MATOMO_ALLOWED_PRIVATE_HOSTS` | Interne Matomo-Server, kommagetrennt und exakt benannt (z. B. `matomo.intern.firma.de`). Ohne Eintrag sind Matomo-Adressen im internen Netz gesperrt. Keine Platzhalter, Bereiche oder Ports (ADR 0013). |
 
    Schlüssel erzeugen:
    `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"`
@@ -146,19 +147,19 @@ Browser ─▶ Web (Next.js, Port WEB_PORT) ─▶ API (Fastify, Port API_PORT) 
 Vollständige Liste mit Einordnung: `docs/acceptance/mvp-acceptance.md`, letzte
 Tabelle. Die für eine Bereitstellung wichtigsten Punkte:
 
-| Thema                                     | Warum es zählt                                                                                                                                                                                                                  | Einordnung                               |
-| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
-| **Matomo im internen Netz**               | In `staging`/`production` lehnt die API Matomo-Adressen in privaten Netzen grundsätzlich ab (Schutz gegen SSRF). Ein Firmen-Matomo mit interner Adresse ist so **nicht anschließbar**; es braucht eine explizite Freigabeliste. | **Blocker** für interne Matomo-Instanzen |
-| **Echtes Matomo nie angebunden**          | Der HTTP-Adapter ist gebaut und abgesichert, aber nur gegen den Mock getestet. Fähigkeitsprüfung, Kennzahlen und Zeitzonen gegen die eigene Matomo-Version prüfen.                                                              | Production Readiness                     |
-| **Anmeldung**                             | Nur lokale Konten mit Passwort. OIDC/SSO ist im Datenmodell vorbereitet, die Anbindung fehlt.                                                                                                                                   | Production Readiness                     |
-| **Reverse Proxy & `API_TRUSTED_PROXIES`** | Rate-Limits und Login-Sperren zählen pro Besucher; das funktioniert nur, wenn der Proxy `X-Forwarded-For` setzt und die API nur dem Web-Server glaubt.                                                                          | Production Readiness                     |
-| **Nur eine Instanz je Prozess**           | Rate-Limits und Analytics-Cache liegen im Speicher; Exportdateien im lokalen Verzeichnis. Horizontal skalieren erfordert gemeinsame Ablagen.                                                                                    | Production Readiness                     |
-| **Keine Container-Images**                | Bereitstellung derzeit als Node-Prozesse aus dem Build; Images/Helm-Charts fehlen.                                                                                                                                              | Production Readiness                     |
-| **Mailzustellung**                        | SPF, DKIM, Bounce-Behandlung für den Absender.                                                                                                                                                                                  | Production Readiness                     |
-| **Barrierefreiheit manuell**              | Automatische WCAG-2.1-AA-Prüfung bestanden; ein Durchgang mit Screenreader (NVDA, JAWS, VoiceOver) steht aus. Firefox-Smoke-Tests sind eingebaut (`E2E_FIREFOX=1`), liefen aber auf der Entwicklungsmaschine nicht.             | Production Readiness                     |
-| **Zwei npm-Hinweise**                     | `image-size` (über pptxgenjs) und `uuid` (über exceljs) – Code, den das Produkt nicht ausführt. Ersetzen, sobald die Pakete aktualisiert werden.                                                                                | Production Readiness                     |
-| **Sicherheitsprüfung**                    | Interne Prüfung bzw. Penetrationstest durch das Unternehmen.                                                                                                                                                                    | vor Go-live empfohlen                    |
-| **Löschfristen beim Offboarding**         | In der Spezifikation offen.                                                                                                                                                                                                     | On Hold                                  |
+| Thema                                     | Warum es zählt                                                                                                                                                                                                                                 | Einordnung                  |
+| ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------- |
+| **Matomo im internen Netz**               | Außerhalb der Entwicklung lehnt die API Matomo-Adressen in privaten Netzen ab (Schutz gegen SSRF). Ein internes Firmen-Matomo wird über `MATOMO_ALLOWED_PRIVATE_HOSTS` ausdrücklich freigegeben; danach API und Worker neu starten (ADR 0013). | Konfiguration vor dem Pilot |
+| **Echtes Matomo nie angebunden**          | Der HTTP-Adapter ist gebaut und abgesichert, aber nur gegen den Mock getestet. Fähigkeitsprüfung, Kennzahlen und Zeitzonen gegen die eigene Matomo-Version prüfen.                                                                             | Production Readiness        |
+| **Anmeldung**                             | Nur lokale Konten mit Passwort. OIDC/SSO ist im Datenmodell vorbereitet, die Anbindung fehlt.                                                                                                                                                  | Production Readiness        |
+| **Reverse Proxy & `API_TRUSTED_PROXIES`** | Rate-Limits und Login-Sperren zählen pro Besucher; das funktioniert nur, wenn der Proxy `X-Forwarded-For` setzt und die API nur dem Web-Server glaubt.                                                                                         | Production Readiness        |
+| **Nur eine Instanz je Prozess**           | Rate-Limits und Analytics-Cache liegen im Speicher; Exportdateien im lokalen Verzeichnis. Horizontal skalieren erfordert gemeinsame Ablagen.                                                                                                   | Production Readiness        |
+| **Keine Container-Images**                | Bereitstellung derzeit als Node-Prozesse aus dem Build; Images/Helm-Charts fehlen.                                                                                                                                                             | Production Readiness        |
+| **Mailzustellung**                        | SPF, DKIM, Bounce-Behandlung für den Absender.                                                                                                                                                                                                 | Production Readiness        |
+| **Barrierefreiheit manuell**              | Automatische WCAG-2.1-AA-Prüfung bestanden; ein Durchgang mit Screenreader (NVDA, JAWS, VoiceOver) steht aus. Firefox-Smoke-Tests sind eingebaut (`E2E_FIREFOX=1`), liefen aber auf der Entwicklungsmaschine nicht.                            | Production Readiness        |
+| **Zwei npm-Hinweise**                     | `image-size` (über pptxgenjs) und `uuid` (über exceljs) – Code, den das Produkt nicht ausführt. Ersetzen, sobald die Pakete aktualisiert werden.                                                                                               | Production Readiness        |
+| **Sicherheitsprüfung**                    | Interne Prüfung bzw. Penetrationstest durch das Unternehmen.                                                                                                                                                                                   | vor Go-live empfohlen       |
+| **Löschfristen beim Offboarding**         | In der Spezifikation offen.                                                                                                                                                                                                                    | On Hold                     |
 
 ## 7. Prüfen, dass alles funktioniert
 
