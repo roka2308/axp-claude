@@ -52,7 +52,7 @@ export class UserService {
         code: 'email_already_used',
         messageKey: 'user.email_already_used',
         fieldErrors: { email: 'user.email_already_used' },
-        internalMessage: `A user with ${email} already exists.`,
+        internalMessage: 'A user with this address already exists.',
       });
     }
 

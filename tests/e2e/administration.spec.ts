@@ -105,8 +105,9 @@ test.describe('administration: self service', () => {
     await page.goto('/profile');
     await expect(page.getByRole('heading', { name: 'Mein Profil' })).toBeVisible();
     await expect(page.getByLabel('Vorname')).toBeEditable();
-    // The address cannot be changed yet, and the page says why (DEV-005).
-    await expect(page.getByLabel('E-Mail-Adresse')).not.toBeEditable();
+    // The address is changed in its own, verified flow - not in this form.
+    await expect(page.getByLabel('E-Mail-Adresse', { exact: true })).not.toBeEditable();
+    await expect(page.getByRole('heading', { name: 'E-Mail-Adresse ändern' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Passwort ändern' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Meine Rechte' })).toBeVisible();
     await expect(page.getByText('Veröffentlichte Dashboards ansehen').first()).toBeVisible();

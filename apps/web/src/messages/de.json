@@ -141,7 +141,13 @@
     },
     "recovery": {
       "link_invalid": "Dieser Link ist nicht mehr gültig. Fordern Sie auf der Anmeldeseite unter „Passwort vergessen?“ einen neuen an."
-    }
+    },
+    "pageFailedTitle": "Die Seite konnte nicht geladen werden",
+    "reference": "Vorgangsnummer: {id}",
+    "tryAgain": "Erneut versuchen",
+    "toHome": "Zur Startseite",
+    "notFoundTitle": "Seite nicht gefunden",
+    "notFoundBody": "Unter dieser Adresse gibt es nichts. Vielleicht wurde der Link geändert, oder die Seite wurde entfernt."
   },
   "roles": {
     "viewer": {
@@ -1576,7 +1582,8 @@
     "project": {
       "created": "Projekt angelegt",
       "updated": "Projekt geändert",
-      "site_assigned": "Matomo-Site zugeordnet"
+      "site_assigned": "Matomo-Site zugeordnet",
+      "context_updated": "Projektkontext geändert"
     },
     "user": {
       "invited": "Person eingeladen",
@@ -1662,6 +1669,10 @@
     },
     "diagnostics": {
       "bundle_generated": "Diagnosepaket erstellt"
+    },
+    "solution": {
+      "installed": "Lösung installiert",
+      "exported": "Lösung exportiert"
     }
   },
   "solution": {
@@ -2518,7 +2529,8 @@
     "signIn": "Zur Anmeldung",
     "invalidTitle": "Link nicht mehr gültig",
     "invalidBody": "Dieser Link wurde schon verwendet oder ist abgelaufen. Ein neuer Link lässt sich jederzeit anfordern.",
-    "requestNew": "Neuen Link anfordern"
+    "requestNew": "Neuen Link anfordern",
+    "emailRequired": "Bitte geben Sie die E-Mail-Adresse Ihres Kontos ein."
   },
   "profile": {
     "emailChange": {

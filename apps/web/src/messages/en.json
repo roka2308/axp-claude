@@ -141,7 +141,13 @@
     },
     "recovery": {
       "link_invalid": "This link is no longer valid. Request a new one on the sign-in page under \"Forgot your password?\"."
-    }
+    },
+    "pageFailedTitle": "The page could not be loaded",
+    "reference": "Reference: {id}",
+    "tryAgain": "Try again",
+    "toHome": "To the start page",
+    "notFoundTitle": "Page not found",
+    "notFoundBody": "There is nothing at this address. The link may have changed, or the page was removed."
   },
   "roles": {
     "viewer": {
@@ -1576,7 +1582,8 @@
     "project": {
       "created": "Project created",
       "updated": "Project changed",
-      "site_assigned": "Matomo site assigned"
+      "site_assigned": "Matomo site assigned",
+      "context_updated": "Project context changed"
     },
     "user": {
       "invited": "Person invited",
@@ -1662,6 +1669,10 @@
     },
     "diagnostics": {
       "bundle_generated": "Diagnostic bundle created"
+    },
+    "solution": {
+      "installed": "Solution installed",
+      "exported": "Solution exported"
     }
   },
   "solution": {
@@ -2518,7 +2529,8 @@
     "signIn": "To sign-in",
     "invalidTitle": "Link no longer valid",
     "invalidBody": "This link was already used or has expired. You can request a new link at any time.",
-    "requestNew": "Request a new link"
+    "requestNew": "Request a new link",
+    "emailRequired": "Please enter the e-mail address of your account."
   },
   "profile": {
     "emailChange": {

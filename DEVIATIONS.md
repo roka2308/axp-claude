@@ -173,7 +173,7 @@ first one with a live Matomo available.
 
 ## DEV-005 — A local account's e-mail address is not self-service yet
 
-- Status: `track_specific`
+- Status: `resolved`
 - Milestone: F5
 - Specification reference: Master Spec §12 ("E-Mail-Änderungen bei Local Auth
   erfordern Re-Auth und Verifikation")
@@ -206,6 +206,14 @@ invitation links by mail at the same time.
 Update (Phase 8): the mail transport exists now (console, SMTP; ADR 0010) and
 carries reports and attention notices. The verified address change and mailed
 invitations are still to be built; they move to Phase 10 hardening.
+
+### Resolution
+
+Resolved in Phase 10 (ADR 0012): invitations are mailed to the invited person
+(the link is still shown once to the administrator, as a fallback); "Mein
+Profil" changes the address with the current password and a confirmation from
+the new mailbox, and the old address is told. Self-service password recovery,
+which the specification also lists for the MVP, was built at the same time.
 
 ---
 

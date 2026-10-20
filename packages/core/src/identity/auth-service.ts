@@ -35,7 +35,14 @@ export interface SessionPolicy {
  * either way so the lock itself does not become an account oracle.
  */
 export interface BruteForcePolicy {
+  /** Failures before one account is locked. */
   readonly failureThreshold: number;
+  /**
+   * Failures before one address is locked. Higher: a whole company can share
+   * one address, and its people's typos must not lock each other out; the
+   * per-account threshold protects each account on its own.
+   */
+  readonly addressFailureThreshold: number;
   readonly baseLockMinutes: number;
   readonly maxLockMinutes: number;
   /** Failure counters older than this are forgotten. */
@@ -44,6 +51,7 @@ export interface BruteForcePolicy {
 
 export const DEFAULT_BRUTE_FORCE_POLICY: BruteForcePolicy = {
   failureThreshold: 5,
+  addressFailureThreshold: 50,
   baseLockMinutes: 1,
   maxLockMinutes: 15,
   windowMinutes: 30,
@@ -364,7 +372,8 @@ export class AuthService {
           code: 'temporarily_locked',
           messageKey: 'auth.temporarily_locked',
           messageParams: { retryAfterSeconds: Math.ceil((+row.lockedUntil - +now) / 1000) },
-          internalMessage: `Login refused: ${subjectKey} is locked until ${row.lockedUntil.toISOString()}.`,
+          // The kind of lock, never the key: the key holds an address.
+          internalMessage: `Login refused: ${subjectKey.startsWith('ip:') ? 'address' : 'account'} locked until ${row.lockedUntil.toISOString()}.`,
         });
       }
     }
@@ -382,9 +391,12 @@ export class AuthService {
 
       const stale = !existing || existing.lastFailedAt < windowStart;
       const failedCount = stale ? 1 : existing.failedCount + 1;
+      const threshold = subjectKey.startsWith('ip:')
+        ? this.bruteForce.addressFailureThreshold
+        : this.bruteForce.failureThreshold;
       const lockedUntil =
-        failedCount >= this.bruteForce.failureThreshold
-          ? addMs(now, minutes(this.lockMinutesFor(failedCount)))
+        failedCount >= threshold
+          ? addMs(now, minutes(this.lockMinutesFor(failedCount, threshold)))
           : null;
 
       if (!existing) {
@@ -411,8 +423,8 @@ export class AuthService {
   }
 
   /** Doubling backoff from the threshold upwards, capped by policy. */
-  private lockMinutesFor(failedCount: number): number {
-    const overshoot = failedCount - this.bruteForce.failureThreshold;
+  private lockMinutesFor(failedCount: number, threshold: number): number {
+    const overshoot = failedCount - threshold;
     const minutesToLock = this.bruteForce.baseLockMinutes * 2 ** Math.max(0, overshoot);
     return Math.min(minutesToLock, this.bruteForce.maxLockMinutes);
   }

@@ -237,6 +237,7 @@ export function registerProjectRoutes(app: FastifyInstance, container: Container
           projectId: scope.projectId,
           step,
           notRelevant,
+          actorUserId: auth.userId,
         }),
       };
     },

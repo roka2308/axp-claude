@@ -81,7 +81,9 @@ test.describe('exports of the current view', () => {
 
   test('exports one widget as CSV from its detail view', async ({ page }) => {
     await openDashboard(page);
-    await page.getByRole('link', { name: /PULSE/ }).first().click();
+    // The score tile streams in after the text tile next to it, which names PULSE
+    // too - wait for the score's own link rather than whichever arrives first.
+    await page.getByRole('link', { name: 'PULSE Details', exact: true }).click();
     const dialog = page.getByRole('dialog');
     await expect(dialog).toBeVisible();
 

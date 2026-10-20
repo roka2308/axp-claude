@@ -62,6 +62,9 @@ export const ANALYTICS_PAYLOAD_KEYS: readonly string[] = [
 export const REDACTED_MARKER = '[redacted]';
 export const DROPPED_MARKER = '[dropped:analytics-payload]';
 
+/** An e-mail address inside any logged text. */
+const EMAIL_PATTERN = /[A-Za-z0-9._%+-]+@([A-Za-z0-9.-]+.[A-Za-z]{2,})/g;
+
 const MAX_DEPTH = 6;
 const MAX_ARRAY_ITEMS = 20;
 const MAX_STRING_LENGTH = 2000;
@@ -80,9 +83,12 @@ export function sanitizeForLog(value: unknown, depth = 0): unknown {
   if (depth > MAX_DEPTH) return '[truncated:depth]';
 
   if (typeof value === 'string') {
-    return value.length > MAX_STRING_LENGTH
-      ? `${value.slice(0, MAX_STRING_LENGTH)}…[truncated]`
-      : value;
+    // A person's address is personal data, not operational context: only the
+    // domain stays, which is what an operator needs to see a pattern.
+    const masked = value.replace(EMAIL_PATTERN, (_match, domain: string) => `***@${domain}`);
+    return masked.length > MAX_STRING_LENGTH
+      ? `${masked.slice(0, MAX_STRING_LENGTH)}…[truncated]`
+      : masked;
   }
   if (typeof value === 'number' || typeof value === 'boolean' || typeof value === 'bigint') {
     return value;

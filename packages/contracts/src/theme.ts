@@ -132,6 +132,18 @@ export const THEME_CONTRAST_PAIRS: readonly {
     reason: 'body_text',
   },
   {
+    foreground: '--text-muted',
+    background: '--surface-sunken',
+    minimumRatio: 4.5,
+    reason: 'body_text',
+  },
+  {
+    foreground: '--text-muted',
+    background: '--surface-selected',
+    minimumRatio: 4.5,
+    reason: 'body_text',
+  },
+  {
     foreground: '--accent-contrast',
     background: '--accent-default',
     minimumRatio: 4.5,
@@ -248,7 +260,7 @@ export const DEFAULT_LIGHT_COLORS: Readonly<Partial<Record<ThemeableToken, strin
   '--border-strong': '#667085',
   '--text-primary': '#101828',
   '--text-secondary': '#475467',
-  '--text-muted': '#667085',
+  '--text-muted': '#5b6475',
   '--text-link': '#1c5cab',
   '--text-on-accent': '#ffffff',
   '--accent-subtle': '#e8f0fb',

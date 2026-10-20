@@ -100,4 +100,21 @@ describe('message catalogues', () => {
       expect(unresolved, `${locale}.json`).toEqual([]);
     }
   });
+
+  it('name every audit action in the audit trail, in both languages', () => {
+    const contract = readFileSync(path.join(repo, 'packages/contracts/src/audit.ts'), 'utf8');
+    const actions = [...contract.matchAll(/^ {2}'([a-z_]+(?:\.[a-z_]+)+)',$/gm)].map(
+      (match) => match[1]!,
+    );
+    expect(actions.length).toBeGreaterThan(50);
+    for (const [locale, messages] of Object.entries(catalogues)) {
+      const t = createTranslator({ locale, messages, onError: () => undefined }) as unknown as {
+        has: (key: string) => boolean;
+      };
+      expect(
+        actions.filter((action) => !t.has(`auditAction.${action}`)),
+        `${locale}.json`,
+      ).toEqual([]);
+    }
+  });
 });

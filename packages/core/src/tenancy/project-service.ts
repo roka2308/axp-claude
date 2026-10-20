@@ -283,6 +283,7 @@ export class ProjectService {
     projectId: string;
     step: SetupStepKey;
     notRelevant: boolean;
+    actorUserId?: string;
   }): Promise<ProjectSetupStatus> {
     if (!DISMISSABLE_SETUP_STEPS.includes(input.step)) {
       throw new AppError('validation_failed', {
@@ -307,6 +308,13 @@ export class ProjectService {
       .update(projects)
       .set({ setupChecklist: { ...stored, notRelevant: [...current] } })
       .where(eq(projects.id, input.projectId));
+    await this.deps.audit.success('project.updated', {
+      actorUserId: input.actorUserId ?? null,
+      tenantId: input.tenantId,
+      targetType: 'project',
+      targetId: input.projectId,
+      metadata: { setupStep: input.step, notRelevant: input.notRelevant },
+    });
 
     await this.refreshSetupState(input.tenantId, input.projectId);
     return this.getSetupStatus(input.tenantId, input.projectId);

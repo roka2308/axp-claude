@@ -9,7 +9,7 @@
 export const EXPORT_PALETTE = {
   textPrimary: '#101828',
   textSecondary: '#475467',
-  textMuted: '#667085',
+  textMuted: '#5b6475',
   borderSubtle: '#e4e7ec',
   borderDefault: '#868e9c',
   surfaceSunken: '#eef0f3',

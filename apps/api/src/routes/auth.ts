@@ -4,6 +4,7 @@ import { eq } from 'drizzle-orm';
 import { ROLE_DESCRIPTORS } from '@axp/contracts';
 import { users } from '@axp/db';
 import type { Container } from '@axp/core';
+import { clientAddress } from '../lib/client-address';
 import { extractBearerToken, requireAuth } from '../plugins/authentication';
 
 const loginSchema = z.object({
@@ -24,7 +25,7 @@ export function registerAuthRoutes(app: FastifyInstance, container: Container): 
       const result = await container.auth.login({
         email: input.email,
         password: input.password,
-        ipAddress: request.ip,
+        ipAddress: clientAddress(request, container.config.api.trustedProxies),
         userAgent: request.headers['user-agent'],
       });
 

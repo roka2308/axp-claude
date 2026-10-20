@@ -17,8 +17,9 @@ describe('sanitizeForLog', () => {
     expect(result.user!.password).toBe(REDACTED_MARKER);
     expect(result.connection!.tokenAuth).toBe(REDACTED_MARKER);
     expect(result.headers!.authorization).toBe(REDACTED_MARKER);
-    // Non-sensitive context survives, otherwise logs stop being useful.
-    expect(result.user!.email).toBe('a@example.invalid');
+    // Context survives, otherwise logs stop being useful - but a person's
+    // address keeps only its domain.
+    expect(result.user!.email).toBe('***@example.invalid');
     expect(result.headers!['x-request-id']).toBe('r-1');
   });
 

@@ -23,11 +23,18 @@ export function ForgotPasswordForm() {
   const [sent, setSent] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
-  function submit(event: React.FormEvent) {
+  function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setMessage(null);
+    // Read from the field itself: what was typed or autofilled before the
+    // page became interactive counts too.
+    const value = String(new FormData(event.currentTarget).get('email') ?? email).trim();
+    if (!value) {
+      setMessage(t('emailRequired'));
+      return;
+    }
     startTransition(async () => {
-      const outcome = await requestPasswordResetAction(email);
+      const outcome = await requestPasswordResetAction(value);
       if (outcome.status === 'ok') setSent(true);
       else if (outcome.status === 'error') setMessage(outcome.message);
     });
@@ -54,6 +61,7 @@ export function ForgotPasswordForm() {
       <p className="text-secondary">{t('explain')}</p>
       <TextField
         label={t('email')}
+        name="email"
         type="email"
         autoComplete="username"
         required
@@ -62,13 +70,7 @@ export function ForgotPasswordForm() {
       />
       <div className="stack stack--tight">
         <div>
-          <Button
-            type="submit"
-            variant="primary"
-            disabled={!email.trim()}
-            busy={pending}
-            busyLabel={t('sending')}
-          >
+          <Button type="submit" variant="primary" busy={pending} busyLabel={t('sending')}>
             {t('submit')}
           </Button>
         </div>

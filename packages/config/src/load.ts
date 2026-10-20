@@ -48,7 +48,12 @@ function raw(env: NodeJS.ProcessEnv) {
     appEnv: env.APP_ENV,
     deploymentProfile: env.DEPLOYMENT_PROFILE,
     log: { level: env.LOG_LEVEL, format: env.LOG_FORMAT },
-    api: { host: env.API_HOST, port: env.API_PORT, publicUrl: env.API_PUBLIC_URL },
+    api: {
+      host: env.API_HOST,
+      port: env.API_PORT,
+      publicUrl: env.API_PUBLIC_URL,
+      trustedProxies: env.API_TRUSTED_PROXIES,
+    },
     web: { port: env.WEB_PORT, publicUrl: env.WEB_PUBLIC_URL },
     database: {
       url: env.NODE_ENV === 'test' ? (env.TEST_DATABASE_URL ?? env.DATABASE_URL) : env.DATABASE_URL,

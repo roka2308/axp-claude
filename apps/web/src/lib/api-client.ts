@@ -70,6 +70,11 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions = {
   if (options.body !== undefined) requestHeaders['content-type'] = 'application/json';
   Object.assign(requestHeaders, options.headers ?? {});
 
+  // The visitor's address, for the API's rate limits; the API believes it only
+  // from this server. The last entry is the hop closest to us.
+  const clientAddress = await currentClientAddress();
+  if (clientAddress) requestHeaders['x-axp-client-address'] = clientAddress;
+
   const token = options.token ?? (options.authenticated ? await readSessionToken() : null);
   if (token) requestHeaders.authorization = `Bearer ${token}`;
 
@@ -175,4 +180,21 @@ export async function apiDownload(
     contentType: response.headers.get('content-type') ?? 'application/octet-stream',
     disposition: response.headers.get('content-disposition') ?? 'attachment',
   };
+}
+
+async function currentClientAddress(): Promise<string | null> {
+  try {
+    const inbound = await headers();
+    const forwarded = inbound.get('x-forwarded-for');
+    const last = forwarded
+      ?.split(',')
+      .map((entry) => entry.trim())
+      .filter(Boolean)
+      .pop();
+    const address = last ?? inbound.get('x-real-ip');
+    return address && address.length <= 64 ? address : null;
+  } catch {
+    // Outside a request scope there is no visitor.
+    return null;
+  }
 }

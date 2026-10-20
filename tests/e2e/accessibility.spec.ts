@@ -62,6 +62,7 @@ test.describe('signed out', () => {
     '/invite?token=unbekannt-0000000000',
     '/profile/email/confirm?token=unbekannt-0000000000',
     '/s/unbekannt-0000000000',
+    '/gibt-es-nicht',
   ]) {
     test(`${path} has no WCAG violations`, async ({ page }) => {
       await page.goto(path);

@@ -1,10 +1,16 @@
-import Fastify, { type FastifyBaseLogger, type FastifyInstance } from 'fastify';
+import { createHash } from 'node:crypto';
+import Fastify, {
+  type FastifyBaseLogger,
+  type FastifyInstance,
+  type FastifyRequest,
+} from 'fastify';
 import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
 import type { AppConfig } from '@axp/config';
 import { errors } from '@axp/contracts';
 import type { Container } from '@axp/core';
 import type { Logger } from '@axp/observability';
+import { clientAddress } from './lib/client-address';
 import { registerRequestContext } from './plugins/request-context';
 import { registerErrorHandler } from './plugins/error-handler';
 import { registerAuthentication } from './plugins/authentication';
@@ -63,10 +69,22 @@ export async function buildServer(options: BuildServerOptions): Promise<FastifyI
     crossOriginResourcePolicy: { policy: 'same-origin' },
   });
 
+  // Routes share option objects (`guard`), and with them their hook arrays.
+  // The rate limiter adds its hook to a route's `onRequest` array; on a shared
+  // array that hook would reach every other route using it - a sign-in limit
+  // on the profile page. Each route gets its own copies before that happens.
+  app.addHook('onRoute', (route) => {
+    for (const hook of ['onRequest', 'preHandler', 'preValidation'] as const) {
+      const value = route[hook];
+      if (Array.isArray(value)) route[hook] = [...value] as never;
+    }
+  });
+
   await app.register(rateLimit, {
     global: false,
     max: 300,
     timeWindow: '1 minute',
+    keyGenerator: (request) => rateLimitKey(request, config.api.trustedProxies),
     // A refusal says what happened and when to try again, like any other
     // product error - not "the request could not be processed".
     errorResponseBuilder: (_request, context) =>
@@ -108,4 +126,16 @@ export async function buildServer(options: BuildServerOptions): Promise<FastifyI
   // Requests arrive from the Next.js server, which holds the session cookie.
 
   return app;
+}
+
+/**
+ * Who a rate limit counts: a signed-in request per session, an anonymous one
+ * per visitor (see `clientAddress`) - never the web server as a whole.
+ */
+export function rateLimitKey(request: FastifyRequest, trustedProxies: readonly string[]): string {
+  const authorization = request.headers.authorization;
+  if (typeof authorization === 'string' && authorization.length > 0) {
+    return `session:${createHash('sha256').update(authorization).digest('hex').slice(0, 32)}`;
+  }
+  return `client:${clientAddress(request, trustedProxies)}`;
 }

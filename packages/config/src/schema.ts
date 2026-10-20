@@ -49,6 +49,20 @@ export const configSchema = z.object({
     host: z.string().min(1).default('127.0.0.1'),
     port: port.default(4000),
     publicUrl: z.string().url(),
+    /**
+     * Addresses allowed to tell the API who the visitor is (the web server).
+     * Only a request from one of them may name a client address for rate
+     * limiting; anyone else is counted by their own address.
+     */
+    trustedProxies: z
+      .string()
+      .default('127.0.0.1,::1,::ffff:127.0.0.1')
+      .transform((value) =>
+        value
+          .split(',')
+          .map((entry) => entry.trim())
+          .filter(Boolean),
+      ),
   }),
 
   web: z.object({

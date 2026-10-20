@@ -1,5 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
+import { clientAddress } from '../lib/client-address';
 import { type PlatformStatusResponse } from '@axp/contracts';
 import type { Container } from '@axp/core';
 
@@ -53,7 +54,7 @@ export function registerPlatformRoutes(app: FastifyInstance, container: Containe
       const input = completeBootstrapSchema.parse(request.body);
       const result = await container.bootstrap.completeInitialBootstrap({
         ...input,
-        ipAddress: request.ip,
+        ipAddress: clientAddress(request, container.config.api.trustedProxies),
         userAgent: request.headers['user-agent'],
       });
       void reply.status(201);
@@ -81,7 +82,7 @@ export function registerPlatformRoutes(app: FastifyInstance, container: Containe
       const input = completeBootstrapSchema.parse(request.body);
       const result = await container.bootstrap.completeRecovery({
         ...input,
-        ipAddress: request.ip,
+        ipAddress: clientAddress(request, container.config.api.trustedProxies),
         userAgent: request.headers['user-agent'],
       });
       void reply.status(201);
