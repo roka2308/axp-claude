@@ -16,7 +16,11 @@ truth; this repository implements it and never redefines it.
 | `acceptance/acceptance_checklist.md`             | Acceptance criteria, identical for both tracks               |
 | `fixtures/demo_seed.json`                        | Canonical demo fixture (copied to `packages/fixtures/data/`) |
 
-Current milestone: **Phase 0 — Foundation (Gate F0)**.
+Current milestone: **Engineering MVP reached** (Phases 0–10, Gate F10;
+tag `v0.10-mvp-acceptance`). Acceptance verdict and classified remaining work:
+[`docs/acceptance/mvp-acceptance.md`](docs/acceptance/mvp-acceptance.md).
+Handover to the team that operates the platform (German):
+[`docs/UEBERGABE.md`](docs/UEBERGABE.md).
 
 ## Requirements
 
