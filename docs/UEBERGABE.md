@@ -21,11 +21,11 @@ Abschnitt 6.
 
 ## 2. Was übergeben wird
 
-| Teil                             | Inhalt                                                                                                                                                             |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Dieses Repository                | Code, Migrationen, Tests, Gate-Skripte, Doku; vollständige Git-Historie mit Tags `v0.1` … `v0.10`                                                                  |
-| Spezifikation (separater Ordner) | `analytics_experience_version_d_v1.0/` – Master-Spezifikation, Engineering-Vertrag, Entwicklungsplan, Abnahme-Checkliste, Demo-Fixture. Maßgeblich für das Produkt |
-| Nicht enthalten                  | `.env` (Secrets), `node_modules`, Build-Artefakte, `.local/` (lokale Datenbank, Logs)                                                                              |
+| Teil                             | Inhalt                                                                                                                                                                                 |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Dieses Repository                | Code, Migrationen, Tests, Gate-Skripte, Doku; vollständige Git-Historie mit Tags `v0.1` … `v0.10`. Privat auf GitHub: <https://github.com/roka2308/axp-claude> (Zugang über Einladung) |
+| Spezifikation (separater Ordner) | `analytics_experience_version_d_v1.0/` – Master-Spezifikation, Engineering-Vertrag, Entwicklungsplan, Abnahme-Checkliste, Demo-Fixture. Maßgeblich für das Produkt                     |
+| Nicht enthalten                  | `.env` (Secrets), `node_modules`, Build-Artefakte, `.local/` (lokale Datenbank, Logs)                                                                                                  |
 
 Wichtige Dokumente im Repository:
 
