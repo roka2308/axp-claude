@@ -13,9 +13,11 @@ Read before changing anything substantial:
 4. `../analytics_experience_version_d_v1.0/acceptance/acceptance_checklist.md`
 5. `docs/adr/` — decisions already taken here
 
-Current milestone: **Phase 10 — MVP Hardening and Acceptance**. Phases 0–9
-are complete and their gates are demonstrated
-(`npm run gate:f0|…|f9`, see `docs/gates/`). Data access needs a
+Current milestone: **Engineering MVP reached**. Phases 0–10 are complete and
+their gates are demonstrated (`npm run gate:f0|…|f10`, see `docs/gates/`); the
+acceptance verdict per checklist item and the classified remaining work are in
+`docs/acceptance/mvp-acceptance.md`. Work beyond it (MVP+, Performance Gate,
+Production Readiness) starts only on an explicit decision. Data access needs a
 role capability and an object grant (ADR 0006) — a new data path must check
 both. Solution packages are untrusted declarative data (ADR 0008). Shares lend
 their creator's access and exports are ephemeral encrypted files; anything
@@ -25,7 +27,9 @@ goes through the durable job queue with ids-only payloads; attention kinds are
 a closed operational list (ADR 0010). A theme is a map of allowlisted tokens
 to validated values - never free CSS - and publishing is blocked by failing
 contrast; a missing entitlement is its own state (`entitlement_required`),
-never a permission error, and never deletes configuration (ADR 0011). Still open
+never a permission error, and never deletes configuration (ADR 0011). Account links are mailed through the
+job queue; rate limits and sign-in lockouts count the visitor, never the web
+server in front of the API (ADR 0012). Still open
 from earlier phases: the Inspector cannot yet pick a catalog definition per
 widget, and annotations have no store. Gate criteria are in the development
 plan.
